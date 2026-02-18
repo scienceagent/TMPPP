@@ -10,6 +10,11 @@ namespace HotelBookingSystem.Models
                Capacity = capacity;
           }
 
+          public override void SetAvailability(bool status)
+          {
+               IsAvailable = status;
+          }
+
           public override string GetDisplayInfo() =>
               $"Standard Room {RoomNumber} | Capacity: {Capacity}";
 

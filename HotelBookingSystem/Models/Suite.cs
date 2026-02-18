@@ -16,6 +16,11 @@
                HasLivingRoom = hasLivingRoom;
           }
 
+          public override void SetAvailability(bool status)
+          {
+               IsAvailable = status;
+          }
+
           public override string GetDisplayInfo()
           {
                var kitchen = HasKitchen ? "with kitchen" : "no kitchen";

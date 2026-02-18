@@ -8,6 +8,13 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Factories - Copy\**" />
+	  <EmbeddedResource Remove="Factories - Copy\**" />
+	  <None Remove="Factories - Copy\**" />
+	  <Page Remove="Factories - Copy\**" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
 		<PackageReference Include="MaterialDesignColors" Version="2.1.4" />
 	</ItemGroup>

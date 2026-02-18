@@ -154,26 +154,6 @@
             </Setter>
         </Style>
 
-        <!-- Test Button (Amber) -->
-        <Style x:Key="TestButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-            <Setter Property="Background" Value="#F57F17"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="{TemplateBinding Background}"
-                                CornerRadius="6" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="#E65100"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <!-- Input Label -->
         <Style x:Key="InputLabel" TargetType="TextBlock">
             <Setter Property="Foreground" Value="#546E7A"/>
@@ -237,10 +217,6 @@
                         <TextBlock Text="Bookings" Foreground="White" FontSize="13"/>
                     </RadioButton>
 
-                    <RadioButton x:Name="NavTest" Style="{StaticResource SidebarButton}">
-                        <TextBlock Text="Test System" Foreground="White" FontSize="13"/>
-                    </RadioButton>
-
                     <Separator Background="#37474F" Margin="12,16"/>
 
                     <TextBlock Text="L O G S" FontSize="10" Foreground="#607D8B"
@@ -263,7 +239,7 @@
         <!-- ========== MAIN CONTENT ========== -->
         <Grid Grid.Column="1" Margin="28,24">
 
-            <!-- PAGE 1: New Booking -->
+            <!-- ==================== PAGE 1: New Booking ==================== -->
             <Grid>
                 <Grid.Style>
                     <Style TargetType="Grid">
@@ -284,7 +260,7 @@
                 <!-- Page Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
                     <TextBlock Text="New Booking" FontSize="24" FontWeight="SemiBold" Foreground="#263238"/>
-                    <TextBlock Text="Register a guest, assign a room, and create the booking."
+                    <TextBlock Text="Register a guest, assign a room, select booking type, and create the booking."
                                FontSize="13" Foreground="#78909C" Margin="0,4,0,0"/>
                 </StackPanel>
 
@@ -313,19 +289,19 @@
                             <Border Style="{StaticResource Card}">
                                 <StackPanel>
                                     <TextBlock Text="Full Name" Style="{StaticResource InputLabel}"/>
-                                    <TextBox Text="{Binding GuestName, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Text="{Binding GuestCtrl.GuestName, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
                                     <TextBlock Text="Email Address" Style="{StaticResource InputLabel}"/>
-                                    <TextBox Text="{Binding GuestEmail, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Text="{Binding GuestCtrl.GuestEmail, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
                                     <TextBlock Text="Nationality" Style="{StaticResource InputLabel}"/>
-                                    <TextBox Text="{Binding GuestNationality, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Text="{Binding GuestCtrl.GuestNationality, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
                                     <TextBlock Text="Passport / ID Number" Style="{StaticResource InputLabel}"/>
-                                    <TextBox Text="{Binding GuestPassport, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Text="{Binding GuestCtrl.GuestPassport, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,16"/>
 
                                     <Button Content="Register Guest" Command="{Binding CreateGuestCommand}"
@@ -334,7 +310,7 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- STEP 2: Room -->
+                        <!-- STEP 2: Room (Factory Method) -->
                         <StackPanel Grid.Column="2">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Background="#1976D2" CornerRadius="12" Width="24" Height="24">
@@ -348,20 +324,20 @@
                             <Border Style="{StaticResource Card}">
                                 <StackPanel>
                                     <TextBlock Text="Room Number" Style="{StaticResource InputLabel}"/>
-                                    <TextBox Text="{Binding RoomNumber, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Text="{Binding RoomCtrl.RoomNumber, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
                                     <TextBlock Text="Price per Night (USD)" Style="{StaticResource InputLabel}"/>
-                                    <TextBox Text="{Binding RoomPrice, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Text="{Binding RoomCtrl.RoomPrice, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
                                     <TextBlock Text="Capacity (Guests)" Style="{StaticResource InputLabel}"/>
-                                    <TextBox Text="{Binding RoomCapacity, UpdateSourceTrigger=PropertyChanged}"
+                                    <TextBox Text="{Binding RoomCtrl.RoomCapacity, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
-                                    <TextBlock Text="Room Type" Style="{StaticResource InputLabel}"/>
-                                    <ComboBox ItemsSource="{Binding RoomTypes}"
-                                              SelectedItem="{Binding SelectedRoomType, Mode=TwoWay}"
+                                    <TextBlock Text="Room Type (Factory Method)" Style="{StaticResource InputLabel}"/>
+                                    <ComboBox ItemsSource="{Binding RoomCtrl.RoomTypes}"
+                                              SelectedItem="{Binding RoomCtrl.SelectedRoomType, Mode=TwoWay}"
                                               Padding="10,8" Margin="0,0,0,16" Background="#FAFAFA"
                                               BorderBrush="#CFD8DC"/>
 
@@ -371,7 +347,7 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- STEP 3: Confirm Booking -->
+                        <!-- STEP 3: Confirm Booking (Abstract Factory) -->
                         <StackPanel Grid.Column="4">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Background="#2E7D32" CornerRadius="12" Width="24" Height="24">
@@ -388,11 +364,18 @@
                                         <StackPanel>
                                             <TextBlock Text="Booking Summary" FontSize="14" FontWeight="SemiBold"
                                                        Foreground="#2E7D32" Margin="0,0,0,8"/>
-                                            <TextBlock Text="Complete steps 1 and 2 before confirming."
+                                            <TextBlock Text="Complete steps 1 and 2, select a booking type, then confirm."
                                                        TextWrapping="Wrap" Foreground="#546E7A" FontSize="12"
                                                        LineHeight="20"/>
                                         </StackPanel>
                                     </Border>
+
+                                    <!-- Booking Type Selector (Abstract Factory) -->
+                                    <TextBlock Text="Booking Type (Abstract Factory)" Style="{StaticResource InputLabel}"/>
+                                    <ComboBox ItemsSource="{Binding BookingCtrl.BookingTypes}"
+                                              SelectedItem="{Binding BookingCtrl.SelectedBookingType, Mode=TwoWay}"
+                                              Padding="10,8" Margin="0,0,0,16" Background="#FAFAFA"
+                                              BorderBrush="#CFD8DC"/>
 
                                     <Button Content="Create Booking" Command="{Binding CreateBookingCommand}"
                                             Style="{StaticResource SuccessButton}" HorizontalAlignment="Stretch"
@@ -400,13 +383,13 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Quick info card -->
+                            <!-- Booking Types Info Card -->
                             <Border Style="{StaticResource Card}" Margin="0,16,0,0">
                                 <StackPanel>
-                                    <TextBlock Text="How it works" FontSize="13" FontWeight="SemiBold"
+                                    <TextBlock Text="Booking Types" FontSize="13" FontWeight="SemiBold"
                                                Foreground="#263238" Margin="0,0,0,8"/>
                                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#78909C" LineHeight="20"
-                                               Text="1. Register the guest with valid ID&#x0a;2. Assign an available room&#x0a;3. Confirm to finalize the booking&#x0a;&#x0a;Manage bookings in the Bookings tab."/>
+                                               Text="Standard: Base rate per night&#x0a;Premium: 10% discount + early check-in&#x0a;VIP: 20% discount + free nights + extras&#x0a;&#x0a;Each type uses Abstract Factory to create&#x0a;Booking + Pricing + Confirmation objects."/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -414,7 +397,7 @@
                 </ScrollViewer>
             </Grid>
 
-            <!-- PAGE 2: Bookings Management -->
+            <!-- ==================== PAGE 2: Bookings Management ==================== -->
             <Grid>
                 <Grid.Style>
                     <Style TargetType="Grid">
@@ -451,8 +434,8 @@
 
                 <!-- Bookings Table -->
                 <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" Margin="0,0,0,16">
-                    <DataGrid ItemsSource="{Binding Bookings}"
-                              SelectedItem="{Binding SelectedBooking, Mode=TwoWay}"
+                    <DataGrid ItemsSource="{Binding BookingCtrl.Bookings}"
+                              SelectedItem="{Binding BookingCtrl.SelectedBooking, Mode=TwoWay}"
                               IsReadOnly="True" SelectionMode="Single" AutoGenerateColumns="False"
                               HeadersVisibility="Column" GridLinesVisibility="Horizontal"
                               HorizontalGridLinesBrush="#ECEFF1"
@@ -474,7 +457,7 @@
                     </DataGrid>
                 </Border>
 
-                <!-- Action buttons -->
+                <!-- Action Buttons -->
                 <Border Grid.Row="3" Style="{StaticResource Card}" Padding="16">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Confirm Booking" Command="{Binding ConfirmBookingCommand}"
@@ -485,64 +468,7 @@
                 </Border>
             </Grid>
 
-            <!-- PAGE 3: Test Polymorphism -->
-            <Grid>
-                <Grid.Style>
-                    <Style TargetType="Grid">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavTest}" Value="True">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Grid.Style>
-
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                    <TextBlock Text="System Test" FontSize="24" FontWeight="SemiBold" Foreground="#263238"/>
-                    <TextBlock Text="Run polymorphism and SOLID tests to verify system behavior."
-                               FontSize="13" Foreground="#78909C" Margin="0,4,0,0"/>
-                </StackPanel>
-
-                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="20" Margin="0,0,0,16">
-                    <StackPanel>
-                        <TextBlock Text="This test creates sample Users (Guest, Admin) and Rooms (Standard, Deluxe, Suite) to demonstrate polymorphism, virtual method overrides, and SOLID-compliant service calls."
-                                   TextWrapping="Wrap" FontSize="13" Foreground="#546E7A" Margin="0,0,0,16"
-                                   LineHeight="20"/>
-                        <Button Content="Run Polymorphism Test" Command="{Binding TestPolymorphismCommand}"
-                                Style="{StaticResource TestButton}" HorizontalAlignment="Left"
-                                FontSize="14" Padding="24,12"/>
-                    </StackPanel>
-                </Border>
-
-                <!-- Test output -->
-                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" Text="Test Output" Style="{StaticResource SectionTitle}"/>
-                        <Border Grid.Row="1" Background="#FAFAFA" CornerRadius="6" Padding="16"
-                                BorderBrush="#ECEFF1" BorderThickness="1">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                                          MaxHeight="400">
-                                <TextBlock Text="{Binding LogOutput}" TextWrapping="Wrap"
-                                           FontFamily="Cascadia Code, Consolas, Courier New"
-                                           FontSize="12" Foreground="#37474F" LineHeight="20"/>
-                            </ScrollViewer>
-                        </Border>
-                    </Grid>
-                </Border>
-            </Grid>
-
-            <!-- PAGE 4: Activity Log -->
+            <!-- ==================== PAGE 3: Activity Log ==================== -->
             <Grid>
                 <Grid.Style>
                     <Style TargetType="Grid">
@@ -569,7 +495,7 @@
                 <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16">
                     <Border Background="#263238" CornerRadius="8" Padding="20">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                            <TextBlock Text="{Binding LogOutput}" TextWrapping="Wrap"
+                            <TextBlock Text="{Binding LogCtrl.LogOutput}" TextWrapping="Wrap"
                                        FontFamily="Cascadia Code, Consolas, Courier New"
                                        FontSize="12" Foreground="#A5D6A7" LineHeight="20"/>
                         </ScrollViewer>

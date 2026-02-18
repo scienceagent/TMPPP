@@ -17,6 +17,11 @@ namespace HotelBookingSystem.Models
                HasBalcony = hasBalcony;
           }
 
+          public override void SetAvailability(bool status)
+          {
+               IsAvailable = status;
+          }
+
           public override string GetDisplayInfo()
           {
                var balcony = HasBalcony ? "with balcony" : "no balcony";

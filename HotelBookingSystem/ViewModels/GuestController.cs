@@ -41,7 +41,6 @@ namespace HotelBookingSystem.ViewModels
 
           public User CurrentUser => _currentUser;
 
-          // Event to notify MainViewModel when something happens
           public event Action<string> OnLog;
 
           public GuestController(IUserRepository userRepository, IUserValidator userValidator)
@@ -77,27 +76,6 @@ namespace HotelBookingSystem.ViewModels
                {
                     OnLog?.Invoke($"Error: {ex.Message}\n");
                }
-          }
-
-          public bool ValidateCurrentUser()
-          {
-               return _currentUser != null && _userValidator.Validate(_currentUser);
-          }
-
-          public void TestPolymorphism()
-          {
-               User guest = new Guest("G1", "Test Guest", "guest@test.com", "0721111111", "US", "US111");
-               User admin = new Admin("A1", "Test Admin", "admin@test.com", "0721222222",
-                                      "Manager", "IT",
-                                      new System.Collections.Generic.List<string> { "ManageRooms", "ViewBookings", "ManageUsers" });
-
-               OnLog?.Invoke("Guest info:");
-               OnLog?.Invoke(guest.GetDisplayInfo());
-               OnLog?.Invoke($"Valid: {_userValidator.Validate(guest)}\n");
-
-               OnLog?.Invoke("Admin info:");
-               OnLog?.Invoke(admin.GetDisplayInfo());
-               OnLog?.Invoke($"Valid: {_userValidator.Validate(admin)}\n");
           }
      }
 }

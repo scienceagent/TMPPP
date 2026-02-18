@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using HotelBookingSystem.Factories;
 using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models;
-using HotelBookingSystem.Services;
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -11,15 +12,24 @@ namespace HotelBookingSystem.ViewModels
           private readonly IBookingService _bookingService;
           private readonly IBookingRepository _bookingRepository;
           private readonly IBookingDurationCalculator _durationCalculator;
+          private readonly BookingFactoryProvider _bookingFactoryProvider;
 
           private Booking _selectedBooking;
+          private string _selectedBookingType;
 
           public ObservableCollection<Booking> Bookings { get; } = new ObservableCollection<Booking>();
+          public List<string> BookingTypes { get; }
 
           public Booking SelectedBooking
           {
                get => _selectedBooking;
                set => SetProperty(ref _selectedBooking, value);
+          }
+
+          public string SelectedBookingType
+          {
+               get => _selectedBookingType;
+               set => SetProperty(ref _selectedBookingType, value);
           }
 
           public event Action<string> OnLog;
@@ -32,6 +42,10 @@ namespace HotelBookingSystem.ViewModels
                _bookingService = bookingService;
                _bookingRepository = bookingRepository;
                _durationCalculator = durationCalculator;
+               _bookingFactoryProvider = new BookingFactoryProvider();
+
+               BookingTypes = new List<string>(_bookingFactoryProvider.GetAvailableTypes());
+               SelectedBookingType = "Standard";
           }
 
           public void CreateBooking(User user, Room room, IRoomPricingService pricingService)
@@ -50,7 +64,12 @@ namespace HotelBookingSystem.ViewModels
                          return;
                     }
 
-                    var booking = new Booking(
+                    // ABSTRACT FACTORY — creates a family of related objects
+                    IBookingFactory factory = _bookingFactoryProvider.GetFactory(SelectedBookingType);
+                    IPricingStrategy pricing = factory.CreatePricingStrategy();
+                    IConfirmationHandler confirmation = factory.CreateConfirmationHandler();
+
+                    var booking = factory.CreateBooking(
                         $"BK{DateTime.Now:yyyyMMddHHmmss}",
                         user.Id,
                         room.RoomId,
@@ -63,15 +82,19 @@ namespace HotelBookingSystem.ViewModels
                     {
                          int nights = _durationCalculator.CalculateNights(booking);
                          bool longStay = _durationCalculator.IsLongStay(booking);
-                         decimal totalPrice = pricingService.CalculatePrice(room) * nights;
+                         decimal roomPrice = pricingService.CalculatePrice(room);
+                         decimal totalPrice = pricing.CalculateTotalPrice(roomPrice, nights);
 
-                         OnLog?.Invoke("Booking created.");
+                         OnLog?.Invoke($"[{confirmation.GetConfirmationType()}] Booking created.");
                          OnLog?.Invoke($"ID: {booking.BookingId}");
                          OnLog?.Invoke($"Status: {booking.Status}");
                          OnLog?.Invoke($"Duration: {nights} nights");
+                         OnLog?.Invoke($"Pricing: {pricing.GetPricingDescription()}");
                          OnLog?.Invoke($"Total price: {FormatUsd(totalPrice)}");
                          if (longStay)
                               OnLog?.Invoke("** Long stay booking (7+ nights) **");
+                         OnLog?.Invoke("");
+                         OnLog?.Invoke(confirmation.GenerateConfirmation(booking, totalPrice));
                          OnLog?.Invoke("");
                          RefreshBookings();
                     }
@@ -109,16 +132,6 @@ namespace HotelBookingSystem.ViewModels
                Bookings.Clear();
                foreach (var b in _bookingRepository.GetAllBookings())
                     Bookings.Add(b);
-          }
-
-          public void TestDurationCalculator()
-          {
-               var testBooking = new Booking("BK-TEST", "G1", "R1",
-                   DateTime.Now.AddDays(1), DateTime.Now.AddDays(10));
-
-               OnLog?.Invoke("Duration calculator test:");
-               OnLog?.Invoke($"Nights: {_durationCalculator.CalculateNights(testBooking)}");
-               OnLog?.Invoke($"Long stay: {_durationCalculator.IsLongStay(testBooking)}\n");
           }
 
           private static string FormatUsd(decimal amount) =>

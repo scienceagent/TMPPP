@@ -18,11 +18,5 @@ namespace HotelBookingSystem.Services
               CalculateDuration(booking.CheckInDate, booking.CheckOutDate);
 
           public bool IsLongStay(Booking booking) => CalculateNights(booking) >= 7;
-
-          public bool CalculateDuration( DateTime checkOut)
-          {
-               return false;
-          }
      }
-
 }
