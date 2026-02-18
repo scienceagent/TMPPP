@@ -2,7 +2,6 @@
 
 A WPF desktop application built with C# demonstrating Object-Oriented Programming principles, SOLID design, and Creational Design Patterns through a real-world Hotel Booking System.
 
-**Student:** Grigoriev  
 **Course:** TMPPP (Software Design Techniques and Programming Paradigms)  
 **Technology:** C# / WPF / .NET
 
