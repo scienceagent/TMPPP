@@ -1,0 +1,130 @@
+<!-- App.xaml -->
+<Application x:Class="HotelBookingSystem.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:HotelBookingSystem.Converters"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+
+        <!-- Global Styles -->
+        <ResourceDictionary>
+            <converters:BookingDisplayConverter x:Key="BookingDisplayConverter"/>
+
+            <!-- Font Family -->
+            <FontFamily x:Key="DefaultFont">Segoe UI</FontFamily>
+
+            <!-- Colors -->
+            <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
+            <SolidColorBrush x:Key="PrimaryDarkColor" Color="#1976D2"/>
+            <SolidColorBrush x:Key="PrimaryLightColor" Color="#BBDEFB"/>
+            <SolidColorBrush x:Key="AccentColor" Color="#FF9800"/>
+            <SolidColorBrush x:Key="SuccessColor" Color="#4CAF50"/>
+            <SolidColorBrush x:Key="ErrorColor" Color="#F44336"/>
+            <SolidColorBrush x:Key="WarningColor" Color="#FFC107"/>
+            <SolidColorBrush x:Key="BackgroundColor" Color="#F5F5F5"/>
+            <SolidColorBrush x:Key="SurfaceColor" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
+            <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
+            <SolidColorBrush x:Key="DividerColor" Color="#BDBDBD"/>
+
+            <!-- Global TextBlock Style -->
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+                <Setter Property="Foreground" Value="{StaticResource TextPrimaryColor}"/>
+            </Style>
+
+            <!-- Global TextBox Style -->
+            <Style TargetType="TextBox">
+                <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Padding" Value="8"/>
+                <Setter Property="BorderBrush" Value="{StaticResource DividerColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Style.Triggers>
+                    <Trigger Property="IsFocused" Value="True">
+                        <Setter Property="BorderBrush" Value="{StaticResource PrimaryColor}"/>
+                        <Setter Property="BorderThickness" Value="2"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Global ComboBox Style -->
+            <Style TargetType="ComboBox">
+                <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Padding" Value="8"/>
+                <Setter Property="BorderBrush" Value="{StaticResource DividerColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+
+            <!-- Global DatePicker Style -->
+            <Style TargetType="DatePicker">
+                <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="Padding" Value="8"/>
+                <Setter Property="BorderBrush" Value="{StaticResource DividerColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Style>
+
+            <!-- Global DataGrid Style -->
+            <Style TargetType="DataGrid">
+                <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
+                <Setter Property="Background" Value="{StaticResource SurfaceColor}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource DividerColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="RowBackground" Value="White"/>
+                <Setter Property="AlternatingRowBackground" Value="#FAFAFA"/>
+                <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+                <Setter Property="HorizontalGridLinesBrush" Value="#E0E0E0"/>
+                <Setter Property="HeadersVisibility" Value="Column"/>
+                <Setter Property="AutoGenerateColumns" Value="False"/>
+                <Setter Property="CanUserAddRows" Value="False"/>
+                <Setter Property="CanUserDeleteRows" Value="False"/>
+                <Setter Property="SelectionMode" Value="Single"/>
+                <Setter Property="SelectionUnit" Value="FullRow"/>
+            </Style>
+
+            <!-- DataGrid Header Style -->
+            <Style TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
+                <Setter Property="Foreground" Value="White"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="10,8"/>
+                <Setter Property="BorderThickness" Value="0,0,1,0"/>
+                <Setter Property="BorderBrush" Value="{StaticResource PrimaryDarkColor}"/>
+            </Style>
+
+            <!-- DataGrid Cell Style -->
+            <Style TargetType="DataGridCell">
+                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True">
+                        <Setter Property="Background" Value="{StaticResource PrimaryLightColor}"/>
+                        <Setter Property="Foreground" Value="{StaticResource TextPrimaryColor}"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+
+            <!-- Scroll Viewer Style -->
+            <Style TargetType="ScrollViewer">
+                <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
+                <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
+            </Style>
+
+            <!-- ScrollBar Thumb Style -->
+            <Style TargetType="Thumb">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Thumb">
+                            <Border Background="{StaticResource PrimaryColor}" 
+                                    CornerRadius="3"/>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+
+    </Application.Resources>
+</Application>

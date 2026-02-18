@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="HotelBookingSystem.Models.Booking">
+    <Position X="42" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAGQAAYAAIAAAAAAAgAAAAAAAIAAAAAAAAAAEA=</HashCode>
+      <FileName>Models\Booking.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Models.DeluxeRoom">
+    <Position X="6.25" Y="5.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAQAAIAAAAAACAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>Models\DeluxeRoom.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Models.StandardRoom">
+    <Position X="0.75" Y="5.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAIAAAAAACAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\StandardRoom.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Models.Suite">
+    <Position X="3.5" Y="5.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>EAAAAEAAAAAAAQAAIAAAAAACAAAAAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>Models\Suite.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Models.User">
+    <Position X="10.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACAAAQAAAAAAAAQAAAAAAAAAAAAAIAAAAAA=</HashCode>
+      <FileName>Models\User.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Models.Guest">
+    <Position X="9" Y="5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAACIA=</HashCode>
+      <FileName>Models\Guest.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Models.Admin">
+    <Position X="11.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAEAAAAAAAEAAAAAAAEAAAAAAAAAA=</HashCode>
+      <FileName>Models\Admin.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Services.BookingConfirmationService">
+    <Position X="13.75" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Services\BookingConfirmationService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="System.Object" Collapsed="true">
+    <Position X="26" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="HotelBookingSystem.Services.BookingDurationCalculator">
+    <Position X="28" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAQAAAEAAAAA=</HashCode>
+      <FileName>Services\BookingDurationCalculator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.Services.ConsoleLogger">
+    <Position X="31" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAEAAAAAAEAAAAA=</HashCode>
+      <FileName>Services\ConsoleLogger.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.Services.InMemoryBookingRepository">
+    <Position X="33.25" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAJAABAAAAAABAAAAAAAA=</HashCode>
+      <FileName>Services\InMemoryBookingRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.Services.InMemoryRoomRepository">
+    <Position X="39" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAQAIACAAAAAAAAAAAAAAAAAAABAgAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\InMemoryRoomRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.Services.InMemoryUserRepository">
+    <Position X="36.25" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAABAIAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\InMemoryUserRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.Models.BookingResult">
+    <Position X="44.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAgAAgAAAAAAAAABIAAAAAA=</HashCode>
+      <FileName>Models\BookingResult.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.ViewModels.BaseViewModel">
+    <Position X="21.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAgAEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ViewModels\BaseViewModel.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.ViewModels.MainViewModel" Collapsed="true">
+    <Position X="16.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAECgAoihSEgAABTAEAgYADAAJCEMACACBgkJAxAGCA=</HashCode>
+      <FileName>ViewModels\MainViewModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Services.RoomPricingService">
+    <Position X="51.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\RoomPricingService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.Services.UserValidator">
+    <Position X="49.25" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Services\UserValidator.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.Models.Room">
+    <Position X="3.5" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAACAAAAAQAAIAAAIAACAAAAAAAAAAAAAIABAAA=</HashCode>
+      <FileName>Models\Room.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.Services.BookingService">
+    <Position X="46.75" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIgBIAAAABAAAAAAAAAIAAAAAAAAAAABAQACAA=</HashCode>
+      <FileName>Services\BookingService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="HotelBookingSystem.ViewModels.BookingController" Collapsed="true">
+    <Position X="19" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIABCAgAABCAAAAAABAABAAIACACAAAAAQACAA=</HashCode>
+      <FileName>ViewModels\BookingController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.ViewModels.GuestController" Collapsed="true">
+    <Position X="23.5" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgiAIAAAAAQAEAAIAAAAAAAAACACBAAJAhIAAA=</HashCode>
+      <FileName>ViewModels\GuestController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.ViewModels.LogController" Collapsed="true">
+    <Position X="25.75" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAgAAAAIAAAAAAAAAAEAAAAAAA=</HashCode>
+      <FileName>ViewModels\LogController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="HotelBookingSystem.ViewModels.RoomController" Collapsed="true">
+    <Position X="21.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAIAAQAAAAAAEAAAYACAAIAAMACACgAgAAgAECA=</HashCode>
+      <FileName>ViewModels\RoomController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="HotelBookingSystem.Interfaces.IBookingConfirmationService" Collapsed="true">
+    <Position X="54" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAA=</HashCode>
+      <FileName>Interfaces\IBookingConfirmationService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HotelBookingSystem.Interfaces.IBookingRepository" Collapsed="true">
+    <Position X="57.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAIAABAAAAAABAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IBookingRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HotelBookingSystem.Interfaces.IRoomRepository" Collapsed="true">
+    <Position X="54" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAIACAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IRoomRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HotelBookingSystem.Interfaces.IUserRepository" Collapsed="true">
+    <Position X="55.75" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IUserRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HotelBookingSystem.Interfaces.ILogger" Collapsed="true">
+    <Position X="54" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAEAAAAAAEAAAAA=</HashCode>
+      <FileName>Interfaces\ILogger.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="System.ComponentModel.INotifyPropertyChanged" Collapsed="true">
+    <Position X="55.75" Y="1.25" Width="1.5" />
+    <TypeIdentifier />
+  </Interface>
+  <Interface Name="HotelBookingSystem.Interfaces.IBookingDurationCalculator" Collapsed="true">
+    <Position X="55.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAQAAAEAAAAA=</HashCode>
+      <FileName>Interfaces\IBookingDurationCalculator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HotelBookingSystem.Interfaces.IRoomPricingService" Collapsed="true">
+    <Position X="57.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAABAAAAAAAAAIAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IRoomPricingService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="HotelBookingSystem.Interfaces.IUserValidator" Collapsed="true">
+    <Position X="57.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interfaces\IUserValidator.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="HotelBookingSystem.Models.BookingStatus" Collapsed="true">
+    <Position X="54" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAIAAAAAAAAAAAAAAAAAAAAgIAAAAAA=</HashCode>
+      <FileName>Models\Enums.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
