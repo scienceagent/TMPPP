@@ -9,7 +9,7 @@ namespace HotelBookingSystem.Factories.Confirmation
           {
                return $"***** VIP Booking Confirmed *****\n" +
                       $"Booking ID: {booking.BookingId}\n" +
-                      $"Total (VIP rate): {totalPrice:C2}\n" +
+                      $"Total (VIP rate): {totalPrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))}\n" +
                       $"Benefits: Free upgrade, Spa access, Airport transfer,\n" +
                       $"          Early check-in, Late check-out, Free minibar";
           }

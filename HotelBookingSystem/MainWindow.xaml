@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:HotelBookingSystem.ViewModels"
         xmlns:converters="clr-namespace:HotelBookingSystem.Converters"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         Title="Hotel Booking System"
         Height="780" Width="1100"
         WindowStartupLocation="CenterScreen"
@@ -260,7 +261,7 @@
                 <!-- Page Header -->
                 <StackPanel Grid.Row="0" Margin="0,0,0,20">
                     <TextBlock Text="New Booking" FontSize="24" FontWeight="SemiBold" Foreground="#263238"/>
-                    <TextBlock Text="Register a guest, assign a room, select booking type, and create the booking."
+                    <TextBlock Text="Register a guest, assign a room, select booking type and dates, then create the booking."
                                FontSize="13" Foreground="#78909C" Margin="0,4,0,0"/>
                 </StackPanel>
 
@@ -275,7 +276,7 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- STEP 1: Guest -->
+                        <!-- ===== STEP 1: Guest Details ===== -->
                         <StackPanel Grid.Column="0">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Background="#1976D2" CornerRadius="12" Width="24" Height="24">
@@ -310,7 +311,7 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- STEP 2: Room (Factory Method) -->
+                        <!-- ===== STEP 2: Room Assignment (Factory Method) ===== -->
                         <StackPanel Grid.Column="2">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Background="#1976D2" CornerRadius="12" Width="24" Height="24">
@@ -331,15 +332,32 @@
                                     <TextBox Text="{Binding RoomCtrl.RoomPrice, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
-                                    <TextBlock Text="Capacity (Guests)" Style="{StaticResource InputLabel}"/>
+                                    <!-- Dynamic label: "Number of Rooms" for Suite, "Capacity (Guests)" for others -->
+                                    <TextBlock Text="{Binding RoomCtrl.CapacityLabel}" Style="{StaticResource InputLabel}"/>
                                     <TextBox Text="{Binding RoomCtrl.RoomCapacity, UpdateSourceTrigger=PropertyChanged}"
                                              Style="{StaticResource InputField}" Margin="0,0,0,12"/>
 
                                     <TextBlock Text="Room Type (Factory Method)" Style="{StaticResource InputLabel}"/>
                                     <ComboBox ItemsSource="{Binding RoomCtrl.RoomTypes}"
                                               SelectedItem="{Binding RoomCtrl.SelectedRoomType, Mode=TwoWay}"
-                                              Padding="10,8" Margin="0,0,0,16" Background="#FAFAFA"
+                                              Padding="10,8" Margin="0,0,0,12" Background="#FAFAFA"
                                               BorderBrush="#CFD8DC"/>
+
+                                    <!-- Suite hint visible only when Suite is selected -->
+                                    <Border Background="#FFF8E1" CornerRadius="6" Padding="10,6" Margin="0,0,0,16">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Collapsed"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding RoomCtrl.SelectedRoomType}" Value="Suite">
+                                                        <Setter Property="Visibility" Value="Visible"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#795548"
+                                                   Text="Suite capacity = Number of Rooms x 2. Enter number of rooms, not total guests."/>
+                                    </Border>
 
                                     <Button Content="Assign Room" Command="{Binding CreateRoomCommand}"
                                             Style="{StaticResource PrimaryButton}" HorizontalAlignment="Stretch"/>
@@ -347,7 +365,7 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- STEP 3: Confirm Booking (Abstract Factory) -->
+                        <!-- ===== STEP 3: Booking Dates + Type (Abstract Factory) ===== -->
                         <StackPanel Grid.Column="4">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
                                 <Border Background="#2E7D32" CornerRadius="12" Width="24" Height="24">
@@ -360,17 +378,35 @@
 
                             <Border Style="{StaticResource Card}">
                                 <StackPanel>
-                                    <Border Background="#E8F5E9" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+
+                                    <!-- Stay dates with live nights counter -->
+                                    <Border Background="#E8F5E9" CornerRadius="8" Padding="14,12" Margin="0,0,0,16">
                                         <StackPanel>
-                                            <TextBlock Text="Booking Summary" FontSize="14" FontWeight="SemiBold"
-                                                       Foreground="#2E7D32" Margin="0,0,0,8"/>
-                                            <TextBlock Text="Complete steps 1 and 2, select a booking type, then confirm."
-                                                       TextWrapping="Wrap" Foreground="#546E7A" FontSize="12"
-                                                       LineHeight="20"/>
+                                            <TextBlock Text="Stay Dates" FontSize="13" FontWeight="SemiBold"
+                                                       Foreground="#2E7D32" Margin="0,0,0,10"/>
+
+                                            <TextBlock Text="Check-in Date" Style="{StaticResource InputLabel}"/>
+                                            <DatePicker SelectedDate="{Binding BookingCtrl.CheckInDate, Mode=TwoWay}"
+                                                        DisplayDateStart="{x:Static sys:DateTime.Today}"
+                                                        Margin="0,0,0,12" Background="#FAFAFA" BorderBrush="#CFD8DC"/>
+
+                                            <TextBlock Text="Check-out Date" Style="{StaticResource InputLabel}"/>
+                                            <DatePicker SelectedDate="{Binding BookingCtrl.CheckOutDate, Mode=TwoWay}"
+                                                        DisplayDateStart="{Binding BookingCtrl.CheckInDate}"
+                                                        Margin="0,0,0,10" Background="#FAFAFA" BorderBrush="#CFD8DC"/>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                                                <TextBlock Text="Number of nights:" Style="{StaticResource InputLabel}"
+                                                           Margin="0" VerticalAlignment="Center"/>
+                                                <Border Background="#1976D2" CornerRadius="4"
+                                                        Padding="8,2" Margin="8,0,0,0">
+                                                    <TextBlock Text="{Binding BookingCtrl.Nights}"
+                                                               Foreground="White" FontSize="12" FontWeight="SemiBold"/>
+                                                </Border>
+                                            </StackPanel>
                                         </StackPanel>
                                     </Border>
 
-                                    <!-- Booking Type Selector (Abstract Factory) -->
                                     <TextBlock Text="Booking Type (Abstract Factory)" Style="{StaticResource InputLabel}"/>
                                     <ComboBox ItemsSource="{Binding BookingCtrl.BookingTypes}"
                                               SelectedItem="{Binding BookingCtrl.SelectedBookingType, Mode=TwoWay}"
@@ -383,13 +419,33 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- Booking Types Info Card -->
+                            <!-- Booking types reference card -->
                             <Border Style="{StaticResource Card}" Margin="0,16,0,0">
                                 <StackPanel>
                                     <TextBlock Text="Booking Types" FontSize="13" FontWeight="SemiBold"
-                                               Foreground="#263238" Margin="0,0,0,8"/>
-                                    <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#78909C" LineHeight="20"
-                                               Text="Standard: Base rate per night&#x0a;Premium: 10% discount + early check-in&#x0a;VIP: 20% discount + free nights + extras&#x0a;&#x0a;Each type uses Abstract Factory to create&#x0a;Booking + Pricing + Confirmation objects."/>
+                                               Foreground="#263238" Margin="0,0,0,10"/>
+
+                                    <Border Background="#F5F5F5" CornerRadius="6" Padding="10,8" Margin="0,0,0,6">
+                                        <StackPanel>
+                                            <TextBlock Text="Standard" FontSize="12" FontWeight="SemiBold" Foreground="#263238"/>
+                                            <TextBlock Text="Base rate x nights. No perks." FontSize="11" Foreground="#78909C" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Background="#E3F2FD" CornerRadius="6" Padding="10,8" Margin="0,0,0,6">
+                                        <StackPanel>
+                                            <TextBlock Text="Premium" FontSize="12" FontWeight="SemiBold" Foreground="#1565C0"/>
+                                            <TextBlock Text="10% discount. Early check-in + late check-out." FontSize="11" Foreground="#1976D2" Margin="0,2,0,0"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Background="#F3E5F5" CornerRadius="6" Padding="10,8">
+                                        <StackPanel>
+                                            <TextBlock Text="VIP" FontSize="12" FontWeight="SemiBold" Foreground="#6A1B9A"/>
+                                            <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="#7B1FA2" Margin="0,2,0,0"
+                                                       Text="20% off + 1 free night every 5. Spa, airport transfer, minibar, upgrade."/>
+                                        </StackPanel>
+                                    </Border>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -432,7 +488,6 @@
                     </StackPanel>
                 </Border>
 
-                <!-- Bookings Table -->
                 <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" Margin="0,0,0,16">
                     <DataGrid ItemsSource="{Binding BookingCtrl.Bookings}"
                               SelectedItem="{Binding BookingCtrl.SelectedBooking, Mode=TwoWay}"
@@ -443,9 +498,24 @@
                               RowBackground="White" AlternatingRowBackground="#FAFAFA"
                               Padding="0" Margin="0">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Booking ID" Width="2*">
+                            <DataGridTextColumn Header="Booking ID" Width="2.5*">
                                 <DataGridTextColumn.Binding>
                                     <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Id"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Type" Width="*">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Type"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Check-in" Width="*">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="CheckIn"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Check-out" Width="*">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="CheckOut"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
                             <DataGridTextColumn Header="Status" Width="*">
@@ -502,6 +572,7 @@
                     </Border>
                 </Border>
             </Grid>
+
         </Grid>
     </Grid>
 </Window>

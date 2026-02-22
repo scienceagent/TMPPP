@@ -39,8 +39,21 @@ namespace HotelBookingSystem.ViewModels
           public string SelectedRoomType
           {
                get => _selectedRoomType;
-               set => SetProperty(ref _selectedRoomType, value);
+               set
+               {
+                    if (SetProperty(ref _selectedRoomType, value))
+                    {
+                         // Notify XAML that the capacity label also changed when room type changes
+                         OnPropertyChanged(nameof(CapacityLabel));
+                    }
+               }
           }
+
+          // Dynamic label used in Step 2:
+          // Suite expects "number of rooms" input (capacity = rooms x 2)
+          // All other types expect "number of guests" input directly
+          public string CapacityLabel =>
+              SelectedRoomType == "Suite" ? "Number of Rooms" : "Capacity (Guests)";
 
           public List<string> RoomTypes { get; } = new List<string> { "Standard", "Deluxe", "Suite" };
 
@@ -64,7 +77,7 @@ namespace HotelBookingSystem.ViewModels
           {
                try
                {
-                    // FACTORY METHOD — no switch, no new StandardRoom/DeluxeRoom/Suite
+                    // FACTORY METHOD — decouples RoomController from concrete room classes
                     IRoomFactory factory = _roomFactoryProvider.GetFactory(SelectedRoomType);
                     _currentRoom = factory.CreateRoom(
                         Guid.NewGuid().ToString(),

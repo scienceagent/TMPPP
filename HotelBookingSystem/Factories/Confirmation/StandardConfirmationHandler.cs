@@ -9,7 +9,7 @@ namespace HotelBookingSystem.Factories.Confirmation
           {
                return $"Standard Booking Confirmed\n" +
                       $"Booking ID: {booking.BookingId}\n" +
-                      $"Total: {totalPrice:C2}";
+                      $"Total: {totalPrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))}";
           }
 
           public string GetConfirmationType() => "Standard";

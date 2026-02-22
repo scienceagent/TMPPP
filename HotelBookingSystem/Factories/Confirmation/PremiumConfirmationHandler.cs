@@ -9,7 +9,7 @@ namespace HotelBookingSystem.Factories.Confirmation
           {
                return $"*** Premium Booking Confirmed ***\n" +
                       $"Booking ID: {booking.BookingId}\n" +
-                      $"Total (10% discount): {totalPrice:C2}\n" +
+                      $"Total (10% discount): {totalPrice.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"))}\n" +
                       $"Benefits: Early check-in, Late check-out";
           }
 
