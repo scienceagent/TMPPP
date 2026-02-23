@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using HotelBookingSystem.Factories;
+using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models;
 

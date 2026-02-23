@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using HotelBookingSystem.Factories;
 using HotelBookingSystem.Interfaces;
+using HotelBookingSystem.Interfaces;
+using HotelBookingSystem.Models.User;
+using HotelBookingSystem.Models;
 using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.ViewModels
@@ -93,7 +96,7 @@ namespace HotelBookingSystem.ViewModels
                     if (room == null) { OnLog?.Invoke("Please assign a room first.\n"); return; }
                     if (CheckOutDate <= CheckInDate) { OnLog?.Invoke("Check-out must be after check-in.\n"); return; }
 
-                    // Abstract Factory — get the factory for the selected type
+                    // Abstract Factory � get the factory for the selected type
                     // Teacher's pattern: factory.CreateButton(), factory.CreateCheckbox()
                     IBookingFactory factory = _factoryProvider.GetFactory(SelectedBookingType ?? "Standard");
 

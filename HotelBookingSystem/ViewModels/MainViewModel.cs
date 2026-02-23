@@ -2,6 +2,8 @@ using System.Windows.Input;
 using HotelBookingSystem.Commands;
 using HotelBookingSystem.Factories;
 using HotelBookingSystem.Interfaces;
+using HotelBookingSystem.Interfaces;
+using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Services;
 
 namespace HotelBookingSystem.ViewModels

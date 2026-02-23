@@ -1,4 +1,4 @@
-﻿using HotelBookingSystem.Interfaces;
+using HotelBookingSystem.Interfaces;
 
 namespace HotelBookingSystem.ViewModels
 {

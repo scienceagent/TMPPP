@@ -1,6 +1,6 @@
-﻿using System;
+using System;
 using HotelBookingSystem.Interfaces;
-using HotelBookingSystem.Models;
+using HotelBookingSystem.Models.User;
 
 namespace HotelBookingSystem.ViewModels
 {
