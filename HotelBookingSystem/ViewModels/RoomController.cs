@@ -10,13 +10,14 @@ namespace HotelBookingSystem.ViewModels
      {
           private readonly IRoomRepository _roomRepository;
           private readonly IRoomPricingService _roomPricingService;
-          private readonly RoomFactoryProvider _roomFactoryProvider;
+          private readonly RoomCreatorProvider _creatorProvider;
+          private RoomCreator _creator;
+          private Room _currentRoom;
 
           private string _roomNumber;
           private decimal _roomPrice;
           private int _roomCapacity;
           private string _selectedRoomType;
-          private Room _currentRoom;
 
           public string RoomNumber
           {
@@ -43,20 +44,16 @@ namespace HotelBookingSystem.ViewModels
                {
                     if (SetProperty(ref _selectedRoomType, value))
                     {
-                         // Notify XAML that the capacity label also changed when room type changes
+                         _creator = _creatorProvider.GetCreator(value ?? "Standard");
                          OnPropertyChanged(nameof(CapacityLabel));
                     }
                }
           }
 
-          // Dynamic label used in Step 2:
-          // Suite expects "number of rooms" input (capacity = rooms x 2)
-          // All other types expect "number of guests" input directly
           public string CapacityLabel =>
               SelectedRoomType == "Suite" ? "Number of Rooms" : "Capacity (Guests)";
 
-          public List<string> RoomTypes { get; } = new List<string> { "Standard", "Deluxe", "Suite" };
-
+          public List<string> RoomTypes { get; }
           public Room CurrentRoom => _currentRoom;
 
           public event Action<string> OnLog;
@@ -65,10 +62,12 @@ namespace HotelBookingSystem.ViewModels
           {
                _roomRepository = roomRepository;
                _roomPricingService = roomPricingService;
-               _roomFactoryProvider = new RoomFactoryProvider();
+               _creatorProvider = new RoomCreatorProvider();
+
+               RoomTypes = new List<string>(_creatorProvider.GetAvailableTypes());
 
                RoomNumber = "101";
-               RoomPrice = 200;
+               RoomPrice = 200m;
                RoomCapacity = 2;
                SelectedRoomType = "Standard";
           }
@@ -77,23 +76,23 @@ namespace HotelBookingSystem.ViewModels
           {
                try
                {
-                    // FACTORY METHOD — decouples RoomController from concrete room classes
-                    IRoomFactory factory = _roomFactoryProvider.GetFactory(SelectedRoomType);
-                    _currentRoom = factory.CreateRoom(
-                        Guid.NewGuid().ToString(),
-                        RoomNumber,
-                        RoomPrice,
-                        RoomCapacity
-                    );
+                    var (success, error, room, display, description, priceSummary, cleaningCost) =
+                        _creator.CreateRoom(RoomNumber, RoomPrice, RoomCapacity, _roomRepository, _roomPricingService);
 
-                    _roomRepository.Save(_currentRoom);
+                    if (!success)
+                    {
+                         OnLog?.Invoke($"Room creation failed: {error}\n");
+                         return;
+                    }
+
+                    _currentRoom = room;
 
                     OnLog?.Invoke($"{SelectedRoomType} room created.");
-                    OnLog?.Invoke(_currentRoom.GetDisplayInfo());
-                    OnLog?.Invoke(_currentRoom.GetDescription());
-                    OnLog?.Invoke($"Price: {FormatUsd(_roomPricingService.CalculatePrice(_currentRoom))}");
-                    OnLog?.Invoke($"Cleaning cost: {FormatUsd(_roomPricingService.CalculateCleaningCost(_currentRoom))}");
-                    OnLog?.Invoke($"Capacity: {_currentRoom.Capacity} guests\n");
+                    OnLog?.Invoke(display);
+                    OnLog?.Invoke(description);
+                    OnLog?.Invoke(priceSummary);
+                    OnLog?.Invoke($"Cleaning cost: {FormatUsd(cleaningCost)}");
+                    OnLog?.Invoke($"Capacity: {room.Capacity} guests\n");
                }
                catch (Exception ex)
                {
