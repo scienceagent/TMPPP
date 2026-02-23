@@ -1,4 +1,6 @@
-﻿namespace HotelBookingSystem.Models
+﻿using System.Globalization;
+
+namespace HotelBookingSystem.Models
 {
      public class Suite : Room
      {
@@ -16,10 +18,7 @@
                HasLivingRoom = hasLivingRoom;
           }
 
-          public override void SetAvailability(bool status)
-          {
-               IsAvailable = status;
-          }
+          public override void SetAvailability(bool status) => IsAvailable = status;
 
           public override string GetDisplayInfo()
           {
@@ -30,5 +29,8 @@
 
           public override string GetDescription() =>
               $"Luxury suite with {NumberOfRooms} rooms accommodating up to {Capacity} guests.";
+
+          public override string GetPriceSummary(decimal price) =>
+              $"Price: {price.ToString("C", CultureInfo.GetCultureInfo("en-US"))} ({NumberOfRooms} rooms × premium rate)";
      }
 }

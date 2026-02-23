@@ -1,6 +1,9 @@
+using System.Globalization;
+using HotelBookingSystem.Interfaces;
+
 namespace HotelBookingSystem.Models
 {
-     public abstract class Room
+     public abstract class Room : IRoomProduct
      {
           public string RoomId { get; }
           public string RoomNumber { get; }
@@ -17,9 +20,9 @@ namespace HotelBookingSystem.Models
           }
 
           public virtual void SetAvailability(bool status) => IsAvailable = status;
-
           public virtual string GetDisplayInfo() => $"Room {RoomNumber} | Capacity: {Capacity}";
-
-          public virtual string GetDescription() => $"Standard accommodation in room {RoomNumber}.";
+          public virtual string GetDescription() => $"Accommodation in room {RoomNumber}.";
+          public virtual string GetPriceSummary(decimal price) =>
+              price.ToString("C", CultureInfo.GetCultureInfo("en-US"));
      }
 }

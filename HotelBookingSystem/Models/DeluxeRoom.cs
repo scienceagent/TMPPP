@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace HotelBookingSystem.Models
 {
@@ -17,10 +18,7 @@ namespace HotelBookingSystem.Models
                HasBalcony = hasBalcony;
           }
 
-          public override void SetAvailability(bool status)
-          {
-               IsAvailable = status;
-          }
+          public override void SetAvailability(bool status) => IsAvailable = status;
 
           public override string GetDisplayInfo()
           {
@@ -28,10 +26,10 @@ namespace HotelBookingSystem.Models
                return $"Deluxe Room {RoomNumber} | {balcony} | Capacity: {Capacity}";
           }
 
-          public override string GetDescription()
-          {
-               var amenitiesList = string.Join(", ", Amenities);
-               return $"Deluxe room featuring: {amenitiesList}.";
-          }
+          public override string GetDescription() =>
+              $"Deluxe room featuring: {string.Join(", ", Amenities)}.";
+
+          public override string GetPriceSummary(decimal price) =>
+              $"Price: {price.ToString("C", CultureInfo.GetCultureInfo("en-US"))} (includes {Amenities.Count} amenities{(HasBalcony ? " + balcony" : "")})";
      }
 }
