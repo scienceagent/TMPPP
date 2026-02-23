@@ -1,4 +1,4 @@
-﻿@startuml Lab2_Abstract_Factory
+﻿@startuml Lab2_AbstractFactory
 
 skinparam classAttributeIconSize 0
 skinparam classFontSize 13
@@ -6,7 +6,6 @@ skinparam classFontName "Segoe UI"
 skinparam defaultFontName "Segoe UI"
 skinparam shadowing false
 skinparam linetype ortho
-skinparam packageStyle rectangle
 
 skinparam class {
     BackgroundColor #FEFEFE
@@ -14,229 +13,140 @@ skinparam class {
     ArrowColor #546E7A
     HeaderBackgroundColor #E3F2FD
 }
-
 skinparam interface {
     BackgroundColor #E8F5E9
     BorderColor #2E7D32
 }
 
-skinparam note {
-    BackgroundColor #FFFDE7
-    BorderColor #F9A825
-}
+title <b>Abstract Factory Pattern — Booking Families</b>
 
-title <b>Laboratory 2 — Abstract Factory Pattern\nBooking Families (Standard, Premium, VIP)</b>
-
-' ============================================
-' CLIENT
-' ============================================
 class BookingController {
-    - _bookingFactoryProvider : BookingFactoryProvider
     - _bookingService : IBookingService
+    - _bookingRepository : IBookingRepository
     - _durationCalculator : IBookingDurationCalculator
-    --
+    - _factoryProvider : BookingFactoryProvider
+    + BookingTypes : List<string>
+    + SelectedBookingType : string
+    + CheckInDate : DateTime
+    + CheckOutDate : DateTime
+    + Nights : int
+    + SelectedBooking : Booking
     + CreateBooking(user, room, pricingService) : void
     + ConfirmBooking() : void
     + CancelBooking() : void
+    + RefreshBookings() : void
 }
 
-' ============================================
-' FACTORY PROVIDER
-' ============================================
 class BookingFactoryProvider {
-    - _factories : Dictionary<string, IBookingFactory>
-    --
+    - _registry : Dictionary<string, Func<IBookingFactory>>
     + GetFactory(bookingType) : IBookingFactory
     + GetAvailableTypes() : IReadOnlyList<string>
 }
 
-' ============================================
-' ABSTRACT FACTORY INTERFACE
-' ============================================
-interface IBookingFactory <<interface>> {
+interface IBookingFactory {
     + CreateBooking(bookingId, userId, roomId,\n    checkIn, checkOut) : Booking
     + CreatePricingStrategy() : IPricingStrategy
     + CreateConfirmationHandler() : IConfirmationHandler
 }
 
-' ============================================
-' CONCRETE FACTORIES
-' ============================================
 class StandardBookingFactory {
-    + CreateBooking(...) : Booking
+    + CreateBooking(bookingId, userId, roomId,\n    checkIn, checkOut) : Booking
     + CreatePricingStrategy() : IPricingStrategy
     + CreateConfirmationHandler() : IConfirmationHandler
 }
 
 class PremiumBookingFactory {
-    + CreateBooking(...) : Booking
+    + CreateBooking(bookingId, userId, roomId,\n    checkIn, checkOut) : Booking
     + CreatePricingStrategy() : IPricingStrategy
     + CreateConfirmationHandler() : IConfirmationHandler
 }
 
 class VipBookingFactory {
-    + CreateBooking(...) : Booking
+    + CreateBooking(bookingId, userId, roomId,\n    checkIn, checkOut) : Booking
     + CreatePricingStrategy() : IPricingStrategy
     + CreateConfirmationHandler() : IConfirmationHandler
 }
 
-' ============================================
-' PRODUCT FAMILY A: BOOKING
-' ============================================
-package "Product: Booking" as pb #F5F5F5 {
-    class Booking {
-        + BookingId : string
-        + UserId : string
-        + RoomId : string
-        + CheckInDate : DateTime
-        + CheckOutDate : DateTime
-        + Status : BookingStatus
-        --
-        + Confirm() : void
-        + Cancel() : void
-        + Complete() : void
-    }
+interface IPricingStrategy {
+    + CalculateTotalPrice(roomPrice, nights) : decimal
+    + GetPricingDescription() : string
 }
 
-' ============================================
-' PRODUCT FAMILY B: PRICING
-' ============================================
-package "Product Family: Pricing" as pfp #E8F5E9 {
-    interface IPricingStrategy <<interface>> {
-        + CalculateTotalPrice(roomPrice, nights) : decimal
-        + GetPricingDescription() : string
-    }
-
-    class StandardPricingStrategy {
-        + CalculateTotalPrice(roomPrice, nights) : decimal
-        + GetPricingDescription() : string
-    }
-
-    class PremiumPricingStrategy {
-        - DiscountRate : decimal = 0.10
-        --
-        + CalculateTotalPrice(roomPrice, nights) : decimal
-        + GetPricingDescription() : string
-    }
-
-    class VipPricingStrategy {
-        - DiscountRate : decimal = 0.20
-        - FreeNightEvery : decimal = 5
-        --
-        + CalculateTotalPrice(roomPrice, nights) : decimal
-        + GetPricingDescription() : string
-    }
+class StandardPricingStrategy {
+    + CalculateTotalPrice(roomPrice, nights) : decimal
+    + GetPricingDescription() : string
 }
 
-' ============================================
-' PRODUCT FAMILY C: CONFIRMATION
-' ============================================
-package "Product Family: Confirmation" as pfc #E3F2FD {
-    interface IConfirmationHandler <<interface>> {
-        + GenerateConfirmation(booking, totalPrice) : string
-        + GetConfirmationType() : string
-    }
-
-    class StandardConfirmationHandler {
-        + GenerateConfirmation(booking, totalPrice) : string
-        + GetConfirmationType() : string
-    }
-
-    class PremiumConfirmationHandler {
-        + GenerateConfirmation(booking, totalPrice) : string
-        + GetConfirmationType() : string
-    }
-
-    class VipConfirmationHandler {
-        + GenerateConfirmation(booking, totalPrice) : string
-        + GetConfirmationType() : string
-    }
+class PremiumPricingStrategy {
+    - DiscountRate : decimal = 0.10
+    + CalculateTotalPrice(roomPrice, nights) : decimal
+    + GetPricingDescription() : string
 }
 
-' ============================================
-' RELATIONSHIPS: CLIENT → PROVIDER → FACTORY
-' ============================================
-BookingController --> BookingFactoryProvider : uses
-BookingFactoryProvider --> IBookingFactory : selects
+class VipPricingStrategy {
+    - DiscountRate : decimal = 0.20
+    - FreeNightEvery : int = 5
+    + CalculateTotalPrice(roomPrice, nights) : decimal
+    + GetPricingDescription() : string
+}
+
+interface IConfirmationHandler {
+    + GenerateConfirmation(booking, totalPrice) : string
+    + GetConfirmationType() : string
+}
+
+class StandardConfirmationHandler {
+    + GenerateConfirmation(booking, totalPrice) : string
+    + GetConfirmationType() : string
+}
+
+class PremiumConfirmationHandler {
+    + GenerateConfirmation(booking, totalPrice) : string
+    + GetConfirmationType() : string
+}
+
+class VipConfirmationHandler {
+    + GenerateConfirmation(booking, totalPrice) : string
+    + GetConfirmationType() : string
+}
+
+class Booking {
+    + BookingId : string
+    + UserId : string
+    + RoomId : string
+    + CheckInDate : DateTime
+    + CheckOutDate : DateTime
+    + Status : BookingStatus
+    + Confirm() : void
+    + Cancel() : void
+    + Complete() : void
+}
+
+BookingController --> BookingFactoryProvider : uses (injected)
+BookingFactoryProvider --> IBookingFactory : returns
 
 IBookingFactory <|.. StandardBookingFactory
 IBookingFactory <|.. PremiumBookingFactory
 IBookingFactory <|.. VipBookingFactory
 
-' ============================================
-' RELATIONSHIPS: PRICING
-' ============================================
 IPricingStrategy <|.. StandardPricingStrategy
 IPricingStrategy <|.. PremiumPricingStrategy
 IPricingStrategy <|.. VipPricingStrategy
 
-' ============================================
-' RELATIONSHIPS: CONFIRMATION
-' ============================================
 IConfirmationHandler <|.. StandardConfirmationHandler
 IConfirmationHandler <|.. PremiumConfirmationHandler
 IConfirmationHandler <|.. VipConfirmationHandler
 
-' ============================================
-' FACTORY → PRODUCT (creates)
-' ============================================
-StandardBookingFactory ..> Booking : <<creates>>
-StandardBookingFactory ..> StandardPricingStrategy : <<creates>>
+StandardBookingFactory ..> Booking                     : <<creates>>
+StandardBookingFactory ..> StandardPricingStrategy     : <<creates>>
 StandardBookingFactory ..> StandardConfirmationHandler : <<creates>>
 
-PremiumBookingFactory ..> Booking : <<creates>>
-PremiumBookingFactory ..> PremiumPricingStrategy : <<creates>>
-PremiumBookingFactory ..> PremiumConfirmationHandler : <<creates>>
+PremiumBookingFactory  ..> Booking                     : <<creates>>
+PremiumBookingFactory  ..> PremiumPricingStrategy      : <<creates>>
+PremiumBookingFactory  ..> PremiumConfirmationHandler  : <<creates>>
 
-VipBookingFactory ..> Booking : <<creates>>
-VipBookingFactory ..> VipPricingStrategy : <<creates>>
-VipBookingFactory ..> VipConfirmationHandler : <<creates>>
-
-' ============================================
-' NOTES
-' ============================================
-note top of BookingController
-    <b>Client</b>
-    BookingController works only with
-    IBookingFactory, IPricingStrategy,
-    and IConfirmationHandler interfaces.
-    It never knows the concrete types.
-end note
-
-note right of IBookingFactory
-    <b>Abstract Factory Pattern</b>
-    ────────────────────────
-    Defines creation of a <b>FAMILY</b>
-    of related objects:
-    • Booking
-    • IPricingStrategy
-    • IConfirmationHandler
-
-    Each concrete factory produces
-    objects that belong together.
-end note
-
-note bottom of pfp
-    <b>Pricing per type:</b>
-    Standard: base rate × nights
-    Premium: 10% discount
-    VIP: 20% discount + 1 free night / 5
-end note
-
-note bottom of pfc
-    <b>Confirmation per type:</b>
-    Standard: basic confirmation
-    Premium: + early check-in, late check-out
-    VIP: + spa, airport transfer, free minibar
-end note
-
-note right of BookingFactoryProvider
-    <b>To add new booking type:</b>
-    1. Create CorporateBookingFactory
-    2. Create CorporatePricingStrategy
-    3. Create CorporateConfirmationHandler
-    4. Register in BookingFactoryProvider
-    No existing code modified.
-end note
+VipBookingFactory      ..> Booking                     : <<creates>>
+VipBookingFactory      ..> VipPricingStrategy          : <<creates>>
+VipBookingFactory      ..> VipConfirmationHandler      : <<creates>>
 
 @enduml

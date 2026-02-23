@@ -1,4 +1,4 @@
-﻿@startuml Lab2_Factory_Method
+﻿@startuml Lab2_FactoryMethod
 
 skinparam classAttributeIconSize 0
 skinparam classFontSize 13
@@ -6,7 +6,6 @@ skinparam classFontName "Segoe UI"
 skinparam defaultFontName "Segoe UI"
 skinparam shadowing false
 skinparam linetype ortho
-skinparam packageStyle rectangle
 
 skinparam class {
     BackgroundColor #FEFEFE
@@ -14,163 +13,125 @@ skinparam class {
     ArrowColor #546E7A
     HeaderBackgroundColor #E3F2FD
 }
-
 skinparam interface {
     BackgroundColor #E8F5E9
     BorderColor #2E7D32
 }
-
-skinparam note {
-    BackgroundColor #FFFDE7
-    BorderColor #F9A825
+skinparam abstract {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
 }
 
-title <b>Laboratory 2 — Factory Method Pattern\nRoom Creation</b>
+title <b>Factory Method Pattern — Room Creation</b>
 
-' ============================================
-' CLIENT
-' ============================================
 class RoomController {
-    - _roomFactoryProvider : RoomFactoryProvider
+    - _creator : RoomCreator
     - _roomRepository : IRoomRepository
     - _roomPricingService : IRoomPricingService
-    --
+    - _creatorProvider : RoomCreatorProvider
+    - _currentRoom : Room
+    + RoomNumber : string
+    + RoomPrice : decimal
+    + RoomCapacity : int
+    + SelectedRoomType : string
+    + CurrentRoom : Room
     + CreateRoom() : void
 }
 
-' ============================================
-' FACTORY PROVIDER
-' ============================================
-class RoomFactoryProvider {
-    - _factories : Dictionary<string, IRoomFactory>
-    --
-    + GetFactory(roomType) : IRoomFactory
+abstract class RoomCreator {
+    + CreateRoom(roomNumber, basePrice, capacity,\n    repository, pricingService) : tuple
+    + {abstract} CreateProduct(roomId, roomNumber,\n    basePrice, capacity) : IRoomProduct
 }
 
-' ============================================
-' FACTORY INTERFACE
-' ============================================
-interface IRoomFactory <<interface>> {
-    + CreateRoom(roomId, roomNumber,\n    basePrice, capacity) : Room
+class StandardRoomCreator {
+    + CreateProduct(roomId, roomNumber,\n    basePrice, capacity) : IRoomProduct
 }
 
-' ============================================
-' CONCRETE FACTORIES
-' ============================================
-class StandardRoomFactory {
-    + CreateRoom(roomId, roomNumber,\n    basePrice, capacity) : Room
-}
-
-class DeluxeRoomFactory {
-    - _defaultAmenities : List<string>
+class DeluxeRoomCreator {
+    - _amenities : List<string>
     - _hasBalcony : bool
-    --
-    + CreateRoom(roomId, roomNumber,\n    basePrice, capacity) : Room
+    + CreateProduct(roomId, roomNumber,\n    basePrice, capacity) : IRoomProduct
 }
 
-class SuiteRoomFactory {
+class SuiteRoomCreator {
     - _hasKitchen : bool
     - _hasLivingRoom : bool
-    --
-    + CreateRoom(roomId, roomNumber,\n    basePrice, capacity) : Room
+    + CreateProduct(roomId, roomNumber,\n    basePrice, capacity) : IRoomProduct
 }
 
-' ============================================
-' PRODUCT: ABSTRACT
-' ============================================
-abstract class Room {
+interface IRoomProduct {
     + RoomId : string
     + RoomNumber : string
     + BasePrice : decimal
     + IsAvailable : bool
-    + {abstract} Capacity : int
-    --
-    + <<virtual>> GetDisplayInfo() : string
-    + <<virtual>> GetDescription() : string
-    + <<virtual>> SetAvailability(status) : void
+    + Capacity : int
+    + GetDisplayInfo() : string
+    + GetDescription() : string
+    + GetPriceSummary(calculatedPrice) : string
+    + SetAvailability(status) : void
 }
 
-' ============================================
-' PRODUCTS: CONCRETE
-' ============================================
 class StandardRoom {
-    + <<override>> Capacity : int
-    --
-    + <<override>> GetDisplayInfo() : string
-    + <<override>> GetDescription() : string
-    + <<override>> SetAvailability(status) : void
+    + RoomId : string
+    + RoomNumber : string
+    + BasePrice : decimal
+    + Capacity : int
+    + GetDisplayInfo() : string
+    + GetDescription() : string
+    + GetPriceSummary(price) : string
+    + SetAvailability(status) : void
 }
 
 class DeluxeRoom {
-    + <<override>> Capacity : int
+    + RoomId : string
+    + RoomNumber : string
+    + BasePrice : decimal
+    + Capacity : int
     + Amenities : IReadOnlyList<string>
     + HasBalcony : bool
-    --
-    + <<override>> GetDisplayInfo() : string
-    + <<override>> GetDescription() : string
-    + <<override>> SetAvailability(status) : void
+    + GetDisplayInfo() : string
+    + GetDescription() : string
+    + GetPriceSummary(price) : string
+    + SetAvailability(status) : void
 }
 
 class Suite {
+    + RoomId : string
+    + RoomNumber : string
+    + BasePrice : decimal
     + NumberOfRooms : int
     + HasKitchen : bool
     + HasLivingRoom : bool
-    + <<override>> Capacity : int
-    --
-    + <<override>> GetDisplayInfo() : string
-    + <<override>> GetDescription() : string
-    + <<override>> SetAvailability(status) : void
+    + Capacity : int
+    + GetDisplayInfo() : string
+    + GetDescription() : string
+    + GetPriceSummary(price) : string
+    + SetAvailability(status) : void
 }
 
-' ============================================
-' RELATIONSHIPS
-' ============================================
-RoomController --> RoomFactoryProvider : uses
-RoomFactoryProvider --> IRoomFactory : selects
+class RoomCreatorProvider {
+    - _registry : Dictionary<string, Func<RoomCreator>>
+    + GetCreator(roomType) : RoomCreator
+    + GetAvailableTypes() : IReadOnlyList<string>
+}
 
-IRoomFactory <|.. StandardRoomFactory
-IRoomFactory <|.. DeluxeRoomFactory
-IRoomFactory <|.. SuiteRoomFactory
+RoomController --> RoomCreatorProvider : uses
+RoomController --> RoomCreator : holds ref / calls CreateRoom()
 
-StandardRoomFactory ..> StandardRoom : <<creates>>
-DeluxeRoomFactory ..> DeluxeRoom : <<creates>>
-SuiteRoomFactory ..> Suite : <<creates>>
+RoomCreatorProvider ..> RoomCreator : returns
 
-Room <|-- StandardRoom
-Room <|-- DeluxeRoom
-Room <|-- Suite
+RoomCreator <|-- StandardRoomCreator
+RoomCreator <|-- DeluxeRoomCreator
+RoomCreator <|-- SuiteRoomCreator
 
-' ============================================
-' NOTES
-' ============================================
-note top of RoomController
-    <b>Client</b>
-    RoomController never calls
-    "new StandardRoom()" directly.
-    It asks the factory to create
-    the room object.
-end note
+RoomCreator ..> IRoomProduct : creates / uses
 
-note right of IRoomFactory
-    <b>Factory Method Pattern</b>
-    ─────────────────────
-    Defines ONE creation method.
-    Each concrete factory creates
-    ONE specific product type.
+StandardRoomCreator ..> StandardRoom : <<creates>>
+DeluxeRoomCreator   ..> DeluxeRoom   : <<creates>>
+SuiteRoomCreator    ..> Suite        : <<creates>>
 
-    <b>To add new room type:</b>
-    1. Create PenthouseRoom : Room
-    2. Create PenthouseRoomFactory
-    3. Register in Provider
-    No existing code modified.
-end note
-
-note bottom of Room
-    <b>Liskov Substitution</b>
-    ALL virtual methods are
-    overridden in every child.
-    Any child substitutes
-    the parent.
-end note
+IRoomProduct <|.. StandardRoom
+IRoomProduct <|.. DeluxeRoom
+IRoomProduct <|.. Suite
 
 @enduml
