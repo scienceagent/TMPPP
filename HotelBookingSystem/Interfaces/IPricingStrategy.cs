@@ -1,6 +1,4 @@
-﻿using HotelBookingSystem.Models;
-
-namespace HotelBookingSystem.Interfaces
+﻿namespace HotelBookingSystem.Interfaces
 {
      public interface IPricingStrategy
      {

@@ -6,27 +6,22 @@ namespace HotelBookingSystem.Factories
 {
      public class BookingFactoryProvider
      {
-          private readonly Dictionary<string, IBookingFactory> _factories;
-
-          public BookingFactoryProvider()
-          {
-               _factories = new Dictionary<string, IBookingFactory>
-               {
-                    { "Standard", new StandardBookingFactory() },
-                    { "Premium", new PremiumBookingFactory() },
-                    { "VIP", new VipBookingFactory() }
-               };
-          }
+          private readonly Dictionary<string, Func<IBookingFactory>> _registry =
+              new Dictionary<string, Func<IBookingFactory>>(StringComparer.OrdinalIgnoreCase)
+              {
+                { "Standard", () => new StandardBookingFactory() },
+                { "Premium",  () => new PremiumBookingFactory()  },
+                { "VIP",      () => new VipBookingFactory()      },
+              };
 
           public IBookingFactory GetFactory(string bookingType)
           {
-               if (_factories.TryGetValue(bookingType, out var factory))
-                    return factory;
+               if (_registry.TryGetValue(bookingType, out var build))
+                    return build();
 
                throw new ArgumentException($"Unknown booking type: {bookingType}");
           }
 
-          public IReadOnlyList<string> GetAvailableTypes() =>
-               new List<string>(_factories.Keys);
+          public IReadOnlyList<string> GetAvailableTypes() => new List<string>(_registry.Keys);
      }
 }

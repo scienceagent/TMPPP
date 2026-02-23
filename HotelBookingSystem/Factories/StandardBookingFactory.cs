@@ -8,20 +8,13 @@ namespace HotelBookingSystem.Factories
 {
      public class StandardBookingFactory : IBookingFactory
      {
-          public Booking CreateBooking(string bookingId, string userId, string roomId,
-                                       DateTime checkIn, DateTime checkOut)
-          {
-               return new Booking(bookingId, userId, roomId, checkIn, checkOut);
-          }
+          public Booking CreateBooking(string bookingId, string userId, string roomId, DateTime checkIn, DateTime checkOut)
+              => new Booking(bookingId, userId, roomId, checkIn, checkOut);
 
           public IPricingStrategy CreatePricingStrategy()
-          {
-               return new StandardPricingStrategy();
-          }
+              => new StandardPricingStrategy();
 
           public IConfirmationHandler CreateConfirmationHandler()
-          {
-               return new StandardConfirmationHandler();
-          }
+              => new StandardConfirmationHandler();
      }
 }

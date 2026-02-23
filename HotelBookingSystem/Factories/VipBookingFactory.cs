@@ -8,20 +8,13 @@ namespace HotelBookingSystem.Factories
 {
      public class VipBookingFactory : IBookingFactory
      {
-          public Booking CreateBooking(string bookingId, string userId, string roomId,
-                                       DateTime checkIn, DateTime checkOut)
-          {
-               return new Booking(bookingId, userId, roomId, checkIn, checkOut);
-          }
+          public Booking CreateBooking(string bookingId, string userId, string roomId, DateTime checkIn, DateTime checkOut)
+              => new Booking(bookingId, userId, roomId, checkIn, checkOut);
 
           public IPricingStrategy CreatePricingStrategy()
-          {
-               return new VipPricingStrategy();
-          }
+              => new VipPricingStrategy();
 
           public IConfirmationHandler CreateConfirmationHandler()
-          {
-               return new VipConfirmationHandler();
-          }
+              => new VipConfirmationHandler();
      }
 }
