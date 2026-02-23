@@ -1,7 +1,4 @@
-﻿// ============================================
-// Converters/StatusToColorConverter.cs
-// ============================================
-using System;
+﻿using System;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
@@ -9,9 +6,6 @@ using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Converters
 {
-     /// <summary>
-     /// Convertește status-ul booking-ului în culoare
-     /// </summary>
      public class StatusToColorConverter : IValueConverter
      {
           public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -31,8 +25,6 @@ namespace HotelBookingSystem.Converters
           }
 
           public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-          {
-               throw new NotImplementedException();
-          }
+               => throw new NotImplementedException();
      }
 }
