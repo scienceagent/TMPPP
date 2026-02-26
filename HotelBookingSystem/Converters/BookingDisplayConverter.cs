@@ -14,7 +14,7 @@ namespace HotelBookingSystem.Converters
                     return param switch
                     {
                          "Id" => booking.BookingId,
-                         "Type" => booking.GetType().Name.Replace("Booking", ""),
+                         "Type" => booking.BookingType,
                          "CheckIn" => booking.CheckInDate.ToString("dd MMM yyyy"),
                          "CheckOut" => booking.CheckOutDate.ToString("dd MMM yyyy"),
                          "Status" => booking.Status.ToString(),
@@ -25,6 +25,6 @@ namespace HotelBookingSystem.Converters
           }
 
           public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-               => throw new NotImplementedException();
+              => throw new NotImplementedException();
      }
 }

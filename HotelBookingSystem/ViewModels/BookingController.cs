@@ -66,7 +66,7 @@ namespace HotelBookingSystem.ViewModels
 
                try
                {
-                    // Builder + Director: assemble the BookingRequest with correct extras per type
+                    // Builder + Director: build the BookingRequest with the correct extras
                     var request = SelectedBookingType switch
                     {
                          "VIP" => _director.BuildVip(user.Id, room.RoomId, CheckInDate, CheckOutDate),
@@ -79,9 +79,11 @@ namespace HotelBookingSystem.ViewModels
                     if (request.SpecialRequest != null)
                          OnLog?.Invoke($"  Note: {request.SpecialRequest}");
 
-                    // Abstract Factory: create the matching Booking, Pricing, and Confirmation objects
+                    // Abstract Factory: create Booking (with type stored), Pricing, Confirmation
                     var factory = _factoryProvider.GetFactory(SelectedBookingType);
-                    var booking = factory.CreateBooking(request.BookingId, user.Id, room.RoomId, CheckInDate, CheckOutDate);
+                    var booking = factory.CreateBooking(
+                        request.BookingId, user.Id, room.RoomId,
+                        CheckInDate, CheckOutDate, SelectedBookingType);
                     var pricing = factory.CreatePricingStrategy();
                     var confirmation = factory.CreateConfirmationHandler();
 
