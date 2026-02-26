@@ -12,7 +12,7 @@ namespace HotelBookingSystem.ViewModels
           private readonly IRoomRepository _roomRepository;
           private readonly IRoomPricingService _roomPricingService;
           private readonly RoomCreatorProvider _creatorProvider;
-          private readonly RoomPrototypeRegistry _prototypeRegistry;  
+          private readonly RoomPrototypeRegistry _registry;
           private RoomCreator _creator;
           private Room _currentRoom;
 
@@ -35,21 +35,14 @@ namespace HotelBookingSystem.ViewModels
                          _creator = _creatorProvider.GetCreator(value ?? "Standard");
                          OnPropertyChanged(nameof(CapacityLabel));
 
-                       
-                         try
-                         {
-                              var template = _prototypeRegistry.GetClone(value ?? "Standard");
-                              RoomPrice = template.BasePrice;
-                              RoomCapacity = template.Capacity;
-                         }
-                         catch { }
+                         var template = _registry.GetClone(value ?? "Standard");
+                         RoomPrice = template.BasePrice;
+                         RoomCapacity = template.Capacity;
                     }
                }
           }
 
-          public string CapacityLabel =>
-              SelectedRoomType == "Suite" ? "Number of Rooms" : "Capacity (Guests)";
-
+          public string CapacityLabel => SelectedRoomType == "Suite" ? "Number of Rooms" : "Capacity (Guests)";
           public List<string> RoomTypes { get; }
           public Room CurrentRoom => _currentRoom;
 
@@ -57,18 +50,16 @@ namespace HotelBookingSystem.ViewModels
 
           public RoomController(IRoomRepository roomRepository,
                                 IRoomPricingService roomPricingService,
-                                RoomPrototypeRegistry prototypeRegistry)  
+                                RoomPrototypeRegistry registry)
           {
                _roomRepository = roomRepository;
                _roomPricingService = roomPricingService;
-               _prototypeRegistry = prototypeRegistry;
+               _registry = registry;
                _creatorProvider = new RoomCreatorProvider();
 
                RoomTypes = new List<string>(_creatorProvider.GetAvailableTypes());
 
                RoomNumber = "101";
-               RoomPrice = 150m;
-               RoomCapacity = 2;
                SelectedRoomType = "Standard";
           }
 
@@ -76,12 +67,13 @@ namespace HotelBookingSystem.ViewModels
           {
                try
                {
-                    var prototype = _prototypeRegistry.GetClone(SelectedRoomType);
+                    var prototype = _registry.GetClone(SelectedRoomType);
                     prototype.RoomNumber = RoomNumber;
                     prototype.BasePrice = RoomPrice;
                     prototype.Capacity = RoomCapacity;
 
-                    OnLog?.Invoke($"[Prototype] Cloned '{SelectedRoomType}' template  Room {RoomNumber}");
+                    OnLog?.Invoke($"[Prototype] Cloned '{SelectedRoomType}' template -> Room {RoomNumber}");
+                    OnLog?.Invoke($"  {prototype.GetDisplayInfo()}");
 
                     var (success, error, room, display, description, priceSummary, cleaningCost) =
                         _creator.CreateRoom(RoomNumber, RoomPrice, RoomCapacity,
@@ -94,13 +86,11 @@ namespace HotelBookingSystem.ViewModels
                     }
 
                     _currentRoom = room;
-
-                    OnLog?.Invoke($"{SelectedRoomType} room created.");
+                    OnLog?.Invoke($"[Factory Method] {SelectedRoomType} room created.");
                     OnLog?.Invoke(display);
                     OnLog?.Invoke(description);
                     OnLog?.Invoke(priceSummary);
-                    OnLog?.Invoke($"Cleaning cost: {FormatUsd(cleaningCost)}");
-                    OnLog?.Invoke($"Capacity: {room.Capacity} guests\n");
+                    OnLog?.Invoke($"Cleaning cost: {FormatUsd(cleaningCost)}\n");
                }
                catch (Exception ex)
                {
@@ -108,7 +98,7 @@ namespace HotelBookingSystem.ViewModels
                }
           }
 
-          private static string FormatUsd(decimal amount) =>
-              amount.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+          private static string FormatUsd(decimal v) =>
+              v.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
      }
 }

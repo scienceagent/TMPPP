@@ -3,12 +3,8 @@ using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Builders
 {
-     // ─── CONCRETE BUILDER ────────────────────────────────────────────
-     // Implements the construction steps and assembles the BookingRequest.
-     // Matches GoF: ConcreteBuilder implements IBuilder steps + holds product state.
      public class BookingBuilder : IBookingBuilder
      {
-          // Internal state — built up step by step
           private string _guestId = string.Empty;
           private string _roomId = string.Empty;
           private DateTime _checkIn = DateTime.Today;
@@ -32,7 +28,6 @@ namespace HotelBookingSystem.Builders
                return this;
           }
 
-          // GoF: GetResult() delivers the fully assembled Product
           public BookingRequest GetResult()
           {
                if (string.IsNullOrEmpty(_guestId))
@@ -42,7 +37,7 @@ namespace HotelBookingSystem.Builders
                if (_checkOut <= _checkIn)
                     throw new InvalidOperationException("Check-out must be after check-in.");
 
-               return new BookingRequest
+               var request = new BookingRequest
                {
                     BookingId = Guid.NewGuid().ToString(),
                     GuestId = _guestId,
@@ -54,6 +49,21 @@ namespace HotelBookingSystem.Builders
                     AirportTransfer = _transfer,
                     SpecialRequest = _note
                };
+
+               Reset();
+               return request;
+          }
+
+          private void Reset()
+          {
+               _guestId = string.Empty;
+               _roomId = string.Empty;
+               _checkIn = DateTime.Today;
+               _checkOut = DateTime.Today.AddDays(1);
+               _type = "Standard";
+               _breakfast = false;
+               _transfer = false;
+               _note = null;
           }
      }
 }

@@ -1,23 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Prototype
 {
-     // ─── PROTOTYPE REGISTRY ──────────────────────────────────────────
-     // Stores pre-configured room templates.
-     // GetClone() ALWAYS returns a clone — original is never exposed.
-     // Matches GoF: the registry is the "manager" that stores prototypes.
-     public partial class RoomPrototypeRegistry
+     public class RoomPrototypeRegistry
      {
           private readonly Dictionary<string, RoomPrototype> _prototypes = new();
 
           public RoomPrototypeRegistry()
           {
-               // Pre-configured templates — set up once, cloned many times
                Register("Standard", new StandardRoomPrototype
                {
-                    RoomNumber = "TEMPLATE",
                     BasePrice = 150m,
                     Capacity = 2,
                     IsAvailable = true
@@ -25,7 +18,6 @@ namespace HotelBookingSystem.Prototype
 
                Register("Deluxe", new DeluxeRoomPrototype
                {
-                    RoomNumber = "TEMPLATE",
                     BasePrice = 280m,
                     Capacity = 2,
                     HasBalcony = true,
@@ -35,7 +27,6 @@ namespace HotelBookingSystem.Prototype
 
                Register("Suite", new SuitePrototype
                {
-                    RoomNumber = "TEMPLATE",
                     BasePrice = 500m,
                     Capacity = 4,
                     HasKitchen = true,
@@ -48,7 +39,6 @@ namespace HotelBookingSystem.Prototype
           public void Register(string key, RoomPrototype prototype)
               => _prototypes[key] = prototype;
 
-          // Returns a CLONE — original prototype is never modified
           public RoomPrototype GetClone(string key)
           {
                if (!_prototypes.TryGetValue(key, out var prototype))

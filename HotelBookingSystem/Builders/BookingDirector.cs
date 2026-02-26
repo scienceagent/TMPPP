@@ -3,10 +3,6 @@ using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Builders
 {
-     // ─── DIRECTOR ────────────────────────────────────────────────────
-     // Defines preset construction sequences using the builder.
-     // Matches GoF: Director knows the ORDER of steps, not the details.
-     // Client passes a builder in — Director drives it.
      public partial class BookingDirector
      {
           private readonly IBookingBuilder _builder;
@@ -14,7 +10,6 @@ namespace HotelBookingSystem.Builders
           public BookingDirector(IBookingBuilder builder)
               => _builder = builder;
 
-          // Standard booking — no extras
           public BookingRequest BuildStandard(string guestId, string roomId,
               DateTime checkIn, DateTime checkOut) =>
               _builder
@@ -24,7 +19,6 @@ namespace HotelBookingSystem.Builders
                   .SetBookingType("Standard")
                   .GetResult();
 
-          // Premium booking — breakfast included
           public BookingRequest BuildPremium(string guestId, string roomId,
               DateTime checkIn, DateTime checkOut) =>
               _builder
@@ -35,7 +29,6 @@ namespace HotelBookingSystem.Builders
                   .WithBreakfast()
                   .GetResult();
 
-          // VIP full package — all extras
           public BookingRequest BuildVip(string guestId, string roomId,
               DateTime checkIn, DateTime checkOut) =>
               _builder

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using HotelBookingSystem.Builders;
 using HotelBookingSystem.Factories;
@@ -14,7 +15,7 @@ namespace HotelBookingSystem.ViewModels
           private readonly IBookingRepository _bookingRepository;
           private readonly IBookingDurationCalculator _durationCalculator;
           private readonly BookingFactoryProvider _factoryProvider;
-          private readonly BookingDirector _director;    // ? NEW: Builder Director
+          private readonly BookingDirector _director;
 
           private DateTime _checkInDate = DateTime.Today;
           private DateTime _checkOutDate = DateTime.Today.AddDays(1);
@@ -34,20 +35,11 @@ namespace HotelBookingSystem.ViewModels
           }
 
           public int Nights => Math.Max(0, (CheckOutDate - CheckInDate).Days);
-
-          public string SelectedBookingType
-          {
-               get => _selectedBookingType;
-               set => SetProperty(ref _selectedBookingType, value);
-          }
+          public string SelectedBookingType { get => _selectedBookingType; set => SetProperty(ref _selectedBookingType, value); }
+          public Booking SelectedBooking { get => _selectedBooking; set => SetProperty(ref _selectedBooking, value); }
 
           public ObservableCollection<Booking> Bookings { get; } = new();
-          public System.Collections.Generic.List<string> BookingTypes { get; }
-          public Booking SelectedBooking
-          {
-               get => _selectedBooking;
-               set => SetProperty(ref _selectedBooking, value);
-          }
+          public List<string> BookingTypes { get; }
 
           public event Action<string> OnLog;
 
@@ -56,7 +48,7 @@ namespace HotelBookingSystem.ViewModels
               IBookingRepository bookingRepository,
               IBookingDurationCalculator durationCalculator,
               BookingFactoryProvider factoryProvider,
-              BookingDirector director)     // ? injected
+              BookingDirector director)
           {
                _bookingService = bookingService;
                _bookingRepository = bookingRepository;
@@ -64,38 +56,32 @@ namespace HotelBookingSystem.ViewModels
                _factoryProvider = factoryProvider;
                _director = director;
 
-               BookingTypes = new System.Collections.Generic.List<string>(
-                   _factoryProvider.GetAvailableTypes());
+               BookingTypes = new List<string>(_factoryProvider.GetAvailableTypes());
           }
 
           public void CreateBooking(User user, Room room, IRoomPricingService pricingService)
           {
-               if (user == null) { OnLog?.Invoke("Error: Please register a guest first.\n"); return; }
-               if (room == null) { OnLog?.Invoke("Error: Please assign a room first.\n"); return; }
+               if (user == null) { OnLog?.Invoke("Error: Register a guest first.\n"); return; }
+               if (room == null) { OnLog?.Invoke("Error: Assign a room first.\n"); return; }
 
                try
                {
-                    // ?? BUILDER / DIRECTOR: build the BookingRequest step by step ??
-                    BookingRequest request;
-
-                    // Director handles preset packages; custom uses builder directly
-                    request = SelectedBookingType switch
+                    // Builder + Director: assemble the BookingRequest with correct extras per type
+                    var request = SelectedBookingType switch
                     {
                          "VIP" => _director.BuildVip(user.Id, room.RoomId, CheckInDate, CheckOutDate),
                          "Premium" => _director.BuildPremium(user.Id, room.RoomId, CheckInDate, CheckOutDate),
                          _ => _director.BuildStandard(user.Id, room.RoomId, CheckInDate, CheckOutDate)
                     };
 
-                    OnLog?.Invoke($"[Builder] Built {request.BookingType} BookingRequest:");
+                    OnLog?.Invoke($"[Builder] {request.BookingType} request built.");
                     OnLog?.Invoke($"  Breakfast: {request.BreakfastIncluded} | Transfer: {request.AirportTransfer}");
                     if (request.SpecialRequest != null)
                          OnLog?.Invoke($"  Note: {request.SpecialRequest}");
 
-                    // ?? ABSTRACT FACTORY: create Booking + Pricing + Confirmation ??
+                    // Abstract Factory: create the matching Booking, Pricing, and Confirmation objects
                     var factory = _factoryProvider.GetFactory(SelectedBookingType);
-                    var booking = factory.CreateBooking(
-                        request.BookingId, user.Id, room.RoomId, CheckInDate, CheckOutDate);
-
+                    var booking = factory.CreateBooking(request.BookingId, user.Id, room.RoomId, CheckInDate, CheckOutDate);
                     var pricing = factory.CreatePricingStrategy();
                     var confirmation = factory.CreateConfirmationHandler();
 
@@ -107,7 +93,8 @@ namespace HotelBookingSystem.ViewModels
 
                     if (result.Success)
                     {
-                         OnLog?.Invoke($"\n{confirmation.GenerateConfirmation(booking, totalPrice)}");
+                         OnLog?.Invoke($"\n[Abstract Factory] {confirmation.GetConfirmationType()} family used.");
+                         OnLog?.Invoke(confirmation.GenerateConfirmation(booking, totalPrice));
                          OnLog?.Invoke($"Pricing: {pricing.GetPricingDescription()}\n");
                          RefreshBookings();
                     }

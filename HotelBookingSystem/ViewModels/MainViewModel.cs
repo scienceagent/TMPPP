@@ -23,29 +23,20 @@ namespace HotelBookingSystem.ViewModels
           public ICommand ConfirmBookingCommand { get; }
           public ICommand CancelBookingCommand { get; }
 
+          public string SingletonInfo { get; }
+
           private readonly IRoomPricingService _roomPricingService;
 
           public MainViewModel()
           {
-               // ?? SINGLETON ????????????????????????????????????????????
-               // Both logger1 and logger2 are the SAME instance — proof of Singleton
-               ILogger logger1 = HotelAuditLogger.Instance;
-               ILogger logger2 = HotelAuditLogger.Instance;
-               // ReferenceEquals(logger1, logger2) == true
+               // Singleton: every call returns the exact same instance
+               var logger = HotelAuditLogger.Instance;
+               var logger2 = HotelAuditLogger.Instance;
+               SingletonInfo = $"Singleton: same instance = {ReferenceEquals(logger, logger2)}";
 
-               // Use the Singleton logger throughout the app
-               ILogger logger = HotelAuditLogger.Instance;
-
-               // ?? PROTOTYPE ????????????????????????????????????????????
-               // Registry holds pre-configured room templates
-               // RoomController clones from registry when creating rooms
-               var prototypeRegistry = new RoomPrototypeRegistry();
-
-               // ?? BUILDER ??????????????????????????????????????????????
-               // Director uses builder to create preset booking packages
+               var registry = new RoomPrototypeRegistry();
                var bookingDirector = new BookingDirector(new BookingBuilder());
 
-               // ?? Existing services (unchanged) ????????????????????????
                IBookingRepository bookingRepository = new InMemoryBookingRepository();
                IRoomRepository roomRepository = new InMemoryRoomRepository();
                IUserRepository userRepository = new InMemoryUserRepository();
@@ -61,28 +52,27 @@ namespace HotelBookingSystem.ViewModels
 
                _roomPricingService = roomPricingService;
 
-               // ?? Controllers ??????????????????????????????????????????
                LogCtrl = new LogController(logger);
                GuestCtrl = new GuestController(userRepository, userValidator);
-               RoomCtrl = new RoomController(roomRepository, roomPricingService, prototypeRegistry);
+               RoomCtrl = new RoomController(roomRepository, roomPricingService, registry);
                BookingCtrl = new BookingController(
-                   bookingService, bookingRepository, durationCalc,
-                   bookingFactory, bookingDirector);
+                   bookingService, bookingRepository, durationCalc, bookingFactory, bookingDirector);
 
                GuestCtrl.OnLog += msg => LogCtrl.AddLog(msg);
                RoomCtrl.OnLog += msg => LogCtrl.AddLog(msg);
                BookingCtrl.OnLog += msg => LogCtrl.AddLog(msg);
 
-               // ?? Commands ?????????????????????????????????????????????
+               LogCtrl.AddLog(SingletonInfo);
+
                CreateGuestCommand = new RelayCommand(_ => GuestCtrl.CreateGuest());
                CreateRoomCommand = new RelayCommand(_ => RoomCtrl.CreateRoom());
-               CreateBookingCommand = new RelayCommand(_ =>
-                   BookingCtrl.CreateBooking(GuestCtrl.CurrentUser, RoomCtrl.CurrentRoom, _roomPricingService));
+               CreateBookingCommand = new RelayCommand(_ => BookingCtrl.CreateBooking(
+                   GuestCtrl.CurrentUser, RoomCtrl.CurrentRoom, _roomPricingService));
                RefreshBookingsCommand = new RelayCommand(_ => BookingCtrl.RefreshBookings());
-               ConfirmBookingCommand = new RelayCommand(_ => BookingCtrl.ConfirmBooking(),
-                   _ => BookingCtrl.SelectedBooking != null);
-               CancelBookingCommand = new RelayCommand(_ => BookingCtrl.CancelBooking(),
-                   _ => BookingCtrl.SelectedBooking != null);
+               ConfirmBookingCommand = new RelayCommand(
+                   _ => BookingCtrl.ConfirmBooking(), _ => BookingCtrl.SelectedBooking != null);
+               CancelBookingCommand = new RelayCommand(
+                   _ => BookingCtrl.CancelBooking(), _ => BookingCtrl.SelectedBooking != null);
 
                BookingCtrl.RefreshBookings();
           }
