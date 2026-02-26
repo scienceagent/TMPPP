@@ -13,19 +13,19 @@ namespace HotelBookingSystem.ViewModels
           private readonly IRoomPricingService _roomPricingService;
           private readonly RoomCreatorProvider _creatorProvider;
           private readonly RoomPrototypeRegistry _registry;
-          private RoomCreator _creator;
-          private Room _currentRoom;
+          private RoomCreator? _creator;
+          private Room? _currentRoom;
 
-          private string _roomNumber;
+          private string? _roomNumber;
           private decimal _roomPrice;
           private int _roomCapacity;
-          private string _selectedRoomType;
+          private string? _selectedRoomType;
 
-          public string RoomNumber { get => _roomNumber; set => SetProperty(ref _roomNumber, value); }
+          public string? RoomNumber { get => _roomNumber; set => SetProperty(ref _roomNumber, value); }
           public decimal RoomPrice { get => _roomPrice; set => SetProperty(ref _roomPrice, value); }
           public int RoomCapacity { get => _roomCapacity; set => SetProperty(ref _roomCapacity, value); }
 
-          public string SelectedRoomType
+          public string? SelectedRoomType
           {
                get => _selectedRoomType;
                set
@@ -35,18 +35,18 @@ namespace HotelBookingSystem.ViewModels
                          _creator = _creatorProvider.GetCreator(value ?? "Standard");
                          OnPropertyChanged(nameof(CapacityLabel));
 
-                         var template = _registry.GetClone(value ?? "Standard");
-                         RoomPrice = template.BasePrice;
-                         RoomCapacity = template.Capacity;
+                         var snapshot = _registry.GetClone(value ?? "Standard");
+                         RoomPrice = snapshot.BasePrice;
+                         RoomCapacity = snapshot.Capacity;
                     }
                }
           }
 
           public string CapacityLabel => SelectedRoomType == "Suite" ? "Number of Rooms" : "Capacity (Guests)";
           public List<string> RoomTypes { get; }
-          public Room CurrentRoom => _currentRoom;
+          public Room? CurrentRoom => _currentRoom;
 
-          public event Action<string> OnLog;
+          public event Action<string>? OnLog;
 
           public RoomController(IRoomRepository roomRepository,
                                 IRoomPricingService roomPricingService,
@@ -67,17 +67,17 @@ namespace HotelBookingSystem.ViewModels
           {
                try
                {
-                    var prototype = _registry.GetClone(SelectedRoomType);
-                    prototype.RoomNumber = RoomNumber;
-                    prototype.BasePrice = RoomPrice;
-                    prototype.Capacity = RoomCapacity;
+                    var snapshot = _registry.GetClone(SelectedRoomType ?? "Standard");
+                    snapshot.RoomNumber = RoomNumber ?? "";
+                    snapshot.BasePrice = RoomPrice;
+                    snapshot.Capacity = RoomCapacity;
 
                     OnLog?.Invoke($"[Prototype] Cloned '{SelectedRoomType}' template -> Room {RoomNumber}");
-                    OnLog?.Invoke($"  {prototype.GetDisplayInfo()}");
+                    OnLog?.Invoke($"  {snapshot.DisplayInfo}");
 
                     var (success, error, room, display, description, priceSummary, cleaningCost) =
-                        _creator.CreateRoom(RoomNumber, RoomPrice, RoomCapacity,
-                                            _roomRepository, _roomPricingService);
+                        _creator!.CreateRoom(RoomNumber ?? "", RoomPrice, RoomCapacity,
+                                             _roomRepository, _roomPricingService);
 
                     if (!success)
                     {
@@ -87,9 +87,9 @@ namespace HotelBookingSystem.ViewModels
 
                     _currentRoom = room;
                     OnLog?.Invoke($"[Factory Method] {SelectedRoomType} room created.");
-                    OnLog?.Invoke(display);
-                    OnLog?.Invoke(description);
-                    OnLog?.Invoke(priceSummary);
+                    OnLog?.Invoke(display!);
+                    OnLog?.Invoke(description!);
+                    OnLog?.Invoke(priceSummary!);
                     OnLog?.Invoke($"Cleaning cost: {FormatUsd(cleaningCost)}\n");
                }
                catch (Exception ex)

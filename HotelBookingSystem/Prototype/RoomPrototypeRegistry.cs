@@ -1,53 +1,64 @@
-﻿using System.Collections.Generic;
-using HotelBookingSystem.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace HotelBookingSystem.Prototype
 {
      public class RoomPrototypeRegistry
      {
-          private readonly Dictionary<string, RoomPrototype> _prototypes = new();
+          // Each entry stores the clone operation so the original is never exposed
+          private readonly Dictionary<string, Func<RoomTemplateSnapshot>> _registry = new();
 
           public RoomPrototypeRegistry()
           {
-               Register("Standard", new StandardRoomPrototype
-               {
-                    BasePrice = 150m,
-                    Capacity = 2,
-                    IsAvailable = true
-               });
+               var standard = new StandardRoomPrototype("", 150m, 2);
+               var deluxe = new DeluxeRoomPrototype("", 280m, 2, true, ["Minibar", "Balcony", "Sea View"]);
+               var suite = new SuitePrototype("", 500m, 4, true, true, 2);
 
-               Register("Deluxe", new DeluxeRoomPrototype
+               _registry["Standard"] = () =>
                {
-                    BasePrice = 280m,
-                    Capacity = 2,
-                    HasBalcony = true,
-                    IsAvailable = true,
-                    Amenities = new List<string> { "Minibar", "Balcony", "Sea View" }
-               });
+                    var c = standard.Clone();
+                    return new RoomTemplateSnapshot(c.RoomNumber, c.BasePrice, c.Capacity, c.GetDisplayInfo());
+               };
 
-               Register("Suite", new SuitePrototype
+               _registry["Deluxe"] = () =>
                {
-                    BasePrice = 500m,
-                    Capacity = 4,
-                    HasKitchen = true,
-                    HasLivingRoom = true,
-                    NumberOfRooms = 2,
-                    IsAvailable = true
-               });
+                    var c = deluxe.Clone();
+                    return new RoomTemplateSnapshot(c.RoomNumber, c.BasePrice, c.Capacity, c.GetDisplayInfo());
+               };
+
+               _registry["Suite"] = () =>
+               {
+                    var c = suite.Clone();
+                    return new RoomTemplateSnapshot(c.RoomNumber, c.BasePrice, c.Capacity, c.GetDisplayInfo());
+               };
           }
 
-          public void Register(string key, RoomPrototype prototype)
-              => _prototypes[key] = prototype;
-
-          public RoomPrototype GetClone(string key)
+          public RoomTemplateSnapshot GetClone(string key)
           {
-               if (!_prototypes.TryGetValue(key, out var prototype))
+               if (!_registry.TryGetValue(key, out var cloneFunc))
                     throw new KeyNotFoundException($"No prototype registered for: '{key}'");
 
-               return prototype.Clone();
+               return cloneFunc();
           }
 
-          public IReadOnlyCollection<string> GetAvailableTypes()
-              => _prototypes.Keys;
+          public IReadOnlyCollection<string> GetAvailableTypes() => [.. _registry.Keys];
+     }
+
+     // Snapshot returned to callers — decoupled from the prototype internals
+     public class RoomTemplateSnapshot
+     {
+          public string RoomNumber { get; set; }
+          public decimal BasePrice { get; set; }
+          public int Capacity { get; set; }
+          public string DisplayInfo { get; }
+
+          public RoomTemplateSnapshot(string roomNumber, decimal basePrice, int capacity, string displayInfo)
+          {
+               RoomNumber = roomNumber;
+               BasePrice = basePrice;
+               Capacity = capacity;
+               DisplayInfo = displayInfo;
+          }
      }
 }
