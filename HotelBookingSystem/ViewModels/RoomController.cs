@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using HotelBookingSystem.Factories;
 using HotelBookingSystem.Interfaces;
-using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models;
+using HotelBookingSystem.Prototype;
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -12,6 +12,7 @@ namespace HotelBookingSystem.ViewModels
           private readonly IRoomRepository _roomRepository;
           private readonly IRoomPricingService _roomPricingService;
           private readonly RoomCreatorProvider _creatorProvider;
+          private readonly RoomPrototypeRegistry _prototypeRegistry;  
           private RoomCreator _creator;
           private Room _currentRoom;
 
@@ -20,23 +21,9 @@ namespace HotelBookingSystem.ViewModels
           private int _roomCapacity;
           private string _selectedRoomType;
 
-          public string RoomNumber
-          {
-               get => _roomNumber;
-               set => SetProperty(ref _roomNumber, value);
-          }
-
-          public decimal RoomPrice
-          {
-               get => _roomPrice;
-               set => SetProperty(ref _roomPrice, value);
-          }
-
-          public int RoomCapacity
-          {
-               get => _roomCapacity;
-               set => SetProperty(ref _roomCapacity, value);
-          }
+          public string RoomNumber { get => _roomNumber; set => SetProperty(ref _roomNumber, value); }
+          public decimal RoomPrice { get => _roomPrice; set => SetProperty(ref _roomPrice, value); }
+          public int RoomCapacity { get => _roomCapacity; set => SetProperty(ref _roomCapacity, value); }
 
           public string SelectedRoomType
           {
@@ -47,6 +34,15 @@ namespace HotelBookingSystem.ViewModels
                     {
                          _creator = _creatorProvider.GetCreator(value ?? "Standard");
                          OnPropertyChanged(nameof(CapacityLabel));
+
+                       
+                         try
+                         {
+                              var template = _prototypeRegistry.GetClone(value ?? "Standard");
+                              RoomPrice = template.BasePrice;
+                              RoomCapacity = template.Capacity;
+                         }
+                         catch { }
                     }
                }
           }
@@ -59,16 +55,19 @@ namespace HotelBookingSystem.ViewModels
 
           public event Action<string> OnLog;
 
-          public RoomController(IRoomRepository roomRepository, IRoomPricingService roomPricingService)
+          public RoomController(IRoomRepository roomRepository,
+                                IRoomPricingService roomPricingService,
+                                RoomPrototypeRegistry prototypeRegistry)  
           {
                _roomRepository = roomRepository;
                _roomPricingService = roomPricingService;
+               _prototypeRegistry = prototypeRegistry;
                _creatorProvider = new RoomCreatorProvider();
 
                RoomTypes = new List<string>(_creatorProvider.GetAvailableTypes());
 
                RoomNumber = "101";
-               RoomPrice = 200m;
+               RoomPrice = 150m;
                RoomCapacity = 2;
                SelectedRoomType = "Standard";
           }
@@ -77,8 +76,16 @@ namespace HotelBookingSystem.ViewModels
           {
                try
                {
+                    var prototype = _prototypeRegistry.GetClone(SelectedRoomType);
+                    prototype.RoomNumber = RoomNumber;
+                    prototype.BasePrice = RoomPrice;
+                    prototype.Capacity = RoomCapacity;
+
+                    OnLog?.Invoke($"[Prototype] Cloned '{SelectedRoomType}' template  Room {RoomNumber}");
+
                     var (success, error, room, display, description, priceSummary, cleaningCost) =
-                        _creator.CreateRoom(RoomNumber, RoomPrice, RoomCapacity, _roomRepository, _roomPricingService);
+                        _creator.CreateRoom(RoomNumber, RoomPrice, RoomCapacity,
+                                            _roomRepository, _roomPricingService);
 
                     if (!success)
                     {
