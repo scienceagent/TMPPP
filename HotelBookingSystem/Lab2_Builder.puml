@@ -1,0 +1,102 @@
+﻿@startuml Lab3_Builder
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #FFF3E0
+}
+skinparam interface {
+    BackgroundColor #FFF8E1
+    BorderColor #E65100
+}
+
+title <b>Builder Pattern — Booking Request Construction</b>
+
+note as GoFRoles
+  <b>GoF Roles</b>
+  Builder         → IBookingBuilder
+  ConcreteBuilder → BookingBuilder
+  Director        → BookingDirector
+  Product         → BookingRequest
+end note
+
+interface IBookingBuilder {
+    + SetGuest(guestId) : IBookingBuilder
+    + SetRoom(roomId) : IBookingBuilder
+    + SetDates(checkIn, checkOut) : IBookingBuilder
+    + SetBookingType(type) : IBookingBuilder
+    + WithBreakfast() : IBookingBuilder
+    + WithAirportTransfer() : IBookingBuilder
+    + WithSpecialRequest(note) : IBookingBuilder
+    + GetResult() : BookingRequest
+}
+
+class BookingBuilder implements IBookingBuilder {
+    - _guestId   : string
+    - _roomId    : string
+    - _checkIn   : DateTime
+    - _checkOut  : DateTime
+    - _type      : string
+    - _breakfast : bool
+    - _transfer  : bool
+    - _note      : string?
+    --
+    + SetGuest(guestId) : IBookingBuilder
+    + SetRoom(roomId) : IBookingBuilder
+    + SetDates(checkIn, checkOut) : IBookingBuilder
+    + SetBookingType(type) : IBookingBuilder
+    + WithBreakfast() : IBookingBuilder
+    + WithAirportTransfer() : IBookingBuilder
+    + WithSpecialRequest(note) : IBookingBuilder
+    + GetResult() : BookingRequest
+    - Reset() : void
+}
+
+class BookingDirector {
+    - _builder : IBookingBuilder
+    --
+    + BookingDirector(builder)
+    + BuildStandard(guestId, roomId, checkIn, checkOut) : BookingRequest
+    + BuildPremium(guestId, roomId, checkIn, checkOut) : BookingRequest
+    + BuildVip(guestId, roomId, checkIn, checkOut) : BookingRequest
+}
+
+class BookingRequest {
+    + BookingId        : string
+    + GuestId          : string
+    + RoomId           : string
+    + CheckInDate      : DateTime
+    + CheckOutDate     : DateTime
+    + BookingType      : string
+    + BreakfastIncluded : bool
+    + AirportTransfer  : bool
+    + SpecialRequest   : string?
+    + Nights           : int
+}
+
+note right of BookingDirector
+  BuildStandard → type only
+  BuildPremium  → type + breakfast
+  BuildVip      → type + breakfast
+                  + transfer
+                  + special request
+end note
+
+note right of BookingBuilder
+  GetResult() calls Reset()
+  automatically — builder is
+  reusable for next booking.
+end note
+
+BookingDirector o--> IBookingBuilder : uses
+BookingBuilder ..> BookingRequest : <<creates>>
+
+@enduml
