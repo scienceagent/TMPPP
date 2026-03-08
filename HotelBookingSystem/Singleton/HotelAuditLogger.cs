@@ -8,9 +8,8 @@ namespace HotelBookingSystem.Singleton
           private static readonly Lazy<HotelAuditLogger> _instance =
               new Lazy<HotelAuditLogger>(() => new HotelAuditLogger());
 
-          public static HotelAuditLogger Instance => _instance.Value;
-
           private HotelAuditLogger() { }
+          public static HotelAuditLogger Instance => _instance.Value;
 
           public void Info(string message) => Console.WriteLine($"{DateTime.Now:HH:mm:ss} [INFO]  {message}");
           public void Warn(string message) => Console.WriteLine($"{DateTime.Now:HH:mm:ss} [WARN]  {message}");

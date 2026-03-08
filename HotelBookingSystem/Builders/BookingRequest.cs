@@ -4,6 +4,7 @@ namespace HotelBookingSystem.Models
 {
      public class BookingRequest
      {
+          // obiectele complexe rezultate din procesul de construire a cererii de rezervare
           public string BookingId { get; init; }
           public string GuestId { get; init; }
           public string RoomId { get; init; }

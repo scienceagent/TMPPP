@@ -1,0 +1,69 @@
+﻿@startuml Lab3_Prototype_Simple
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #E3F2FD
+}
+skinparam interface {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+}
+
+title <b>Prototype Pattern — Room Templates (Simplified)</b>
+
+interface "IPrototype<T>" as IPrototype {
+    + Clone() : T
+}
+
+class StandardRoomPrototype {
+    + RoomNumber : string
+    + BasePrice  : decimal
+    + Capacity   : int
+    + IsAvailable : bool
+    --
+    + Clone() : StandardRoomPrototype
+}
+
+class DeluxeRoomPrototype {
+    + RoomNumber : string
+    + BasePrice  : decimal
+    + Capacity   : int
+    + HasBalcony : bool
+    + Amenities  : List<string>
+    --
+    + Clone() : DeluxeRoomPrototype
+}
+
+class SuitePrototype {
+    + RoomNumber    : string
+    + BasePrice     : decimal
+    + Capacity      : int
+    + HasKitchen    : bool
+    + HasLivingRoom : bool
+    + NumberOfRooms : int
+    --
+    + Clone() : SuitePrototype
+}
+
+class RoomPrototypeRegistry {
+    - _registry : Dictionary<string, Func<RoomTemplateSnapshot>>
+    --
+    + GetClone(key) : RoomTemplateSnapshot
+}
+
+IPrototype <|.. StandardRoomPrototype : implements
+IPrototype <|.. DeluxeRoomPrototype   : implements
+IPrototype <|.. SuitePrototype        : implements
+
+RoomPrototypeRegistry ..> IPrototype : <<uses Clone()>>
+
+@enduml

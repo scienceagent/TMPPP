@@ -1,0 +1,41 @@
+﻿@startuml Lab3_Singleton_Simple
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #EDE7F6
+}
+skinparam interface {
+    BackgroundColor #EDE7F6
+    BorderColor #6A1B9A
+}
+
+title <b>Singleton Pattern — HotelAuditLogger</b>
+
+
+class HotelAuditLogger {
+    - {static} _instance : Lazy<HotelAuditLogger>
+    --
+    - HotelAuditLogger()
+    + {static} Instance : HotelAuditLogger
+    + Info(message)  : void
+    + Warn(message)  : void
+    + Error(message) : void
+}
+
+class MainViewModel {
+    + SingletonInfo : string
+}
+
+HotelAuditLogger --> HotelAuditLogger : - _instance\n<<self-reference>>
+MainViewModel ..> HotelAuditLogger    : + Instance\n<<getInstance()>>
+
+@enduml

@@ -6,10 +6,10 @@ namespace HotelBookingSystem.Builders
      public partial class BookingDirector
      {
           private readonly IBookingBuilder _builder;
-
+          
           public BookingDirector(IBookingBuilder builder)
               => _builder = builder;
-
+          // constructia bookingurilor standard, premium si VIP folosind aceleasi date de intrare, dar cu configurari diferite pentru fiecare tip
           public BookingRequest BuildStandard(string guestId, string roomId,
               DateTime checkIn, DateTime checkOut) =>
               _builder

@@ -11,7 +11,7 @@ namespace HotelBookingSystem.Factories
               {
                 { "Standard", () => new StandardBookingFactory() },
                 { "Premium",  () => new PremiumBookingFactory()  },
-                { "VIP",      () => new VipBookingFactory()      },
+                { "VIP",      () => new VipBookingFactory()      }, 
               };
 
           public IBookingFactory GetFactory(string bookingType)

@@ -5,6 +5,7 @@ namespace HotelBookingSystem.Builders
 {
      public interface IBookingBuilder
      {
+          // pasii pentru a construi o rezervare
           IBookingBuilder SetGuest(string guestId);
           IBookingBuilder SetRoom(string roomId);
           IBookingBuilder SetDates(DateTime checkIn, DateTime checkOut);
