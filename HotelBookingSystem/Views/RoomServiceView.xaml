@@ -1,0 +1,220 @@
+﻿<UserControl x:Class="HotelBookingSystem.Views.RoomServiceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:HotelBookingSystem.Converters">
+
+    <UserControl.Resources>
+        <converters:RoomServicePriceConverter x:Key="RoomServicePriceConverter"/>
+        <converters:RoomServiceTypeLabelConverter x:Key="RoomServiceTypeLabelConverter"/>
+        <converters:RoomServiceTypeColorConverter x:Key="RoomServiceTypeColorConverter"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,20">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <Border Background="#00695C" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                    <TextBlock Text="COMPOSITE" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                </Border>
+                <TextBlock Text="Room Services" FontSize="24" FontWeight="SemiBold" Foreground="#263238"/>
+            </StackPanel>
+            <TextBlock FontSize="12" Foreground="#78909C" TextWrapping="Wrap"
+                       Text="Individual items (Leaf) and bundles (Composite) both extend RoomServiceComponent. Packages can nest other packages. The client calls GetPrice() and GetDescription() on any node — leaf or composite — with no type checks needed."/>
+        </StackPanel>
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="20"
+                    BorderBrush="#E8E8E8" BorderThickness="1">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                        <TextBlock Text="Service Catalog" FontSize="13" FontWeight="SemiBold"
+                                   Foreground="#263238" Margin="0,0,0,8"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Background="#00695C" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
+                                <TextBlock Text="COMPOSITE" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                            </Border>
+                            <TextBlock Text="= package  " FontSize="10" Foreground="#78909C" VerticalAlignment="Center"/>
+                            <Border Background="#0277BD" CornerRadius="3" Padding="5,2" Margin="6,0,6,0">
+                                <TextBlock Text="LEAF" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                            </Border>
+                            <TextBlock Text="= single item" FontSize="10" Foreground="#78909C" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button DockPanel.Dock="Bottom" Content="+ Add to Order"
+                            Command="{Binding AddServiceCommand}"
+                            Margin="0,12,0,0" Padding="0,10" BorderThickness="0" Cursor="Hand">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Background" Value="#00695C"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter Property="FontSize" Value="13"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                                    CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="bg" Property="Background" Value="#004D40"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <ListBox ItemsSource="{Binding ServiceCtrl.CatalogItems}"
+                             SelectedItem="{Binding ServiceCtrl.SelectedCatalogItem, Mode=TwoWay}"
+                             BorderThickness="0" Background="Transparent"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,2"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="border" Background="Transparent"
+                                                    CornerRadius="6" Padding="10,8">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#E3F2FD"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#F5F5F5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Border Grid.Column="0" CornerRadius="3" Padding="5,2" Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            Background="{Binding ., Converter={StaticResource RoomServiceTypeColorConverter}}">
+                                        <TextBlock FontSize="9" FontWeight="Bold" Foreground="White"
+                                                   Text="{Binding ., Converter={StaticResource RoomServiceTypeLabelConverter}}"/>
+                                    </Border>
+
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13"
+                                               FontWeight="Medium" Foreground="#263238" VerticalAlignment="Center"/>
+
+                                    <TextBlock Grid.Column="2" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="#1976D2" VerticalAlignment="Center" Margin="8,0,0,0"
+                                               Text="{Binding ., Converter={StaticResource RoomServicePriceConverter}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </DockPanel>
+            </Border>
+
+            <Border Grid.Column="2" Background="White" CornerRadius="10" Padding="20"
+                    BorderBrush="#E8E8E8" BorderThickness="1">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Current Order" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="#263238" VerticalAlignment="Center"/>
+                            <Border Background="#00695C" CornerRadius="10" Padding="10,3" Margin="10,0,0,0">
+                                <TextBlock Text="{Binding ServiceCtrl.OrderTotal, StringFormat=Total: ${0:F2}}"
+                                           Foreground="White" FontSize="11" FontWeight="Bold"/>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
+                        <Button Content="Remove Selected" Command="{Binding RemoveServiceCommand}"
+                                Padding="14,8" BorderThickness="0" Cursor="Hand" Margin="0,0,8,0">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#546E7A"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                                        CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="bg" Property="Background" Value="#455A64"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+
+                        <Button Content="Clear All" Command="{Binding ClearServicesCommand}"
+                                Padding="14,8" BorderThickness="0" Cursor="Hand">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="#C62828"/>
+                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                                        CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="bg" Property="Background" Value="#B71C1C"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                    </StackPanel>
+
+                    <Border Background="#263238" CornerRadius="8" Padding="16">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <TextBlock Text="{Binding ServiceCtrl.OrderSummary}"
+                                       FontFamily="Cascadia Code, Consolas, Courier New"
+                                       FontSize="11" Foreground="#A5D6A7"
+                                       TextWrapping="Wrap" LineHeight="18"/>
+                        </ScrollViewer>
+                    </Border>
+                </DockPanel>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
