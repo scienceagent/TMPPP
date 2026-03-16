@@ -1,6 +1,6 @@
 # 🏨 Hotel Booking System
 
-A WPF desktop application built with **C# / .NET 8** that simulates a hotel booking workflow while demonstrating **five GoF creational design patterns** applied to a real domain.
+A WPF desktop application built with **C# / .NET 8** that simulates a hotel booking workflow while demonstrating **eight GoF design patterns** across two labs — five creational (Lab 3) and three structural (Lab 4).
 
 ---
 
@@ -20,54 +20,156 @@ A WPF desktop application built with **C# / .NET 8** that simulates a hotel book
 
 ```
 HotelBookingSystem/
-├── Builders/                   # Builder pattern
+│
+├── Adapter/                            # Lab 4 — Adapter pattern
+│   ├── IPaymentService.cs              # Target interface (our system expects)
+│   ├── StripePaymentGateway.cs         # Adaptee (incompatible external class)
+│   └── StripePaymentAdapter.cs         # Adapter (translates IPaymentService → Stripe)
+│
+├── Builders/                           # Lab 3 — Builder pattern
 │   ├── IBookingBuilder.cs
 │   ├── BookingBuilder.cs
 │   ├── BookingDirector.cs
 │   └── BookingRequest.cs
-├── Prototype/                  # Prototype pattern
-│   ├── RoomPrototype.cs
-│   └── RoomPrototypeRegistry.cs
-├── Singleton/                  # Singleton pattern
-│   └── HotelAuditLogger.cs
-├── Factories/                  # Abstract Factory + Factory Method
+│
+├── Commands/
+│   └── RelayCommand.cs                 # ICommand implementation for MVVM bindings
+│
+├── Composite/                          # Lab 4 — Composite pattern
+│   ├── RoomServiceComponent.cs         # Abstract component (leaf + composite share this)
+│   ├── RoomServiceItem.cs              # Leaf (single service item)
+│   ├── RoomServicePackage.cs           # Composite (holds children, applies discount)
+│   └── RoomServiceCatalog.cs           # Pre-built catalog with nested packages
+│
+├── Converters/
+│   ├── BookingDisplayConverter.cs
+│   ├── BoolToVisibilityConverter.cs
+│   ├── PriceFormatConverter.cs
+│   ├── RoomServiceConverters.cs        # Lab 4 — PKG/LEAF badge + price converters
+│   └── StatusToColorConverter.cs
+│
+├── Facade/                             # Lab 4 — Façade pattern
+│   ├── HotelFacade.cs                  # Façade (CheckInGuest, CheckOutGuest, GetBookingSummary)
+│   └── FacadeResults.cs                # Result DTOs (CheckInResult, CheckOutResult)
+│
+├── Factories/                          # Lab 3 — Abstract Factory + Factory Method
 │   ├── Booking/
-│   │   ├── IBookingFactory.cs
+│   │   ├── BookingFactoryProvider.cs
 │   │   ├── StandardBookingFactory.cs
 │   │   ├── PremiumBookingFactory.cs
 │   │   ├── VipBookingFactory.cs
-│   │   ├── BookingFactoryProvider.cs
-│   │   ├── Pricing/
-│   │   └── Confirmation/
+│   │   ├── Confirmation/
+│   │   │   ├── StandardConfirmationHandler.cs
+│   │   │   ├── PremiumConfirmationHandler.cs
+│   │   │   └── VipConfirmationHandler.cs
+│   │   └── Pricing/
+│   │       ├── StandardPricingStrategy.cs
+│   │       ├── PremiumPricingStrategy.cs
+│   │       └── VipPricingStrategy.cs
 │   └── Room/
-│       ├── RoomCreator.cs
+│       ├── RoomCreator.cs              # Abstract creator (factory method lives here)
 │       ├── StandardRoomCreator.cs
 │       ├── DeluxeRoomCreator.cs
 │       ├── SuiteRoomCreator.cs
 │       └── RoomCreatorProvider.cs
-├── Models/                     # Domain entities
-│   ├── Room/
+│
+├── Interfaces/
 │   ├── Booking/
+│   │   ├── IBookingConfirmationService.cs
+│   │   ├── IBookingDurationCalculator.cs
+│   │   ├── IBookingFactory.cs
+│   │   ├── IBookingRepository.cs
+│   │   ├── IBookingService.cs
+│   │   ├── IConfirmationHandler.cs
+│   │   └── IPricingStrategy.cs
+│   ├── Room/
+│   │   ├── IRoomPricingService.cs
+│   │   └── IRoomProduct.cs
+│   └── Shared/
+│       ├── ILogger.cs
+│       ├── IRoomRepository.cs
+│       ├── IUserRepository.cs
+│       └── IUserValidator.cs
+│
+├── Models/
+│   ├── Booking/
+│   │   ├── Booking.cs
+│   │   ├── BookingResult.cs
+│   │   └── Enums.cs
+│   ├── Room/
+│   │   ├── Room.cs
+│   │   ├── StandardRoom.cs
+│   │   ├── DeluxeRoom.cs
+│   │   └── Suite.cs
 │   └── User/
-├── Interfaces/                 # Abstraction layer
-├── Services/                   # Business logic
-├── ViewModels/                 # MVVM controllers
-├── Views/                      # UserControl pages
-│   ├── Styles.xaml
-│   ├── NewBookingView.xaml
-│   ├── BookingsView.xaml
-│   └── ActivityLogView.xaml
-├── Converters/
-└── Commands/
+│       ├── User.cs
+│       ├── Guest.cs
+│       └── Admin.cs
+│
+├── Prototype/                          # Lab 3 — Prototype pattern
+│   ├── IPrototype.cs
+│   ├── RoomPrototypes.cs               # StandardRoomPrototype, DeluxeRoomPrototype, SuitePrototype
+│   └── RoomPrototypeRegistry.cs
+│
+├── Services/
+│   ├── Booking/
+│   │   ├── BookingConfirmationService.cs
+│   │   ├── BookingDurationCalculator.cs
+│   │   ├── BookingService.cs
+│   │   └── InMemoryBookingRepository.cs
+│   ├── Room/
+│   │   ├── InMemoryRoomRepository.cs
+│   │   └── RoomPricingService.cs
+│   └── User/
+│       ├── ConsoleLogger.cs
+│       ├── InMemoryUserRepository.cs
+│       └── UserValidator.cs
+│
+├── Singleton/                          # Lab 3 — Singleton pattern
+│   └── HotelAuditLogger.cs
+│
+├── ViewModels/
+│   ├── BaseViewModel.cs                # INotifyPropertyChanged base
+│   ├── BookingController.cs
+│   ├── FacadeController.cs             # Lab 4 — Façade demo VM
+│   ├── GuestController.cs
+│   ├── LogController.cs                # Activity log (capped at 300 lines)
+│   ├── MainViewModel.cs                # Root VM — wires all controllers + commands
+│   ├── PaymentController.cs            # Lab 4 — Adapter demo VM
+│   ├── RoomController.cs
+│   └── RoomServiceController.cs        # Lab 4 — Composite demo VM
+│
+├── Views/
+│   ├── FacadeView.xaml / .cs           # Lab 4 — Hotel Ops page
+│   ├── PaymentView.xaml / .cs          # Lab 4 — Payment page
+│   └── RoomServiceView.xaml / .cs      # Lab 4 — Room Services page
+│
+├── Lab2_AbstractFactory.puml
+├── Lab2_FactoryMethod.puml
+├── Lab3_Builder.puml
+├── Lab3_Prototype.puml
+├── Lab3_Singleton.puml
+├── Lab4_Adapter.puml
+├── Lab4_Composite.puml
+├── Lab4_Facade.puml
+│
+├── App.xaml / App.xaml.cs
+├── MainWindow.xaml / MainWindow.xaml.cs
+├── AssemblyInfo.cs
+└── HotelBookingSystem.csproj
 ```
 
 ---
 
-## Implemented GoF Creational Patterns
+## Implemented GoF Patterns
 
-### 1. Singleton — `HotelAuditLogger`
+### Lab 3 — Creational Patterns
 
-**Problem:** The application needs a single audit logger that every part of the system writes to. Creating multiple logger instances would scatter log output and break consistency.
+---
+
+#### 1. Singleton — `HotelAuditLogger`
+
+**Problem:** The application needs a single audit logger that every part of the system writes to. Multiple logger instances would scatter log output and break consistency.
 
 **Solution:** `HotelAuditLogger` uses `Lazy<T>` for thread-safe, on-demand initialization. The private constructor blocks any external instantiation.
 
@@ -78,7 +180,6 @@ public sealed class HotelAuditLogger : ILogger
         new Lazy<HotelAuditLogger>(() => new HotelAuditLogger());
 
     public static HotelAuditLogger Instance => _instance.Value;
-
     private HotelAuditLogger() { }
 
     public void Info(string message)  => Console.WriteLine($"{DateTime.Now:HH:mm:ss} [INFO]  {message}");
@@ -87,7 +188,7 @@ public sealed class HotelAuditLogger : ILogger
 }
 ```
 
-**Proof it works** — in `MainViewModel`, two references are obtained and compared:
+**Proof it works** — `MainViewModel` obtains two references and compares them:
 
 ```csharp
 var logger  = HotelAuditLogger.Instance;
@@ -96,108 +197,74 @@ SingletonInfo = $"Singleton: same instance = {ReferenceEquals(logger, logger2)}"
 // → "Singleton: same instance = True"
 ```
 
-This result is displayed live in the sidebar of the application.
+The result is displayed live in the sidebar.
 
 ---
 
-### 2. Prototype — `RoomPrototype` + `RoomPrototypeRegistry`
+#### 2. Prototype — `RoomPrototype` + `RoomPrototypeRegistry`
 
-**Problem:** Each room type (Standard, Deluxe, Suite) has a set of pre-configured defaults — price, capacity, amenities. Re-entering these values manually every time a new room is created is error-prone and repetitive.
+**Problem:** Each room type (Standard, Deluxe, Suite) has pre-configured defaults — price, capacity, amenities. Re-entering them manually every time is error-prone and repetitive.
 
-**Solution:** Pre-configured template objects are stored in a registry. When a room type is selected, the registry returns a **clone** of the template, never the original. The clone can then be customized (room number, adjusted price) without affecting the template.
+**Solution:** Pre-configured template objects live in a registry. When a room type is selected, the registry returns a **clone** of the template — never the original. The clone is customized (room number, adjusted price) without affecting the template.
 
 ```csharp
-// Abstract prototype — every subclass must implement Clone()
-public abstract class RoomPrototype
+public class DeluxeRoomPrototype : IPrototype<DeluxeRoomPrototype>
 {
-    public string  RoomNumber { get; set; }
-    public decimal BasePrice  { get; set; }
-    public abstract int Capacity { get; set; }
-    public abstract RoomPrototype Clone();
-}
+    public List<string> Amenities { get; set; }
 
-// Concrete prototype — deep copies the Amenities list
-public class DeluxeRoomPrototype : RoomPrototype
-{
-    public List<string> Amenities { get; set; } = new();
-
-    public override RoomPrototype Clone() =>
-        new DeluxeRoomPrototype
+    public DeluxeRoomPrototype Clone() =>
+        new DeluxeRoomPrototype(RoomNumber, BasePrice, Capacity, HasBalcony,
+                                new List<string>(Amenities))  // deep copy
         {
-            RoomNumber = this.RoomNumber,
-            BasePrice  = this.BasePrice,
-            Capacity   = this.Capacity,
-            Amenities  = new List<string>(this.Amenities)  // deep copy
+            IsAvailable = this.IsAvailable
         };
 }
 ```
 
-The registry holds the three templates and always returns clones:
+The registry always returns clones — the originals are never exposed:
 
 ```csharp
-public RoomPrototype GetClone(string key)
+public RoomTemplateSnapshot GetClone(string key)
 {
-    if (!_prototypes.TryGetValue(key, out var prototype))
+    if (!_registry.TryGetValue(key, out var cloneFunc))
         throw new KeyNotFoundException($"No prototype registered for: '{key}'");
-
-    return prototype.Clone();  // original is never exposed
+    return cloneFunc();
 }
 ```
 
-**Where it's used:** in `RoomController`, when the user changes the room type dropdown, `GetClone()` is called and the price/capacity fields auto-fill with the template values.
+**Where it's used:** in `RoomController`, changing the room type dropdown calls `GetClone()` and auto-fills price and capacity.
 
 ---
 
-### 3. Builder — `BookingBuilder` + `BookingDirector`
+#### 3. Builder — `BookingBuilder` + `BookingDirector`
 
-**Problem:** A `BookingRequest` has 9 fields, many optional (breakfast, airport transfer, special request). Passing them all as constructor parameters leads to the classic *telescoping constructor* problem — hard to read and easy to get wrong.
+**Problem:** `BookingRequest` has 9 fields, many optional. Passing them all as constructor arguments leads to the telescoping constructor problem.
 
-**Solution:** The `BookingBuilder` assembles the request field by field through a fluent API. The `BookingDirector` provides three preset construction sequences so the caller doesn't need to know which fields are required for each booking type.
+**Solution:** `BookingBuilder` assembles the request field by field through a fluent API. `BookingDirector` provides three preset construction sequences — Standard, Premium, VIP — so callers don't need to know which fields each type requires.
 
 ```csharp
-// Builder interface
-public interface IBookingBuilder
-{
-    IBookingBuilder SetGuest(string guestId);
-    IBookingBuilder SetRoom(string roomId);
-    IBookingBuilder SetDates(DateTime checkIn, DateTime checkOut);
-    IBookingBuilder SetBookingType(string type);
-    IBookingBuilder WithBreakfast();
-    IBookingBuilder WithAirportTransfer();
-    IBookingBuilder WithSpecialRequest(string note);
-    BookingRequest  GetResult();
-}
-
-// Director — knows the correct sequence for each booking type
-public class BookingDirector
-{
-    private readonly IBookingBuilder _builder;
-
-    public BookingDirector(IBookingBuilder builder) => _builder = builder;
-
-    public BookingRequest BuildVip(string guestId, string roomId,
-        DateTime checkIn, DateTime checkOut) =>
-        _builder
-            .SetGuest(guestId)
-            .SetRoom(roomId)
-            .SetDates(checkIn, checkOut)
-            .SetBookingType("VIP")
-            .WithBreakfast()
-            .WithAirportTransfer()
-            .WithSpecialRequest("VIP welcome package")
-            .GetResult();
-}
+public BookingRequest BuildVip(string guestId, string roomId,
+    DateTime checkIn, DateTime checkOut) =>
+    _builder
+        .SetGuest(guestId)
+        .SetRoom(roomId)
+        .SetDates(checkIn, checkOut)
+        .SetBookingType("VIP")
+        .WithBreakfast()
+        .WithAirportTransfer()
+        .WithSpecialRequest("VIP welcome package")
+        .GetResult();
 ```
 
-After `GetResult()` is called, the builder resets its internal state automatically, so the same director instance can be reused for subsequent bookings without stale data bleeding through.
+After `GetResult()` the builder resets automatically, so the same director instance is safe to reuse.
 
 ---
 
-### 4. Factory Method — `RoomCreator`
+#### 4. Factory Method — `RoomCreator`
 
-**Problem:** `RoomController` originally had a `switch` statement with `new StandardRoom(...)`, `new DeluxeRoom(...)`, `new Suite(...)`. Adding a new room type meant modifying the controller — violating OCP.
+**Problem:** `RoomController` originally contained a `switch` statement with `new StandardRoom(...)`, `new DeluxeRoom(...)`, `new Suite(...)`. Adding a new room type required modifying the controller — violating OCP.
 
-**Solution:** An abstract `RoomCreator` defines the factory method `CreateProduct()`. Each concrete creator (`StandardRoomCreator`, `DeluxeRoomCreator`, `SuiteRoomCreator`) knows how to build its specific room type. `RoomCreatorProvider` selects the correct creator at runtime by type name.
+**Solution:** Abstract `RoomCreator` defines the factory method `CreateProduct()`. Each concrete creator knows how to build its specific room type. `RoomCreatorProvider` selects the right creator at runtime by type name.
 
 ```
 RoomCreator (abstract)
@@ -209,7 +276,6 @@ SuiteRoomCreator    → Suite
 ```
 
 ```csharp
-// Concrete creator
 public sealed class DeluxeRoomCreator : RoomCreator
 {
     public override IRoomProduct CreateProduct(
@@ -219,25 +285,15 @@ public sealed class DeluxeRoomCreator : RoomCreator
 }
 ```
 
-**Key difference from Abstract Factory:** Factory Method creates **one product**. Abstract Factory creates a **family of related products** — see below.
-
 ---
 
-### 5. Abstract Factory — `IBookingFactory`
+#### 5. Abstract Factory — `IBookingFactory`
 
-**Problem:** Standard, Premium, and VIP bookings need different pricing logic *and* different confirmation messages. These objects must always match — a VIP confirmation message must use VIP pricing, never standard pricing. Creating them independently risks mismatches.
+**Problem:** Standard, Premium, and VIP bookings each need their own pricing logic and confirmation messages. These objects must always match — a VIP confirmation must never use standard pricing. Creating them independently risks mismatches.
 
-**Solution:** `IBookingFactory` groups the three related products (`Booking`, `IPricingStrategy`, `IConfirmationHandler`) into a single interface. Each concrete factory creates a consistent family.
+**Solution:** `IBookingFactory` groups three related products (`Booking`, `IPricingStrategy`, `IConfirmationHandler`) into one interface. Each concrete factory creates a consistent, pre-matched family.
 
 ```csharp
-public interface IBookingFactory
-{
-    Booking              CreateBooking(...);
-    IPricingStrategy     CreatePricingStrategy();
-    IConfirmationHandler CreateConfirmationHandler();
-}
-
-// VIP family — all three objects belong together
 public class VipBookingFactory : IBookingFactory
 {
     public Booking              CreateBooking(...)           => new Booking(..., "VIP");
@@ -248,22 +304,197 @@ public class VipBookingFactory : IBookingFactory
 
 | Factory | Pricing | Confirmation |
 |---|---|---|
-| `StandardBookingFactory` | Base rate × nights | Basic confirmation |
+| `StandardBookingFactory` | Base rate × nights | Basic receipt |
 | `PremiumBookingFactory` | 10% discount | + Early check-in, late check-out |
-| `VipBookingFactory` | 20% off + 1 free night / 5 nights | + Spa, airport transfer, minibar |
+| `VipBookingFactory` | 20% off + 1 free night every 5 nights | + Spa, airport transfer, minibar |
 
-In `BookingController`, the Builder builds the request first, then the Abstract Factory creates the consistent product family:
+---
+
+### Lab 4 — Structural Patterns
+
+---
+
+#### 6. Adapter — `StripePaymentAdapter`
+
+**Problem:** `StripePaymentGateway` (an external payment library) has an incompatible interface — it takes `double amountInCents`, a `string cardToken`, and a `string currencyCode`. Our system expects `IPaymentService` — `ProcessPayment(string guestId, decimal amount)`. Neither class can be modified.
+
+**Solution:** `StripePaymentAdapter` implements `IPaymentService` and holds a `StripePaymentGateway` internally. It translates every call — converting `decimal` → `double cents`, treating `guestId` as the card token, and injecting `"USD"` as the currency — without either the client or the adaptee knowing about each other.
 
 ```csharp
-// Step 1 — Builder assembles the request
-var request = _director.BuildVip(user.Id, room.RoomId, checkIn, checkOut);
+// Target interface — what our system understands
+public interface IPaymentService
+{
+    bool ProcessPayment(string guestId, decimal amount);
+    bool RefundPayment(string guestId, decimal amount);
+    string GetLastTransactionId();
+}
 
-// Step 2 — Abstract Factory creates matching Booking + Pricing + Confirmation
-var factory      = _factoryProvider.GetFactory("VIP");
-var booking      = factory.CreateBooking(...);
-var pricing      = factory.CreatePricingStrategy();
-var confirmation = factory.CreateConfirmationHandler();
+// Adaptee — incompatible external class (cannot be changed)
+public class StripePaymentGateway
+{
+    public bool ChargeCard(string cardToken, double amountInCents, string currencyCode) { ... }
+    public bool RefundCharge(string chargeId, double amountInCents) { ... }
+    public string GetLastChargeId() { ... }
+}
+
+// Adapter — bridges the two
+public class StripePaymentAdapter : IPaymentService
+{
+    private readonly StripePaymentGateway _stripe;
+    private string _lastTransactionId = string.Empty;
+
+    public StripePaymentAdapter(StripePaymentGateway stripe) => _stripe = stripe;
+
+    public bool ProcessPayment(string guestId, decimal amount)
+    {
+        bool success = _stripe.ChargeCard(guestId, (double)(amount * 100), "USD");
+        if (success) _lastTransactionId = _stripe.GetLastChargeId();
+        return success;
+    }
+
+    public bool RefundPayment(string guestId, decimal amount)
+        => _stripe.RefundCharge(_lastTransactionId, (double)(amount * 100));
+
+    public string GetLastTransactionId() => _lastTransactionId;
+}
 ```
+
+**Where it's used:** `HotelFacade` charges room costs at check-in and room services at check-out. `PaymentController` exposes manual charge/refund on the Payment page. In both cases the caller only ever sees `IPaymentService` — the Stripe-specific types are invisible.
+
+**Interface translation diagram:**
+
+```
+PaymentController / HotelFacade
+        │
+        │  IPaymentService
+        │  ProcessPayment(guestId, decimal amount)
+        ▼
+StripePaymentAdapter
+        │
+        │  translates:
+        │  guestId       →  cardToken
+        │  decimal       →  double cents  (× 100)
+        │  (implicit)    →  "USD"
+        ▼
+StripePaymentGateway
+        ChargeCard(cardToken, amountInCents, currencyCode)
+```
+
+---
+
+#### 7. Composite — `RoomServiceComponent`
+
+**Problem:** The room services catalog mixes individual items (a massage, a sandwich) with bundles that group several items together and apply a discount. Some bundles even contain other bundles. Code that processes orders shouldn't need `if (item is Package)` type checks to calculate totals.
+
+**Solution:** `RoomServiceComponent` is the abstract component. `RoomServiceItem` is the leaf — it holds a single price. `RoomServicePackage` is the composite — it holds a list of children (items or other packages) and calculates its price by recursively summing them, then applying an optional discount. The client calls `GetPrice()` on any node and gets the correct total with no type checks.
+
+```csharp
+// Abstract component — leaf and composite share this contract
+public abstract class RoomServiceComponent
+{
+    public abstract string Name { get; }
+    public abstract decimal GetPrice();
+    public abstract string GetDescription();
+    public virtual void Add(RoomServiceComponent c) => throw new InvalidOperationException();
+    public virtual void Remove(RoomServiceComponent c) => throw new InvalidOperationException();
+}
+
+// Leaf — no children, fixed price
+public class RoomServiceItem : RoomServiceComponent
+{
+    private readonly decimal _price;
+    public override decimal GetPrice() => _price;
+}
+
+// Composite — sums children recursively, applies discount
+public class RoomServicePackage : RoomServiceComponent
+{
+    private readonly List<RoomServiceComponent> _children = new();
+    private readonly decimal _discountPercent;
+
+    public override void Add(RoomServiceComponent c) => _children.Add(c);
+
+    public override decimal GetPrice()
+    {
+        decimal total = 0;
+        foreach (var child in _children)
+            total += child.GetPrice();          // works for both items and nested packages
+        return total * (1 - _discountPercent / 100);
+    }
+}
+```
+
+**Catalog structure — two levels of nesting:**
+
+```
+VIP Welcome Bundle (20% off)           ← RoomServicePackage
+├── Breakfast Package (10% off)        ← RoomServicePackage (nested composite)
+│   ├── Continental Breakfast $18      ← RoomServiceItem (leaf)
+│   └── Fresh Fruit Plate $12          ← RoomServiceItem (leaf)
+├── Welcome Champagne $60              ← RoomServiceItem (leaf)
+└── Fresh Flowers $35                  ← RoomServiceItem (leaf)
+```
+
+Calling `GetPrice()` on the VIP bundle traverses the whole tree and returns the correctly discounted total — the client code is a single loop with no `if` statements.
+
+**Where it's used:** `RoomServiceController` drives the Room Services page. `HotelFacade.CheckOutGuest()` receives the ordered items list and calls `GetPrice()` on each to total the room services bill, then charges via the Adapter.
+
+---
+
+#### 8. Façade — `HotelFacade`
+
+**Problem:** Hotel check-in and check-out each involve multiple subsystems — booking repository, room repository, user repository, payment service, booking service, and logger. Coordinating all of them from a UI ViewModel creates tight coupling and exposes implementation details to the presentation layer.
+
+**Solution:** `HotelFacade` provides three simple methods that each orchestrate the full workflow internally. The ViewModel calls one method; the Façade handles everything else.
+
+```csharp
+public class HotelFacade
+{
+    // 6 subsystems injected — caller never sees them
+    private readonly IBookingService _bookingService;
+    private readonly IBookingRepository _bookingRepository;
+    private readonly IRoomRepository _roomRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IPaymentService _paymentService;   // → Adapter
+    private readonly ILogger _logger;                   // → Singleton
+
+    public CheckInResult CheckInGuest(string bookingId)
+    {
+        // 1. Validate booking is Confirmed
+        // 2. Find room + guest
+        // 3. Charge room cost  →  IPaymentService  →  [Adapter]  →  Stripe
+        // 4. Log              →  ILogger           →  [Singleton]
+        // returns CheckInResult (success flag + guest name + room + tx ID)
+    }
+
+    public CheckOutResult CheckOutGuest(string bookingId,
+        IReadOnlyList<RoomServiceComponent> services)
+    {
+        // 1. Find booking
+        // 2. Sum services via GetPrice()  →  [Composite]
+        // 3. Charge services total        →  IPaymentService  →  [Adapter]
+        // 4. Release room (CancelBooking)
+        // 5. Log                          →  [Singleton]
+        // returns CheckOutResult (total charged + itemised lines)
+    }
+
+    public string GetBookingSummary(string bookingId) { ... }
+}
+```
+
+**What the ViewModel sees vs what the Façade does:**
+
+| ViewModel call | Façade orchestrates |
+|---|---|
+| `CheckInGuest(id)` | validate → find entities → charge via Adapter → log via Singleton |
+| `CheckOutGuest(id, services)` | sum via Composite → charge via Adapter → release room → log via Singleton |
+| `GetBookingSummary(id)` | query 3 repositories → format summary string |
+
+**Patterns converging in `CheckOutGuest`:**
+- **Composite** calculates each service total (`GetPrice()`)
+- **Adapter** charges the total (`IPaymentService` → `StripePaymentGateway`)
+- **Singleton** logs the operation (`HotelAuditLogger.Instance`)
+- **Façade** coordinates all three behind a single method call
 
 ---
 
@@ -274,15 +505,15 @@ User selects room type
         │
         ▼
 [PROTOTYPE] RoomPrototypeRegistry.GetClone()
-        │  returns cloned template with default price/capacity
+        │  returns cloned template — price/capacity pre-filled
         ▼
 [FACTORY METHOD] RoomCreator.CreateRoom()
-        │  creates the actual Room domain object
+        │  creates the Room domain object
         ▼
-User fills dates and booking type
+User fills dates + booking type
         │
         ▼
-[BUILDER] BookingDirector.BuildVip/Premium/Standard()
+[BUILDER] BookingDirector.Build{Standard|Premium|Vip}()
         │  assembles BookingRequest step by step
         ▼
 [ABSTRACT FACTORY] IBookingFactory.Create*()
@@ -291,7 +522,25 @@ User fills dates and booking type
 [SINGLETON] HotelAuditLogger.Instance.Info()
         │  every step above is logged through the single logger instance
         ▼
-Booking saved to repository
+Booking saved — status: Pending
+        │
+        ▼
+User confirms booking on Bookings page
+        │
+        ▼  (optionally)
+[COMPOSITE] RoomServiceCatalog / RoomServicePackage.GetPrice()
+        │  guest orders services — packages nest recursively
+        ▼
+[FAÇADE] HotelFacade.CheckInGuest()
+        │  validates + charges room cost
+        ├──► [ADAPTER] StripePaymentAdapter.ProcessPayment()
+        │       translates decimal/guestId → Stripe ChargeCard(token, cents, USD)
+        └──► [SINGLETON] HotelAuditLogger.Instance.Info()
+        ▼
+[FAÇADE] HotelFacade.CheckOutGuest(services)
+        ├──► [COMPOSITE] sums all service totals via GetPrice()
+        ├──► [ADAPTER] charges services total via StripePaymentAdapter
+        └──► [SINGLETON] logs checkout + releases room
 ```
 
 ---
@@ -302,9 +551,18 @@ Booking saved to repository
 2. Set `HotelBookingSystem` as the startup project
 3. Press `F5`
 
-**Workflow inside the app:**
-- **New Booking** — register a guest → assign a room → select booking type and dates → create
-- **Bookings** — view all bookings, confirm or cancel selected
-- **Activity Log** — see every pattern activation prefixed by `[Prototype]`, `[Builder]`, `[Abstract Factory]`, `[Factory Method]`
+### Workflow
 
-The sidebar shows a live Singleton proof: `same instance = True`.
+| Step | Page | Patterns activated |
+|---|---|---|
+| Register a guest | New Booking | — |
+| Assign a room | New Booking | Prototype, Factory Method |
+| Create a booking | New Booking | Builder, Abstract Factory |
+| Confirm the booking | Bookings | — |
+| Add room services | Room Services (Composite) | Composite |
+| Charge a payment | Payment (Adapter) | Adapter |
+| Check in / Check out | Hotel Ops (Façade) | Façade + Adapter + Composite + Singleton |
+| Review all activations | Activity Log | all patterns prefixed |
+
+The sidebar shows a live Singleton proof: `same instance = True`.  
+The Activity Log prefixes every entry: `[Prototype]`, `[Builder]`, `[Abstract Factory]`, `[Factory Method]`, `[Singleton]`, `[Adapter]`, `[Composite]`, `[Facade]`.
