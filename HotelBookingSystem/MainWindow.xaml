@@ -197,8 +197,54 @@
                     </StackPanel>
                 </Border>
 
-                <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="8,0">
+                <!-- Footer docked BEFORE the fill ScrollViewer so DockPanel reserves space for it -->
+                <StackPanel DockPanel.Dock="Bottom" Margin="16,0,16,20">
+                    <Separator Background="#37474F" Margin="0,0,0,12"/>
+                    <TextBlock Text="Logged in as" FontSize="10" Foreground="#607D8B"/>
+                    <TextBlock Text="Staff Member" FontSize="12" Foreground="#B0BEC5" FontWeight="Medium"/>
+                </StackPanel>
+
+                <!-- No DockPanel.Dock — fills all remaining height, enabling real scrolling -->
+                <ScrollViewer VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ScrollViewer.Resources>
+                        <!-- Scrollbar track -->
+                        <Style TargetType="ScrollBar">
+                            <Setter Property="Width" Value="6"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ScrollBar">
+                                        <Grid Background="Transparent" Width="6">
+                                            <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                                <Track.DecreaseRepeatButton>
+                                                    <RepeatButton Command="ScrollBar.PageUpCommand"
+                                                                  Opacity="0" Width="0" Height="0"/>
+                                                </Track.DecreaseRepeatButton>
+                                                <Track.Thumb>
+                                                    <Thumb>
+                                                        <Thumb.Template>
+                                                            <ControlTemplate TargetType="Thumb">
+                                                                <Border Background="#546E7A"
+                                                                        CornerRadius="3"
+                                                                        Margin="1,0"/>
+                                                            </ControlTemplate>
+                                                        </Thumb.Template>
+                                                    </Thumb>
+                                                </Track.Thumb>
+                                                <Track.IncreaseRepeatButton>
+                                                    <RepeatButton Command="ScrollBar.PageDownCommand"
+                                                                  Opacity="0" Width="0" Height="0"/>
+                                                </Track.IncreaseRepeatButton>
+                                            </Track>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ScrollViewer.Resources>
+
+                    <StackPanel Margin="8,0,2,0">
                         <TextBlock Text="C R E A T I O N A L" FontSize="10" Foreground="#607D8B"
                                    FontWeight="Bold" Margin="12,0,0,8"/>
 
@@ -240,7 +286,7 @@
 
                         <TextBlock Text="P A T T E R N S" FontSize="10" Foreground="#607D8B"
                                    FontWeight="Bold" Margin="12,0,0,8"/>
-                        <StackPanel Margin="12,0,12,0">
+                        <StackPanel Margin="12,0,12,12">
                             <StackPanel Orientation="Horizontal" Margin="0,3">
                                 <Border Background="#6A1B9A" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
                                     <TextBlock Text="SINGLETON" FontSize="9" FontWeight="Bold" Foreground="White"/>
@@ -286,12 +332,6 @@
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
-
-                <StackPanel DockPanel.Dock="Bottom" Margin="16,0,16,20">
-                    <Separator Background="#37474F" Margin="0,0,0,12"/>
-                    <TextBlock Text="Logged in as" FontSize="10" Foreground="#607D8B"/>
-                    <TextBlock Text="Staff Member" FontSize="12" Foreground="#B0BEC5" FontWeight="Medium"/>
-                </StackPanel>
             </DockPanel>
         </Border>
 
