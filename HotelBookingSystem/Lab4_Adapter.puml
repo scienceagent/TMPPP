@@ -1,0 +1,52 @@
+﻿@startuml Lab4_Adapter
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #E3F2FD
+}
+skinparam interface {
+    BackgroundColor #E8F5E9
+    BorderColor #2E7D32
+}
+
+title <b>Adapter Pattern — Payment Gateway Integration</b>
+
+class PaymentController {
+    - _paymentService : IPaymentService
+    + ProcessPayment(guestId) : void
+    + RefundPayment(guestId) : void
+}
+
+interface IPaymentService {
+    + ProcessPayment(guestId, amount) : bool
+    + RefundPayment(guestId, amount) : bool
+    + GetLastTransactionId() : string
+}
+
+class StripePaymentAdapter {
+    - _stripe : StripePaymentGateway
+    - _lastTransactionId : string
+    + ProcessPayment(guestId, amount) : bool
+    + RefundPayment(guestId, amount) : bool
+    + GetLastTransactionId() : string
+}
+
+class StripePaymentGateway {
+    + ChargeCard(cardToken, amountInCents, currency) : bool
+    + RefundCharge(chargeId, amountInCents) : bool
+    + GetLastChargeId() : string
+}
+
+PaymentController --> IPaymentService : uses
+IPaymentService <|.. StripePaymentAdapter
+StripePaymentAdapter --> StripePaymentGateway : wraps
+
+@enduml

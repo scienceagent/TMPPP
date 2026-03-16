@@ -1,0 +1,64 @@
+﻿@startuml Lab4_Composite
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #E8F5E9
+}
+skinparam abstract {
+    BackgroundColor #FFF3E0
+    BorderColor #E65100
+}
+
+title <b>Composite Pattern — Room Services</b>
+
+abstract class RoomServiceComponent {
+    + {abstract} Name : string
+    + {abstract} GetPrice() : decimal
+    + {abstract} GetDescription() : string
+    + Add(component) : void
+    + Remove(component) : void
+}
+
+class RoomServiceItem {
+    - _name : string
+    - _price : decimal
+    - _description : string
+    + Name : string
+    + GetPrice() : decimal
+    + GetDescription() : string
+}
+
+class RoomServicePackage {
+    - _name : string
+    - _children : List<RoomServiceComponent>
+    - _discountPercent : decimal
+    + Name : string
+    + Children : IReadOnlyList<RoomServiceComponent>
+    + Add(component) : void
+    + Remove(component) : void
+    + GetPrice() : decimal
+    + GetDescription() : string
+}
+
+class RoomServiceController {
+    + CatalogItems : ObservableCollection
+    + OrderedItems : ObservableCollection
+    + AddToOrder() : void
+    + RemoveFromOrder(item) : void
+}
+
+RoomServiceComponent <|-- RoomServiceItem
+RoomServiceComponent <|-- RoomServicePackage
+RoomServicePackage o--> RoomServiceComponent : children
+
+RoomServiceController --> RoomServiceComponent : uses
+
+@enduml

@@ -1,0 +1,62 @@
+﻿@startuml Lab4_Facade
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #EDE7F6
+}
+skinparam interface {
+    BackgroundColor #EDE7F6
+    BorderColor #6A1B9A
+}
+
+title <b>Façade Pattern — Hotel Operations</b>
+
+class FacadeController {
+    + CheckIn() : void
+    + CheckOut() : void
+    + ShowSummary() : void
+}
+
+class HotelFacade {
+    - _bookingService : IBookingService
+    - _bookingRepository : IBookingRepository
+    - _roomRepository : IRoomRepository
+    - _userRepository : IUserRepository
+    - _paymentService : IPaymentService
+    - _logger : ILogger
+    + CheckInGuest(bookingId) : CheckInResult
+    + CheckOutGuest(bookingId, services) : CheckOutResult
+    + GetBookingSummary(bookingId) : string
+}
+
+interface IBookingService {
+    + ConfirmBooking(id) : BookingResult
+    + CancelBooking(id) : BookingResult
+}
+
+interface IPaymentService {
+    + ProcessPayment(guestId, amount) : bool
+}
+
+interface IBookingRepository
+interface IRoomRepository
+interface IUserRepository
+interface ILogger
+
+FacadeController --> HotelFacade : uses
+HotelFacade --> IBookingService
+HotelFacade --> IBookingRepository
+HotelFacade --> IRoomRepository
+HotelFacade --> IUserRepository
+HotelFacade --> IPaymentService
+HotelFacade --> ILogger
+
+@enduml
