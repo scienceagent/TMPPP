@@ -9,6 +9,9 @@
         <!-- Global Styles -->
         <ResourceDictionary>
             <converters:BookingDisplayConverter x:Key="BookingDisplayConverter"/>
+            <converters:RoomServicePriceConverter      x:Key="RoomServicePriceConverter"/>
+            <converters:RoomServiceTypeLabelConverter  x:Key="RoomServiceTypeLabelConverter"/>
+            <converters:RoomServiceTypeColorConverter  x:Key="RoomServiceTypeColorConverter"/>
 
             <!-- Font Family -->
             <FontFamily x:Key="DefaultFont">Segoe UI</FontFamily>

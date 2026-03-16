@@ -199,7 +199,6 @@
 
                 <ScrollViewer DockPanel.Dock="Top" VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="8,0">
-
                         <TextBlock Text="C R E A T I O N A L" FontSize="10" Foreground="#607D8B"
                                    FontWeight="Bold" Margin="12,0,0,8"/>
 
@@ -285,7 +284,6 @@
                                 <TextBlock Text="CheckIn/CheckOut" FontSize="11" Foreground="#90A4AE" VerticalAlignment="Center"/>
                             </StackPanel>
                         </StackPanel>
-
                     </StackPanel>
                 </ScrollViewer>
 
@@ -312,7 +310,6 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
@@ -334,7 +331,6 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <!-- STEP 1: Guest -->
                         <StackPanel Grid.Column="0">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border Background="#1976D2" CornerRadius="12" Width="24" Height="24">
@@ -364,7 +360,6 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- STEP 2: Room -->
                         <StackPanel Grid.Column="2">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border Background="#1976D2" CornerRadius="12" Width="24" Height="24">
@@ -405,7 +400,6 @@
                             </Border>
                         </StackPanel>
 
-                        <!-- STEP 3: Booking -->
                         <StackPanel Grid.Column="4">
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
                                 <Border Background="#2E7D32" CornerRadius="12" Width="24" Height="24">
@@ -476,21 +470,34 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Margin="0,0,0,20">
+
+                <StackPanel Grid.Row="0" Margin="0,0,0,16">
                     <TextBlock Text="Booking Management" FontSize="24" FontWeight="SemiBold" Foreground="#263238"/>
                     <TextBlock Text="View, confirm, or cancel existing bookings."
                                FontSize="13" Foreground="#78909C" Margin="0,4,0,0"/>
                 </StackPanel>
-                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16" Margin="0,0,0,16">
+
+                <!-- Workflow tip — reminds user to confirm before using Façade Check-In -->
+                <Border Grid.Row="1" Background="#FFF8E1" CornerRadius="8" Padding="14,10"
+                        BorderBrush="#FFE082" BorderThickness="1" Margin="0,0,0,16">
+                    <TextBlock FontSize="12" Foreground="#795548" TextWrapping="Wrap">
+                        <Run FontWeight="Bold">Tip:</Run>
+                        <Run>Select a booking and click Confirm Booking before using Hotel Ops → Check In Guest. The Façade requires status = Confirmed.</Run>
+                    </TextBlock>
+                </Border>
+
+                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16" Margin="0,0,0,16">
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Refresh" Command="{Binding RefreshBookingsCommand}"
                                 Style="{StaticResource SecondaryButton}" Padding="16,8"/>
                     </StackPanel>
                 </Border>
-                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" Margin="0,0,0,16">
+
+                <Border Grid.Row="3" Style="{StaticResource Card}" Padding="0" Margin="0,0,0,16">
                     <DataGrid ItemsSource="{Binding BookingCtrl.Bookings}"
                               SelectedItem="{Binding BookingCtrl.SelectedBooking, Mode=TwoWay}"
                               IsReadOnly="True" SelectionMode="Single" AutoGenerateColumns="False"
@@ -526,7 +533,8 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </Border>
-                <Border Grid.Row="3" Style="{StaticResource Card}" Padding="16">
+
+                <Border Grid.Row="4" Style="{StaticResource Card}" Padding="16">
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="Confirm Booking" Command="{Binding ConfirmBookingCommand}"
                                 Style="{StaticResource SuccessButton}" Padding="20,10" Margin="0,0,10,0"/>
@@ -596,13 +604,16 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
+
                 <StackPanel Grid.Row="0" Margin="0,0,0,16">
                     <TextBlock Text="Activity Log" FontSize="24" FontWeight="SemiBold" Foreground="#263238"/>
                     <TextBlock FontSize="12" Foreground="#78909C" Margin="0,4,0,0"
-                               Text="All pattern activations are logged here — Creational (Builder, Prototype, Abstract Factory, Singleton) and Structural (Adapter, Composite, Façade)."/>
+                               Text="All pattern activations logged here — Creational (Builder, Prototype, Abstract Factory, Singleton) and Structural (Adapter, Composite, Façade). Capped at 300 lines."/>
                 </StackPanel>
+
                 <Border Grid.Row="1" Background="White" CornerRadius="8" Padding="16,10"
                         BorderBrush="#E8E8E8" BorderThickness="1" Margin="0,0,0,12">
                     <WrapPanel>
@@ -633,7 +644,16 @@
                         </Border>
                     </WrapPanel>
                 </Border>
-                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16">
+
+                <!-- Clear Log button row -->
+                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="12,10" Margin="0,0,0,12">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Clear Log" Command="{Binding ClearLogCommand}"
+                                Style="{StaticResource SecondaryButton}" Padding="14,8"/>
+                    </StackPanel>
+                </Border>
+
+                <Border Grid.Row="3" Style="{StaticResource Card}" Padding="16">
                     <Border Background="#263238" CornerRadius="8" Padding="20">
                         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
                             <TextBlock Text="{Binding LogCtrl.LogOutput}" TextWrapping="Wrap"

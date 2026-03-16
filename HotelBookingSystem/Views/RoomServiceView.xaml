@@ -33,6 +33,7 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
+            <!-- ===== LEFT: Catalog ===== -->
             <Border Grid.Column="0" Background="White" CornerRadius="10" Padding="20"
                     BorderBrush="#E8E8E8" BorderThickness="1">
                 <DockPanel>
@@ -116,17 +117,14 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-
                                     <Border Grid.Column="0" CornerRadius="3" Padding="5,2" Margin="0,0,8,0"
                                             VerticalAlignment="Center"
                                             Background="{Binding ., Converter={StaticResource RoomServiceTypeColorConverter}}">
                                         <TextBlock FontSize="9" FontWeight="Bold" Foreground="White"
                                                    Text="{Binding ., Converter={StaticResource RoomServiceTypeLabelConverter}}"/>
                                     </Border>
-
                                     <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="13"
                                                FontWeight="Medium" Foreground="#263238" VerticalAlignment="Center"/>
-
                                     <TextBlock Grid.Column="2" FontSize="12" FontWeight="SemiBold"
                                                Foreground="#1976D2" VerticalAlignment="Center" Margin="8,0,0,0"
                                                Text="{Binding ., Converter={StaticResource RoomServicePriceConverter}}"/>
@@ -137,6 +135,7 @@
                 </DockPanel>
             </Border>
 
+            <!-- ===== RIGHT: Current Order ===== -->
             <Border Grid.Column="2" Background="White" CornerRadius="10" Padding="20"
                     BorderBrush="#E8E8E8" BorderThickness="1">
                 <DockPanel>
@@ -149,6 +148,8 @@
                                            Foreground="White" FontSize="11" FontWeight="Bold"/>
                             </Border>
                         </StackPanel>
+                        <TextBlock Text="Select an item below then click Remove Selected."
+                                   FontSize="10" Foreground="#90A4AE" Margin="0,6,0,0"/>
                     </StackPanel>
 
                     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,12,0,0">
@@ -177,7 +178,6 @@
                                 </Style>
                             </Button.Style>
                         </Button>
-
                         <Button Content="Clear All" Command="{Binding ClearServicesCommand}"
                                 Padding="14,8" BorderThickness="0" Cursor="Hand">
                             <Button.Style>
@@ -205,14 +205,60 @@
                         </Button>
                     </StackPanel>
 
-                    <Border Background="#263238" CornerRadius="8" Padding="16">
-                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <TextBlock Text="{Binding ServiceCtrl.OrderSummary}"
-                                       FontFamily="Cascadia Code, Consolas, Courier New"
-                                       FontSize="11" Foreground="#A5D6A7"
-                                       TextWrapping="Wrap" LineHeight="18"/>
-                        </ScrollViewer>
-                    </Border>
+                    <!-- Order ListBox — now properly bound to SelectedOrderItem -->
+                    <ListBox ItemsSource="{Binding ServiceCtrl.OrderedItems}"
+                             SelectedItem="{Binding ServiceCtrl.SelectedOrderItem, Mode=TwoWay}"
+                             BorderThickness="0" Background="#263238"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             Padding="8">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="Padding" Value="0"/>
+                                <Setter Property="Margin" Value="0,2"/>
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Border x:Name="border" Background="Transparent"
+                                                    CornerRadius="4" Padding="8,6">
+                                                <ContentPresenter/>
+                                            </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#37474F"/>
+                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter TargetName="border" Property="Background" Value="#2E3C43"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0" CornerRadius="3" Padding="5,2" Margin="0,0,8,0"
+                                            VerticalAlignment="Center"
+                                            Background="{Binding ., Converter={StaticResource RoomServiceTypeColorConverter}}">
+                                        <TextBlock FontSize="9" FontWeight="Bold" Foreground="White"
+                                                   Text="{Binding ., Converter={StaticResource RoomServiceTypeLabelConverter}}"/>
+                                    </Border>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="12"
+                                               Foreground="#A5D6A7" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="2" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="#80CBC4" VerticalAlignment="Center" Margin="8,0,0,0"
+                                               Text="{Binding ., Converter={StaticResource RoomServicePriceConverter}}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </DockPanel>
             </Border>
         </Grid>

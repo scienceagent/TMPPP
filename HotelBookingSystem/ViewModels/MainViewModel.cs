@@ -40,6 +40,7 @@ namespace HotelBookingSystem.ViewModels
           public ICommand CheckOutCommand { get; }
           public ICommand ShowSummaryCommand { get; }
           public ICommand RefreshFacadeCommand { get; }
+          public ICommand ClearLogCommand { get; }
 
           public string SingletonInfo { get; }
 
@@ -97,7 +98,11 @@ namespace HotelBookingSystem.ViewModels
                CreateRoomCommand = new RelayCommand(_ => RoomCtrl.CreateRoom());
                CreateBookingCommand = new RelayCommand(_ =>
                    BookingCtrl.CreateBooking(GuestCtrl.CurrentUser, RoomCtrl.CurrentRoom, _roomPricingService));
-               RefreshBookingsCommand = new RelayCommand(_ => BookingCtrl.RefreshBookings());
+               RefreshBookingsCommand = new RelayCommand(_ =>
+               {
+                    BookingCtrl.RefreshBookings();
+                    FacadeCtrl.RefreshBookings();
+               });
                ConfirmBookingCommand = new RelayCommand(
                    _ => BookingCtrl.ConfirmBooking(),
                    _ => BookingCtrl.SelectedBooking != null);
@@ -118,8 +123,10 @@ namespace HotelBookingSystem.ViewModels
                CheckOutCommand = new RelayCommand(_ => FacadeCtrl.CheckOut());
                ShowSummaryCommand = new RelayCommand(_ => FacadeCtrl.ShowSummary());
                RefreshFacadeCommand = new RelayCommand(_ => FacadeCtrl.RefreshBookings());
+               ClearLogCommand = new RelayCommand(_ => LogCtrl.ClearLog());
 
                BookingCtrl.RefreshBookings();
+               FacadeCtrl.RefreshBookings();
           }
      }
 }

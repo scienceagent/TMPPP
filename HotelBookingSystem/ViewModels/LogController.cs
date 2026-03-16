@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using HotelBookingSystem.Interfaces;
 
 namespace HotelBookingSystem.ViewModels
@@ -6,6 +8,7 @@ namespace HotelBookingSystem.ViewModels
      {
           private readonly ILogger _logger;
           private string _logOutput;
+          private const int MaxLines = 300;
 
           public string LogOutput
           {
@@ -16,14 +19,26 @@ namespace HotelBookingSystem.ViewModels
           public LogController(ILogger logger)
           {
                _logger = logger;
-               LogOutput = "Hotel Booking System ready.\n" +
-                          "Create a guest, then a room, then complete your booking.\n\n";
+               _logOutput =
+                   "Hotel Booking System ready.\n" +
+                   "Create a guest, then a room, then complete your booking.\n\n";
           }
 
           public void AddLog(string message)
           {
-               LogOutput += $"{message}\n";
+               var lines = LogOutput.Split('\n').ToList();
+               lines.Add(message);
+
+               if (lines.Count > MaxLines)
+                    lines = lines.Skip(lines.Count - MaxLines).ToList();
+
+               LogOutput = string.Join("\n", lines);
                _logger.Info(message);
+          }
+
+          public void ClearLog()
+          {
+               LogOutput = $"Log cleared at {DateTime.Now:HH:mm:ss}.\n\n";
           }
      }
 }
