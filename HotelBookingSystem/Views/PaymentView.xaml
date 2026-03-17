@@ -1,6 +1,11 @@
 ﻿<UserControl x:Class="HotelBookingSystem.Views.PaymentView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:HotelBookingSystem.Converters">
+
+    <UserControl.Resources>
+        <converters:DecimalInputConverter x:Key="DecimalInputConverter"/>
+    </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <StackPanel Margin="0,0,0,24">
@@ -85,9 +90,15 @@
 
                     <TextBlock Text="AMOUNT (USD)" Foreground="#546E7A" FontSize="12"
                                FontWeight="Medium" Margin="0,0,0,4"/>
-                    <TextBox Text="{Binding PaymentCtrl.PaymentAmount, UpdateSourceTrigger=PropertyChanged}"
-                             FontSize="14" Padding="10,8" BorderBrush="#CFD8DC" BorderThickness="1"
-                             Background="#FAFAFA" Margin="0,0,0,16"/>
+                    <TextBox FontSize="14" Padding="10,8" BorderBrush="#CFD8DC" BorderThickness="1"
+                             Background="#FAFAFA" Margin="0,0,0,16">
+                        <TextBox.Text>
+                            <Binding Path="PaymentCtrl.PaymentAmount"
+                                     Converter="{StaticResource DecimalInputConverter}"
+                                     UpdateSourceTrigger="LostFocus"
+                                     ValidatesOnExceptions="True"/>
+                        </TextBox.Text>
+                    </TextBox>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
                         <Button Content="Charge Payment" Command="{Binding ProcessPaymentCommand}"

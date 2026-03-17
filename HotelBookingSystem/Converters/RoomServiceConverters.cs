@@ -6,6 +6,30 @@ using HotelBookingSystem.Composite;
 
 namespace HotelBookingSystem.Converters
 {
+     public class DecimalInputConverter : IValueConverter
+     {
+          public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+          {
+               if (value is decimal d)
+                    return d.ToString("F2", CultureInfo.InvariantCulture);
+               return "0.00";
+          }
+
+          public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+          {
+               var text = value as string ?? string.Empty;
+
+               if (string.IsNullOrWhiteSpace(text))
+                    return 0m;
+
+               if (decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal result))
+                    return result;
+
+               return System.Windows.DependencyProperty.UnsetValue;
+          }
+     }
+
+
      public class RoomServicePriceConverter : IValueConverter
      {
           public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
