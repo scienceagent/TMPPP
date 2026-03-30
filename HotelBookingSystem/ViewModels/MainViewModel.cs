@@ -22,6 +22,9 @@ namespace HotelBookingSystem.ViewModels
           public RoomServiceController ServiceCtrl { get; }
           public FacadeController FacadeCtrl { get; }
 
+          // Toast overlay — bound directly in MainWindow.xaml
+          public ToastService Toast => ToastService.Instance;
+
           public ICommand CreateGuestCommand { get; }
           public ICommand CreateRoomCommand { get; }
           public ICommand CreateBookingCommand { get; }
@@ -41,6 +44,7 @@ namespace HotelBookingSystem.ViewModels
           public ICommand ShowSummaryCommand { get; }
           public ICommand RefreshFacadeCommand { get; }
           public ICommand ClearLogCommand { get; }
+          public ICommand DismissToastCommand { get; }
 
           public string SingletonInfo { get; }
 
@@ -124,6 +128,7 @@ namespace HotelBookingSystem.ViewModels
                ShowSummaryCommand = new RelayCommand(_ => FacadeCtrl.ShowSummary());
                RefreshFacadeCommand = new RelayCommand(_ => FacadeCtrl.RefreshBookings());
                ClearLogCommand = new RelayCommand(_ => LogCtrl.ClearLog());
+               DismissToastCommand = new RelayCommand(_ => ToastService.Instance.Dismiss());
 
                BookingCtrl.RefreshBookings();
                FacadeCtrl.RefreshBookings();

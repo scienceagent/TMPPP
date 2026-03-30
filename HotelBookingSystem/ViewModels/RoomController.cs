@@ -34,7 +34,6 @@ namespace HotelBookingSystem.ViewModels
                     {
                          _creator = _creatorProvider.GetCreator(value ?? "Standard");
                          OnPropertyChanged(nameof(CapacityLabel));
-
                          var snapshot = _registry.GetClone(value ?? "Standard");
                          RoomPrice = snapshot.BasePrice;
                          RoomCapacity = snapshot.Capacity;
@@ -56,9 +55,7 @@ namespace HotelBookingSystem.ViewModels
                _roomPricingService = roomPricingService;
                _registry = registry;
                _creatorProvider = new RoomCreatorProvider();
-
                RoomTypes = new List<string>(_creatorProvider.GetAvailableTypes());
-
                RoomNumber = "101";
                SelectedRoomType = "Standard";
           }
@@ -82,6 +79,7 @@ namespace HotelBookingSystem.ViewModels
                     if (!success)
                     {
                          OnLog?.Invoke($"Room creation failed: {error}\n");
+                         ToastService.Instance.Show("Room Not Created", error ?? "Unknown error.", ToastKind.Error);
                          return;
                     }
 
@@ -91,14 +89,23 @@ namespace HotelBookingSystem.ViewModels
                     OnLog?.Invoke(description!);
                     OnLog?.Invoke(priceSummary!);
                     OnLog?.Invoke($"Cleaning cost: {FormatUsd(cleaningCost)}\n");
+
+                    ToastService.Instance.Show(
+                        "Room Assigned",
+                        $"{SelectedRoomType} room {RoomNumber} ready at {Usd(RoomPrice)}/night.",
+                        ToastKind.Success);
                }
                catch (Exception ex)
                {
                     OnLog?.Invoke($"Error: {ex.Message}\n");
+                    ToastService.Instance.Show("Room Error", ex.Message, ToastKind.Error);
                }
           }
 
           private static string FormatUsd(decimal v) =>
+              v.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+
+          private static string Usd(decimal v) =>
               v.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
      }
 }

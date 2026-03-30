@@ -6,37 +6,65 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
 
-        <!-- Global Styles -->
         <ResourceDictionary>
-            <converters:BookingDisplayConverter x:Key="BookingDisplayConverter"/>
+
+            <!-- ??????????????????????????????????????????
+                 CONVERTERS
+            ?????????????????????????????????????????? -->
+            <converters:BookingDisplayConverter        x:Key="BookingDisplayConverter"/>
             <converters:RoomServicePriceConverter      x:Key="RoomServicePriceConverter"/>
             <converters:RoomServiceTypeLabelConverter  x:Key="RoomServiceTypeLabelConverter"/>
             <converters:RoomServiceTypeColorConverter  x:Key="RoomServiceTypeColorConverter"/>
+            <converters:BoolToVisibilityConverter      x:Key="BoolToVisibilityConverter"/>
+            <converters:ToastBackgroundConverter       x:Key="ToastBackgroundConverter"/>
+            <converters:ToastIconConverter             x:Key="ToastIconConverter"/>
 
-            <!-- Font Family -->
+            <!-- ??????????????????????????????????????????
+                 FONTS
+            ?????????????????????????????????????????? -->
             <FontFamily x:Key="DefaultFont">Segoe UI</FontFamily>
 
-            <!-- Colors -->
-            <SolidColorBrush x:Key="PrimaryColor" Color="#2196F3"/>
-            <SolidColorBrush x:Key="PrimaryDarkColor" Color="#1976D2"/>
-            <SolidColorBrush x:Key="PrimaryLightColor" Color="#BBDEFB"/>
-            <SolidColorBrush x:Key="AccentColor" Color="#FF9800"/>
-            <SolidColorBrush x:Key="SuccessColor" Color="#4CAF50"/>
-            <SolidColorBrush x:Key="ErrorColor" Color="#F44336"/>
-            <SolidColorBrush x:Key="WarningColor" Color="#FFC107"/>
-            <SolidColorBrush x:Key="BackgroundColor" Color="#F5F5F5"/>
-            <SolidColorBrush x:Key="SurfaceColor" Color="#FFFFFF"/>
-            <SolidColorBrush x:Key="TextPrimaryColor" Color="#212121"/>
-            <SolidColorBrush x:Key="TextSecondaryColor" Color="#757575"/>
-            <SolidColorBrush x:Key="DividerColor" Color="#BDBDBD"/>
+    
+            <SolidColorBrush x:Key="PrimaryColor"         Color="#2196F3"/>
+            <SolidColorBrush x:Key="PrimaryDarkColor"     Color="#1976D2"/>
+            <SolidColorBrush x:Key="PrimaryLightColor"    Color="#BBDEFB"/>
+            <SolidColorBrush x:Key="AccentColor"          Color="#FF9800"/>
+            <SolidColorBrush x:Key="SuccessColor"         Color="#4CAF50"/>
+            <SolidColorBrush x:Key="ErrorColor"           Color="#F44336"/>
+            <SolidColorBrush x:Key="WarningColor"         Color="#FFC107"/>
+            <SolidColorBrush x:Key="BackgroundColor"      Color="#F5F5F5"/>
+            <SolidColorBrush x:Key="SurfaceColor"         Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="TextPrimaryColor"     Color="#212121"/>
+            <SolidColorBrush x:Key="TextSecondaryColor"   Color="#757575"/>
+            <SolidColorBrush x:Key="DividerColor"         Color="#BDBDBD"/>
 
-            <!-- Global TextBlock Style -->
+           
+
+            <!-- Sidebar / navigation -->
+            <SolidColorBrush x:Key="NavyBrush"            Color="#0F1E2E"/>
+            <SolidColorBrush x:Key="NavyMidBrush"         Color="#1A2D40"/>
+
+            <!-- Accent (used throughout for buttons, badges, borders) -->
+            <SolidColorBrush x:Key="AccentBrush"          Color="#3B82F6"/>
+            <SolidColorBrush x:Key="AccentDarkBrush"      Color="#2563EB"/>
+
+            <!-- Page / window background -->
+            <SolidColorBrush x:Key="SurfaceDimBrush"      Color="#F1F5F9"/>
+
+            <!-- Typography -->
+            <SolidColorBrush x:Key="TextPrimaryBrush"     Color="#0F172A"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush"   Color="#64748B"/>
+
+            <!-- Borders -->
+            <SolidColorBrush x:Key="BorderBrush2"         Color="#E2E8F0"/>
+
+           
+
             <Style TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
                 <Setter Property="Foreground" Value="{StaticResource TextPrimaryColor}"/>
             </Style>
 
-            <!-- Global TextBox Style -->
             <Style TargetType="TextBox">
                 <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
                 <Setter Property="FontSize" Value="14"/>
@@ -51,7 +79,6 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- Global ComboBox Style -->
             <Style TargetType="ComboBox">
                 <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
                 <Setter Property="FontSize" Value="14"/>
@@ -60,7 +87,6 @@
                 <Setter Property="BorderThickness" Value="1"/>
             </Style>
 
-            <!-- Global DatePicker Style -->
             <Style TargetType="DatePicker">
                 <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
                 <Setter Property="FontSize" Value="14"/>
@@ -69,7 +95,6 @@
                 <Setter Property="BorderThickness" Value="1"/>
             </Style>
 
-            <!-- Global DataGrid Style -->
             <Style TargetType="DataGrid">
                 <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>
                 <Setter Property="Background" Value="{StaticResource SurfaceColor}"/>
@@ -87,7 +112,6 @@
                 <Setter Property="SelectionUnit" Value="FullRow"/>
             </Style>
 
-            <!-- DataGrid Header Style -->
             <Style TargetType="DataGridColumnHeader">
                 <Setter Property="Background" Value="{StaticResource PrimaryColor}"/>
                 <Setter Property="Foreground" Value="White"/>
@@ -97,7 +121,6 @@
                 <Setter Property="BorderBrush" Value="{StaticResource PrimaryDarkColor}"/>
             </Style>
 
-            <!-- DataGrid Cell Style -->
             <Style TargetType="DataGridCell">
                 <Setter Property="Padding" Value="10,5"/>
                 <Setter Property="BorderThickness" Value="0"/>
@@ -109,19 +132,16 @@
                 </Style.Triggers>
             </Style>
 
-            <!-- Scroll Viewer Style -->
             <Style TargetType="ScrollViewer">
                 <Setter Property="VerticalScrollBarVisibility" Value="Auto"/>
                 <Setter Property="HorizontalScrollBarVisibility" Value="Disabled"/>
             </Style>
 
-            <!-- ScrollBar Thumb Style -->
             <Style TargetType="Thumb">
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Thumb">
-                            <Border Background="{StaticResource PrimaryColor}" 
-                                    CornerRadius="3"/>
+                            <Border Background="{StaticResource PrimaryColor}" CornerRadius="3"/>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
