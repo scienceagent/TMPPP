@@ -7,13 +7,12 @@ namespace HotelBookingSystem.ViewModels
      public class GuestController : BaseViewModel
      {
           private readonly IUserRepository _userRepository;
-          private readonly IUserValidator _userValidator;
 
-          private string _guestName = string.Empty;
-          private string _guestEmail = string.Empty;
-          private string _guestNationality = string.Empty;
-          private string _guestPassport = string.Empty;
-          private User? _currentUser;
+          private string _guestName = "";
+          private string _guestEmail = "";
+          private string _guestNationality = "";
+          private string _guestPassport = "";
+          private string _currentGuestId = "";
 
           public string GuestName
           {
@@ -39,48 +38,47 @@ namespace HotelBookingSystem.ViewModels
                set => SetProperty(ref _guestPassport, value);
           }
 
-          public User? CurrentUser => _currentUser;
+          public string CurrentGuestId => _currentGuestId;
 
           public event Action<string>? OnLog;
 
-          public GuestController(IUserRepository userRepository, IUserValidator userValidator)
+          public GuestController(IUserRepository userRepository)
           {
                _userRepository = userRepository;
-               _userValidator = userValidator;
           }
 
           public void CreateGuest()
           {
-               try
+               if (string.IsNullOrWhiteSpace(GuestName))
                {
-                    _currentUser = new Guest(
-                        Guid.NewGuid().ToString(),
-                        GuestName, GuestEmail, "0721234567",
-                        GuestNationality, GuestPassport);
-
-                    _userRepository.Save(_currentUser);
-                    bool valid = _userValidator.Validate(_currentUser);
-
-                    OnLog?.Invoke("Guest created.");
-                    OnLog?.Invoke(_currentUser.GetDisplayInfo());
-                    OnLog?.Invoke($"Valid: {valid}\n");
-
-                    if (valid)
-                         ToastService.Instance.Show(
-                             "Guest Registered",
-                             $"{GuestName} added successfully.",
-                             ToastKind.Success);
-                    else
-                         ToastService.Instance.Show(
-                             "Validation Warning",
-                             "Guest saved but failed validation — check passport and nationality.",
-                             ToastKind.Warning);
+                    ToastService.Instance.Show("Missing Name", "Please enter a guest name.", ToastKind.Warning);
+                    return;
                }
-               catch (Exception ex)
+
+               if (string.IsNullOrWhiteSpace(GuestEmail))
                {
-                    OnLog?.Invoke($"Error: {ex.Message}\n");
-                    ToastService.Instance.Show("Registration Failed", ex.Message, ToastKind.Error);
+                    ToastService.Instance.Show("Missing Email", "Please enter a guest email.", ToastKind.Warning);
+                    return;
                }
+
+               var guest = new Guest(
+                   Guid.NewGuid().ToString(),
+                   GuestName,
+                   GuestEmail,
+                   "",
+                   string.IsNullOrWhiteSpace(GuestNationality) ? "Unknown" : GuestNationality,
+                   string.IsNullOrWhiteSpace(GuestPassport) ? "UNKNOWN" : GuestPassport);
+
+               _userRepository.Save(guest);
+               _currentGuestId = guest.Id;
+
+               OnLog?.Invoke($"[Guest] Registered: {GuestName} ({GuestEmail})");
+               OnLog?.Invoke($"  ID: {guest.Id[..8]}...\n");
+
+               ToastService.Instance.Show(
+                   "Guest Registered",
+                   $"{GuestName} registered successfully.",
+                   ToastKind.Success);
           }
      }
 }

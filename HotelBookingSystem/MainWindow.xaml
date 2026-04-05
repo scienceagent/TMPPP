@@ -295,6 +295,8 @@
                                    Foreground="#94A3B8" TextWrapping="Wrap"/>
                     </StackPanel>
                 </Border>
+                
+                
 
                 <!-- Staff badge at bottom -->
                 <Border DockPanel.Dock="Bottom" Background="{StaticResource NavyMidBrush}"
@@ -402,10 +404,21 @@
                         <TextBlock Text="SYSTEM" Style="{StaticResource SectionLabel}"/>
 
                         <RadioButton x:Name="NavLog" Style="{StaticResource NavButton}">
+                            
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⋮" FontSize="16" Foreground="#64748B"
                                            VerticalAlignment="Center" Margin="0,0,8,0"/>
                                 <TextBlock Text="Activity Log" Foreground="White" FontSize="13"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <Separator Background="#1E2D40" Margin="12,10"/>
+                        <TextBlock Text="LAB 5" Style="{StaticResource SectionLabel}"/>
+
+                        <RadioButton x:Name="NavLab5" Style="{StaticResource NavButton}">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="◈" FontSize="13" Foreground="#64748B"
+                   VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="Lab 5 Patterns" Foreground="White" FontSize="13"/>
                             </StackPanel>
                         </RadioButton>
 
@@ -435,6 +448,18 @@
                             <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
                                 <TextBlock Text="FAÇADE" FontSize="8" FontWeight="Bold" Foreground="#C084FC"/>
                             </Border>
+                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                <TextBlock Text="FLYWEIGHT" FontSize="8" FontWeight="Bold" Foreground="#C084FC"/>
+                            </Border>
+                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                <TextBlock Text="DECORATOR" FontSize="8" FontWeight="Bold" Foreground="#34D399"/>
+                            </Border>
+                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                <TextBlock Text="BRIDGE" FontSize="8" FontWeight="Bold" Foreground="#FB923C"/>
+                            </Border>
+                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                <TextBlock Text="PROXY" FontSize="8" FontWeight="Bold" Foreground="#F59E0B"/>
+                            </Border>
                         </WrapPanel>
 
                     </StackPanel>
@@ -461,6 +486,9 @@
                                 <Style TargetType="TextBlock">
                                     <Setter Property="Text" Value="New Booking"/>
                                     <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
+                                            <Setter Property="Text" Value="Lab 5 — Flyweight · Decorator · Bridge · Proxy"/>
+                                        </DataTrigger>
                                         <DataTrigger Binding="{Binding IsChecked, ElementName=NavBookings}" Value="True">
                                             <Setter Property="Text" Value="All Bookings"/>
                                         </DataTrigger>
@@ -867,6 +895,21 @@
                             </ScrollViewer>
                         </Border>
                     </Border>
+                </Grid>
+
+                <!-- ══════ PAGE: Lab 5 Patterns ══════ -->
+                <Grid>
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+                    <views:PatternsLab5View/>
                 </Grid>
 
             </Grid>

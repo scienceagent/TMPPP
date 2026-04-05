@@ -1,0 +1,698 @@
+﻿<UserControl x:Class="HotelBookingSystem.Views.PatternsLab5View"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <UserControl.Resources>
+
+        <!-- Tab header button style -->
+        <Style x:Key="TabBtn" TargetType="RadioButton">
+            <Setter Property="GroupName" Value="Lab5Tabs"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="bg" Background="Transparent"
+                                BorderThickness="0,0,0,3" BorderBrush="Transparent"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bg" Property="BorderBrush" Value="#3B82F6"/>
+                                <Setter TargetName="bg" Property="Background" Value="#EFF6FF"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#F1F5F9"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Inner action button -->
+        <Style x:Key="ActionBtn" TargetType="Button">
+            <Setter Property="Padding" Value="18,9"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Opacity" Value="0.88"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="bg" Property="Background" Value="#CBD5E1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+
+        <!-- Result terminal box -->
+        <Style x:Key="Terminal" TargetType="Border">
+            <Setter Property="Background" Value="#1E293B"/>
+            <Setter Property="CornerRadius" Value="8"/>
+            <Setter Property="Padding" Value="16"/>
+            <Setter Property="MinHeight" Value="120"/>
+        </Style>
+
+        <!-- Info card -->
+        <Style x:Key="InfoCard" TargetType="Border">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="CornerRadius" Value="10"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+        </Style>
+
+        <!-- Section label -->
+        <Style x:Key="SLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="Margin" Value="0,0,0,6"/>
+        </Style>
+
+        <!-- Field label -->
+        <Style x:Key="FLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- ═══ TAB BAR ═══ -->
+        <Border Grid.Row="0" Background="White"
+                BorderBrush="#E2E8F0" BorderThickness="0,0,0,1" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal">
+
+                <RadioButton x:Name="TabFlyweight" Style="{StaticResource TabBtn}" IsChecked="True">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#7C3AED" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
+                            <TextBlock Text="FLYWEIGHT" FontSize="8" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Amenity Icons" FontSize="13" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                </RadioButton>
+
+                <RadioButton x:Name="TabDecorator" Style="{StaticResource TabBtn}">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#0369A1" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
+                            <TextBlock Text="DECORATOR" FontSize="8" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Notifications" FontSize="13" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                </RadioButton>
+
+                <RadioButton x:Name="TabBridge" Style="{StaticResource TabBtn}">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#0F766E" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
+                            <TextBlock Text="BRIDGE" FontSize="8" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Reports" FontSize="13" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                </RadioButton>
+
+                <RadioButton x:Name="TabProxy" Style="{StaticResource TabBtn}">
+                    <StackPanel Orientation="Horizontal">
+                        <Border Background="#B45309" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
+                            <TextBlock Text="PROXY" FontSize="8" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Room Access" FontSize="13" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                </RadioButton>
+
+            </StackPanel>
+        </Border>
+
+        <!-- ═══ PAGES ═══ -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <Grid>
+
+                <!-- ══════════════════════════════════════════════
+                     PAGE: FLYWEIGHT
+                ══════════════════════════════════════════════ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=TabFlyweight}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <!-- Header -->
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Border Background="#7C3AED" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                            <TextBlock Text="FLYWEIGHT" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Room Amenity Icons" FontSize="22" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <TextBlock FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,16"
+                               Text="Room amenity metadata (type, icon, color, category) is intrinsic — identical for every room that has 'WiFi' or 'Pool'. Flyweight stores this ONCE. The extrinsic state (roomId, price) is passed as parameters per render call, never stored in the flyweight. Result: 200 rooms × 5 amenities = 1000 entry objects but only ~16 shared flyweight objects."/>
+
+                    <!-- Info box -->
+                    <Border Style="{StaticResource InfoCard}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Border Grid.Column="0" Background="#F5F3FF" CornerRadius="8" Padding="14,12">
+                                <StackPanel>
+                                    <TextBlock Text="INTRINSIC STATE (stored in flyweight)" Style="{StaticResource SLabel}"/>
+                                    <TextBlock FontSize="12" Foreground="#4C1D95" TextWrapping="Wrap" LineHeight="20"
+                                               Text="• AmenityType  (e.g. 'WiFi')&#10;• Icon  (e.g. '📶')&#10;• Color  (hex badge color)&#10;• Category  (e.g. 'Connectivity')&#10;&#10;Shared by ALL rooms with this amenity.&#10;One object regardless of how many rooms."/>
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="2" Background="#FFF7ED" CornerRadius="8" Padding="14,12">
+                                <StackPanel>
+                                    <TextBlock Text="EXTRINSIC STATE (passed per call)" Style="{StaticResource SLabel}"/>
+                                    <TextBlock FontSize="12" Foreground="#92400E" TextWrapping="Wrap" LineHeight="20"
+                                               Text="• RoomId  (unique per room)&#10;• RoomNumber  (display number)&#10;• RoomPrice  (base nightly rate)&#10;&#10;Provided by the client (RoomAmenityEntry).&#10;NOT stored inside the flyweight object."/>
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </Border>
+
+                    <!-- Stats bar + load button -->
+                    <Border Style="{StaticResource InfoCard}" Padding="14,12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Grid.Column="0" Content="▶  Load Room Amenities"
+                                    Command="{Binding LoadAmenitiesCommand}"
+                                    Background="#7C3AED" Style="{StaticResource ActionBtn}" Margin="0,0,16,0"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border Background="#F5F3FF" CornerRadius="6" Padding="10,5" Margin="0,0,10,0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Entries: " FontSize="11" Foreground="#6D28D9"/>
+                                        <TextBlock Text="{Binding FlyweightCtrl.TotalEntries}" FontSize="13"
+                                                   FontWeight="Bold" Foreground="#6D28D9"/>
+                                    </StackPanel>
+                                </Border>
+                                <Border Background="#EDE9FE" CornerRadius="6" Padding="10,5">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Flyweight objects: " FontSize="11" Foreground="#5B21B6"/>
+                                        <TextBlock Text="{Binding FlyweightCtrl.FlyweightObjectCount}"
+                                                   FontSize="13" FontWeight="Bold" Foreground="#5B21B6"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Result + two lists side by side -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="280"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Entries list -->
+                        <Border Grid.Column="0" Style="{StaticResource InfoCard}" Margin="0" Padding="0">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Top" Background="#7C3AED" CornerRadius="10,10,0,0" Padding="14,10">
+                                    <TextBlock Text="Room → Amenity entries (extrinsic state per entry)"
+                                               FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                                </Border>
+                                <DataGrid ItemsSource="{Binding FlyweightCtrl.Entries}"
+                                          IsReadOnly="True" AutoGenerateColumns="False"
+                                          BorderThickness="0" Background="White"
+                                          RowBackground="White" AlternatingRowBackground="#FAFBFF"
+                                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#EEF2FF"
+                                          MaxHeight="260" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Room" Binding="{Binding RoomNumber}" Width="70"/>
+                                        <DataGridTextColumn Header="Amenity" Binding="{Binding IconAndType}" Width="160"/>
+                                        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="*"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+
+                        <!-- Flyweight cache -->
+                        <Border Grid.Column="2" Style="{StaticResource InfoCard}" Margin="0" Padding="0">
+                            <DockPanel>
+                                <Border DockPanel.Dock="Top" Background="#5B21B6" CornerRadius="10,10,0,0" Padding="14,10">
+                                    <TextBlock Text="Flyweight cache (shared objects)"
+                                               FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                                </Border>
+                                <DataGrid ItemsSource="{Binding FlyweightCtrl.CacheEntries}"
+                                          IsReadOnly="True" AutoGenerateColumns="False"
+                                          BorderThickness="0" Background="White"
+                                          RowBackground="White" AlternatingRowBackground="#F5F3FF"
+                                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#EEF2FF"
+                                          MaxHeight="260" ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Amenity" Binding="{Binding Display}" Width="*"/>
+                                        <DataGridTextColumn Header="Cat." Binding="{Binding Category}" Width="90"/>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Result summary -->
+                    <Border Style="{StaticResource Terminal}">
+                        <TextBlock Text="{Binding FlyweightCtrl.FlyweightReport}"
+                                   FontFamily="Cascadia Code, Consolas, Courier New"
+                                   FontSize="12" Foreground="#C4B5FD" TextWrapping="Wrap" LineHeight="20"/>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- ══════════════════════════════════════════════
+                     PAGE: DECORATOR
+                ══════════════════════════════════════════════ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=TabDecorator}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Border Background="#0369A1" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                            <TextBlock Text="DECORATOR" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Booking Notifications" FontSize="22" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <TextBlock FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,16"
+                               Text="Notification channels are added dynamically as decorators over the core BookingNotificationService. Toggle Log / Email / SMS checkboxes — the chain is rebuilt at runtime. Each decorator has one responsibility and is completely independent. 5 behaviors = 5 classes, not 2^5 = 32 subclasses."/>
+
+                    <!-- Chain diagram -->
+                    <Border Style="{StaticResource InfoCard}">
+                        <StackPanel>
+                            <TextBlock Text="DECORATOR CHAIN (built at runtime based on your selections)"
+                                       Style="{StaticResource SLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <Border Background="#E0F2FE" CornerRadius="6" Padding="10,6" Margin="0,0,4,0">
+                                    <TextBlock Text="LoggingDecorator" FontSize="11" FontWeight="SemiBold" Foreground="#0369A1"/>
+                                </Border>
+                                <TextBlock Text="→" FontSize="16" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <Border Background="#E0F2FE" CornerRadius="6" Padding="10,6" Margin="0,0,4,0">
+                                    <TextBlock Text="EmailDecorator" FontSize="11" FontWeight="SemiBold" Foreground="#0369A1"/>
+                                </Border>
+                                <TextBlock Text="→" FontSize="16" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <Border Background="#E0F2FE" CornerRadius="6" Padding="10,6" Margin="0,0,4,0">
+                                    <TextBlock Text="SmsDecorator" FontSize="11" FontWeight="SemiBold" Foreground="#0369A1"/>
+                                </Border>
+                                <TextBlock Text="→" FontSize="16" Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                <Border Background="#DCFCE7" CornerRadius="6" Padding="10,6">
+                                    <TextBlock Text="CoreNotificationService" FontSize="11" FontWeight="SemiBold" Foreground="#15803D"/>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Controls -->
+                    <Border Style="{StaticResource InfoCard}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: config -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="1. CONFIGURE DECORATOR CHAIN" Style="{StaticResource SLabel}"/>
+                                <CheckBox IsChecked="{Binding DecoratorCtrl.UseLogging, Mode=TwoWay}"
+                                          Content="Logging Decorator — adds audit-log entry before/after each call"
+                                          FontSize="12" Margin="0,6,0,6"/>
+                                <CheckBox IsChecked="{Binding DecoratorCtrl.UseEmail, Mode=TwoWay}"
+                                          Content="Email Decorator — simulates SMTP email to guest"
+                                          FontSize="12" Margin="0,0,0,6"/>
+                                <CheckBox IsChecked="{Binding DecoratorCtrl.UseSms, Mode=TwoWay}"
+                                          Content="SMS Decorator — fires only on Confirm/Cancel (not Create)"
+                                          FontSize="12" Margin="0,0,0,14"/>
+
+                                <TextBlock Text="2. SELECT BOOKING" Style="{StaticResource SLabel}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                    <ComboBox ItemsSource="{Binding DecoratorCtrl.BookingIds}"
+                                              SelectedItem="{Binding DecoratorCtrl.SelectedBookingId, Mode=TwoWay}"
+                                              MinWidth="220" Padding="10,8" Background="#FAFAFA"/>
+                                    <Button Content="↻" Command="{Binding RefreshDecoratorCommand}"
+                                            Background="#475569" Style="{StaticResource ActionBtn}"
+                                            Margin="8,0,0,0" Padding="12,8"/>
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- Right: fire buttons -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="3. FIRE EVENT" Style="{StaticResource SLabel}"/>
+                                <Button Content="🔔  Notify: Booking Created"
+                                        Command="{Binding NotifyCreatedCommand}"
+                                        Background="#0369A1" Style="{StaticResource ActionBtn}"
+                                        HorizontalAlignment="Stretch" Margin="0,6,0,6"/>
+                                <Button Content="✓  Notify: Booking Confirmed"
+                                        Command="{Binding NotifyConfirmedCommand}"
+                                        Background="#15803D" Style="{StaticResource ActionBtn}"
+                                        HorizontalAlignment="Stretch" Margin="0,0,0,6"/>
+                                <Button Content="✕  Notify: Booking Cancelled"
+                                        Command="{Binding NotifyCancelledCommand}"
+                                        Background="#DC2626" Style="{StaticResource ActionBtn}"
+                                        HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Result terminal -->
+                    <Border Style="{StaticResource Terminal}">
+                        <TextBlock Text="{Binding DecoratorCtrl.Result}"
+                                   FontFamily="Cascadia Code, Consolas, Courier New"
+                                   FontSize="12" Foreground="#7DD3FC" TextWrapping="Wrap" LineHeight="20"/>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- ══════════════════════════════════════════════
+                     PAGE: BRIDGE
+                ══════════════════════════════════════════════ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=TabBridge}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Border Background="#0F766E" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                            <TextBlock Text="BRIDGE" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Booking Reports" FontSize="22" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <TextBlock FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,16"
+                               Text="Report format (Text / HTML / CSV) and delivery (Log / File / Email) are two independent hierarchies. Bridge connects them via a reference — HotelReport holds IReportDelivery. 3 formats × 3 deliveries = 9 combinations with only 6 classes. Adding a new format or delivery never touches the other hierarchy."/>
+
+                    <!-- Bridge diagram -->
+                    <Border Style="{StaticResource InfoCard}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Abstraction hierarchy -->
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="ABSTRACTION HIERARCHY (format)" Style="{StaticResource SLabel}"/>
+                                <Border Background="#ECFDF5" CornerRadius="8" Padding="12,10">
+                                    <StackPanel>
+                                        <Border Background="#0F766E" CornerRadius="4" Padding="8,4" Margin="0,0,0,6">
+                                            <TextBlock Text="HotelReport  (abstract)" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="White" FontFamily="Consolas"/>
+                                        </Border>
+                                        <TextBlock Text="  └─ TextHotelReport" FontSize="11" Foreground="#065F46" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="  └─ HtmlHotelReport" FontSize="11" Foreground="#065F46" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="  └─ CsvHotelReport"  FontSize="11" Foreground="#065F46" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="Each override FormatContent()" FontSize="10"
+                                                   Foreground="#6B7280" Margin="0,8,0,0" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+
+                            <!-- Bridge arrow -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <TextBlock Text="🌉" FontSize="20" HorizontalAlignment="Center"/>
+                                <TextBlock Text="Bridge" FontSize="9" FontWeight="Bold" Foreground="#0F766E"
+                                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="IReport&#10;Delivery" FontSize="9" Foreground="#64748B"
+                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Implementation hierarchy -->
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="IMPLEMENTATION HIERARCHY (delivery)" Style="{StaticResource SLabel}"/>
+                                <Border Background="#FFF7ED" CornerRadius="8" Padding="12,10">
+                                    <StackPanel>
+                                        <Border Background="#B45309" CornerRadius="4" Padding="8,4" Margin="0,0,0,6">
+                                            <TextBlock Text="IReportDelivery  (interface)" FontSize="11" FontWeight="SemiBold"
+                                                       Foreground="White" FontFamily="Consolas"/>
+                                        </Border>
+                                        <TextBlock Text="  └─ LogDelivery"   FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="  └─ FileDelivery"  FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="  └─ EmailDelivery" FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="Each implement Deliver(content, title)" FontSize="10"
+                                                   Foreground="#6B7280" Margin="0,8,0,0" FontStyle="Italic"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Controls -->
+                    <Border Style="{StaticResource InfoCard}">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="16"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="REPORT FORMAT" Style="{StaticResource FLabel}"/>
+                                <ComboBox ItemsSource="{Binding BridgeCtrl.Formats}"
+                                          SelectedItem="{Binding BridgeCtrl.SelectedFormat, Mode=TwoWay}"
+                                          Padding="10,8" Background="#FAFAFA"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="DELIVERY DESTINATION" Style="{StaticResource FLabel}"/>
+                                <ComboBox ItemsSource="{Binding BridgeCtrl.Deliveries}"
+                                          SelectedItem="{Binding BridgeCtrl.SelectedDelivery, Mode=TwoWay}"
+                                          Padding="10,8" Background="#FAFAFA"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                                <Button Content="▶  Generate Report"
+                                        Command="{Binding GenerateReportCommand}"
+                                        Background="#0F766E" Style="{StaticResource ActionBtn}"
+                                        Padding="20,10"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Result terminal -->
+                    <Border Style="{StaticResource Terminal}">
+                        <TextBlock Text="{Binding BridgeCtrl.Result}"
+                                   FontFamily="Cascadia Code, Consolas, Courier New"
+                                   FontSize="12" Foreground="#6EE7B7" TextWrapping="Wrap" LineHeight="20"/>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- ══════════════════════════════════════════════
+                     PAGE: PROXY
+                ══════════════════════════════════════════════ -->
+                <StackPanel>
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsChecked, ElementName=TabProxy}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Border Background="#B45309" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                            <TextBlock Text="PROXY" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Room Repository Access Control" FontSize="22" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <TextBlock FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,16"
+                               Text="Two proxies wrap IRoomRepository — both transparent to the client (same interface). CachingProxy stores GetAllRooms / FindById results for 30 s and invalidates on Save(). ProtectionProxy checks StaffRole before forwarding — FrontDesk can read available rooms, only Manager can save. Client code never knows which proxy it's talking to."/>
+
+                    <!-- Two proxy cards -->
+                    <Grid Margin="0,0,0,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Caching proxy -->
+                        <Border Grid.Column="0" Style="{StaticResource InfoCard}" Margin="0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Background="#B45309" CornerRadius="4" Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="CACHING PROXY" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Virtual Proxy" FontSize="13" FontWeight="SemiBold" Foreground="#0F172A"/>
+                                </StackPanel>
+                                <TextBlock FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,12"
+                                           Text="Intercepts FindById, GetAllRooms, GetAvailableRooms. Serves from cache within TTL. Save() invalidates cache (write-through). Client sees IRoomRepository — proxy is invisible."/>
+
+                                <Border Background="#FFF7ED" CornerRadius="6" Padding="10,8" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <TextBlock Text="Cache flow:" FontSize="10" FontWeight="Bold" Foreground="#92400E" Margin="0,0,0,4"/>
+                                        <TextBlock Text="Call 1 → MISS  → query real repo → store in cache" FontSize="10" FontFamily="Consolas" Foreground="#78350F"/>
+                                        <TextBlock Text="Call 2 → HIT   → return from cache (0 ms)" FontSize="10" FontFamily="Consolas" Foreground="#78350F"/>
+                                        <TextBlock Text="Save() → INVALIDATE cache" FontSize="10" FontFamily="Consolas" Foreground="#78350F"/>
+                                        <TextBlock Text="Call 3 → MISS  → query real repo again" FontSize="10" FontFamily="Consolas" Foreground="#78350F"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <Button Content="▶  Test Cache Proxy"
+                                        Command="{Binding TestCacheProxyCommand}"
+                                        Background="#B45309" Style="{StaticResource ActionBtn}"
+                                        HorizontalAlignment="Stretch" Margin="0,0,0,12"/>
+
+                                <Border Background="#1E293B" CornerRadius="6" Padding="12" MinHeight="80">
+                                    <TextBlock Text="{Binding ProxyCtrl.CacheResult}"
+                                               FontFamily="Cascadia Code, Consolas, Courier New"
+                                               FontSize="11" Foreground="#FDE68A"
+                                               TextWrapping="Wrap" LineHeight="18"/>
+                                </Border>
+
+                                <Border Background="#FEF3C7" CornerRadius="6" Padding="8,6" Margin="0,8,0,0">
+                                    <TextBlock Text="{Binding ProxyCtrl.CacheStats}"
+                                               FontSize="11" FontWeight="SemiBold" Foreground="#92400E"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Protection proxy -->
+                        <Border Grid.Column="2" Style="{StaticResource InfoCard}" Margin="0">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                    <Border Background="#7C3AED" CornerRadius="4" Padding="6,3" Margin="0,0,8,0">
+                                        <TextBlock Text="PROTECTION PROXY" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                    </Border>
+                                    <TextBlock Text="Access Control" FontSize="13" FontWeight="SemiBold" Foreground="#0F172A"/>
+                                </StackPanel>
+                                <TextBlock FontSize="11" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,12"
+                                           Text="Checks StaffRole before each operation. FrontDesk can read available rooms. HouseKeeping can read all rooms. Only Manager can Save(). Throws UnauthorizedAccessException on violation."/>
+
+                                <!-- Role permission table -->
+                                <Border Background="#F5F3FF" CornerRadius="6" Padding="10,8" Margin="0,0,0,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                            <ColumnDefinition Width="40"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                            <RowDefinition Height="Auto"/>
+                                        </Grid.RowDefinitions>
+                                        <!-- Headers -->
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Operation" FontSize="10" FontWeight="Bold" Foreground="#4C1D95"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="FD"  FontSize="9" FontWeight="Bold" Foreground="#4C1D95" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="2" Text="HK"  FontSize="9" FontWeight="Bold" Foreground="#4C1D95" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="3" Text="Mgr" FontSize="9" FontWeight="Bold" Foreground="#4C1D95" HorizontalAlignment="Center"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="4" Text="RO"  FontSize="9" FontWeight="Bold" Foreground="#4C1D95" HorizontalAlignment="Center"/>
+                                        <!-- FindById -->
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="FindById"          FontSize="10" Foreground="#374151" Margin="0,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="2" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="3" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="4" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                                        <!-- GetAvailableRooms -->
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="GetAvailableRooms" FontSize="10" Foreground="#374151" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="2" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="3" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="4" Text="✗" FontSize="11" Foreground="#DC2626" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <!-- GetAllRooms -->
+                                        <TextBlock Grid.Row="3" Grid.Column="0" Text="GetAllRooms"       FontSize="10" Foreground="#374151" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="1" Text="✗" FontSize="11" Foreground="#DC2626" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="2" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="3" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="3" Grid.Column="4" Text="✗" FontSize="11" Foreground="#DC2626" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <!-- Save -->
+                                        <TextBlock Grid.Row="4" Grid.Column="0" Text="Save"              FontSize="10" Foreground="#374151" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="1" Text="✗" FontSize="11" Foreground="#DC2626" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="2" Text="✗" FontSize="11" Foreground="#DC2626" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="3" Text="✓" FontSize="11" Foreground="#15803D" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                        <TextBlock Grid.Row="4" Grid.Column="4" Text="✗" FontSize="11" Foreground="#DC2626" HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock Text="TEST WITH ROLE" Style="{StaticResource FLabel}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                                    <ComboBox ItemsSource="{Binding ProxyCtrl.Roles}"
+                                              SelectedItem="{Binding ProxyCtrl.SelectedRole, Mode=TwoWay}"
+                                              MinWidth="160" Padding="10,8" Background="#FAFAFA"/>
+                                    <Button Content="▶  Test Auth Proxy"
+                                            Command="{Binding TestAuthProxyCommand}"
+                                            Background="#7C3AED" Style="{StaticResource ActionBtn}"
+                                            Margin="10,0,0,0"/>
+                                </StackPanel>
+
+                                <Border Background="#1E293B" CornerRadius="6" Padding="12" MinHeight="80">
+                                    <TextBlock Text="{Binding ProxyCtrl.AuthResult}"
+                                               FontFamily="Cascadia Code, Consolas, Courier New"
+                                               FontSize="11" Foreground="#C4B5FD"
+                                               TextWrapping="Wrap" LineHeight="18"/>
+                                </Border>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Proxy vs Decorator note -->
+                    <Border Background="#FFF9C4" CornerRadius="8" Padding="14,10"
+                            BorderBrush="#F9E44F" BorderThickness="1">
+                        <TextBlock FontSize="11" Foreground="#7C5100" TextWrapping="Wrap">
+                            <Run FontWeight="Bold">Proxy vs Decorator distinction:</Run>
+                            <Run>Decorator adds behavior to an object the CLIENT created and controls. Proxy controls ACCESS — the proxy creates/owns the subject (client never touches the real object directly). Both share the same interface, which is why they're easy to confuse.</Run>
+                        </TextBlock>
+                    </Border>
+
+                </StackPanel>
+
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

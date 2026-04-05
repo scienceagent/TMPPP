@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using HotelBookingSystem.Builders;
 using HotelBookingSystem.Factories;
 using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models;
-using HotelBookingSystem.Models.User;
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -15,12 +14,14 @@ namespace HotelBookingSystem.ViewModels
           private readonly IBookingRepository _bookingRepository;
           private readonly IBookingDurationCalculator _durationCalculator;
           private readonly BookingFactoryProvider _factoryProvider;
-          private readonly BookingDirector _director;
 
           private DateTime _checkInDate = DateTime.Today;
           private DateTime _checkOutDate = DateTime.Today.AddDays(1);
-          private Booking? _selectedBooking;
           private string _selectedBookingType = "Standard";
+          private Booking? _selectedBooking;
+
+          public ObservableCollection<Booking> Bookings { get; } = new();
+          public ObservableCollection<string> BookingTypes { get; }
 
           public DateTime CheckInDate
           {
@@ -34,12 +35,20 @@ namespace HotelBookingSystem.ViewModels
                set { if (SetProperty(ref _checkOutDate, value)) OnPropertyChanged(nameof(Nights)); }
           }
 
-          public int Nights => Math.Max(0, (CheckOutDate - CheckInDate).Days);
-          public string SelectedBookingType { get => _selectedBookingType; set => SetProperty(ref _selectedBookingType, value); }
-          public Booking? SelectedBooking { get => _selectedBooking; set => SetProperty(ref _selectedBooking, value); }
+          public string SelectedBookingType
+          {
+               get => _selectedBookingType;
+               set => SetProperty(ref _selectedBookingType, value);
+          }
 
-          public ObservableCollection<Booking> Bookings { get; } = new();
-          public List<string> BookingTypes { get; }
+          public int Nights => CheckOutDate > CheckInDate
+              ? (CheckOutDate - CheckInDate).Days : 0;
+
+          public Booking? SelectedBooking
+          {
+               get => _selectedBooking;
+               set => SetProperty(ref _selectedBooking, value);
+          }
 
           public event Action<string>? OnLog;
 
@@ -47,117 +56,108 @@ namespace HotelBookingSystem.ViewModels
               IBookingService bookingService,
               IBookingRepository bookingRepository,
               IBookingDurationCalculator durationCalculator,
-              BookingFactoryProvider factoryProvider,
-              BookingDirector director)
+              BookingFactoryProvider factoryProvider)
           {
                _bookingService = bookingService;
                _bookingRepository = bookingRepository;
                _durationCalculator = durationCalculator;
                _factoryProvider = factoryProvider;
-               _director = director;
-               BookingTypes = new List<string>(_factoryProvider.GetAvailableTypes());
+               BookingTypes = new ObservableCollection<string>(_factoryProvider.GetAvailableTypes());
+               _selectedBookingType = BookingTypes[0];
           }
 
-          public void CreateBooking(User? user, Room? room, IRoomPricingService pricingService)
+          public void CreateBooking(string guestId, Room room, IRoomPricingService pricingService)
           {
-               if (user == null)
-               {
-                    OnLog?.Invoke("Error: Register a guest first.\n");
-                    ToastService.Instance.Show("Missing Guest", "Please register a guest first (Step 1).", ToastKind.Error);
-                    return;
-               }
-               if (room == null)
-               {
-                    OnLog?.Invoke("Error: Assign a room first.\n");
-                    ToastService.Instance.Show("Missing Room", "Please assign a room first (Step 2).", ToastKind.Error);
-                    return;
-               }
-
                try
                {
-                    var request = SelectedBookingType switch
+                    // ── Builder ──────────────────────────────────────────────────
+                    var builder = new BookingBuilder();
+                    var director = new BookingDirector(builder);
+
+                    BookingRequest request = SelectedBookingType switch
                     {
-                         "VIP" => _director.BuildVip(user.Id, room.RoomId, CheckInDate, CheckOutDate),
-                         "Premium" => _director.BuildPremium(user.Id, room.RoomId, CheckInDate, CheckOutDate),
-                         _ => _director.BuildStandard(user.Id, room.RoomId, CheckInDate, CheckOutDate)
+                         "Premium" => director.BuildPremium(guestId, room.RoomId, CheckInDate, CheckOutDate),
+                         "VIP" => director.BuildVip(guestId, room.RoomId, CheckInDate, CheckOutDate),
+                         _ => director.BuildStandard(guestId, room.RoomId, CheckInDate, CheckOutDate),
                     };
 
-                    OnLog?.Invoke($"[Builder] {request.BookingType} request built.");
-                    OnLog?.Invoke($"  Breakfast: {request.BreakfastIncluded} | Transfer: {request.AirportTransfer}");
-                    if (request.SpecialRequest != null)
-                         OnLog?.Invoke($"  Note: {request.SpecialRequest}");
+                    OnLog?.Invoke($"[Builder] Built {SelectedBookingType} BookingRequest: {request.BookingId[..8]}...");
+                    OnLog?.Invoke($"  Nights: {request.Nights}, Breakfast: {request.BreakfastIncluded}, Transfer: {request.AirportTransfer}");
 
+                    // ── Abstract Factory ──────────────────────────────────────────
                     var factory = _factoryProvider.GetFactory(SelectedBookingType);
-                    var booking = factory.CreateBooking(request.BookingId, user.Id, room.RoomId,
-                                           CheckInDate, CheckOutDate, SelectedBookingType);
-                    var pricing = factory.CreatePricingStrategy();
-                    var confirmation = factory.CreateConfirmationHandler();
+                    var booking = factory.CreateBooking(
+                        request.BookingId, request.GuestId, request.RoomId,
+                        request.CheckInDate, request.CheckOutDate, request.BookingType);
 
-                    decimal roomPrice = pricingService.CalculatePrice(room);
-                    int nights = _durationCalculator.CalculateNights(booking);
-                    decimal totalPrice = pricing.CalculateTotalPrice(roomPrice, nights);
+                    var pricing = factory.CreatePricingStrategy();
+                    var confirm = factory.CreateConfirmationHandler();
+
+                    decimal price = pricing.CalculateTotalPrice(room.BasePrice, request.Nights);
+                    string conf = confirm.GenerateConfirmation(booking, price);
+
+                    OnLog?.Invoke($"[Abstract Factory] {SelectedBookingType} family:");
+                    OnLog?.Invoke($"  {pricing.GetPricingDescription()}");
+                    OnLog?.Invoke($"  Total: {price.ToString("C", CultureInfo.GetCultureInfo("en-US"))}");
 
                     var result = _bookingService.CreateBooking(booking);
 
                     if (result.Success)
                     {
-                         OnLog?.Invoke($"\n[Abstract Factory] {confirmation.GetConfirmationType()} family used.");
-                         OnLog?.Invoke(confirmation.GenerateConfirmation(booking, totalPrice));
-                         OnLog?.Invoke($"Pricing: {pricing.GetPricingDescription()}\n");
-                         RefreshBookings();
-
+                         Bookings.Add(booking);
+                         OnLog?.Invoke($"  ✓ Booking created: {booking.BookingId[..8]}...\n");
                          ToastService.Instance.Show(
                              "Booking Created",
-                             $"{SelectedBookingType} � {nights} night{(nights == 1 ? "" : "s")} � {Usd(totalPrice)}",
+                             $"{SelectedBookingType} booking for {Nights} night(s). Total: {price:C}",
                              ToastKind.Success);
                     }
                     else
                     {
-                         OnLog?.Invoke($"Booking failed: {result.Message}\n");
+                         OnLog?.Invoke($"  ✗ {result.Message}\n");
                          ToastService.Instance.Show("Booking Failed", result.Message, ToastKind.Error);
                     }
                }
                catch (Exception ex)
                {
-                    OnLog?.Invoke($"Error: {ex.Message}\n");
+                    OnLog?.Invoke($"Error creating booking: {ex.Message}\n");
                     ToastService.Instance.Show("Error", ex.Message, ToastKind.Error);
                }
           }
 
           public void ConfirmBooking()
           {
-               if (SelectedBooking == null) return;
+               if (SelectedBooking == null)
+               {
+                    ToastService.Instance.Show("No Selection", "Select a booking to confirm.", ToastKind.Warning);
+                    return;
+               }
+
                var result = _bookingService.ConfirmBooking(SelectedBooking.BookingId);
-               OnLog?.Invoke(result.Success
-                   ? $"Confirmed: {SelectedBooking.BookingId}\n"
-                   : $"Failed: {result.Message}\n");
+               OnLog?.Invoke($"[Booking] Confirm {SelectedBooking.BookingId[..8]}...: {result.Message}");
+               RefreshBookings();
 
                if (result.Success)
-                    ToastService.Instance.Show("Booking Confirmed",
-                        $"ID {SelectedBooking.BookingId[..8]}� is now Confirmed. Ready for Check-In.",
-                        ToastKind.Success);
+                    ToastService.Instance.Show("Booking Confirmed", result.Message, ToastKind.Success);
                else
                     ToastService.Instance.Show("Confirm Failed", result.Message, ToastKind.Error);
-
-               RefreshBookings();
           }
 
           public void CancelBooking()
           {
-               if (SelectedBooking == null) return;
+               if (SelectedBooking == null)
+               {
+                    ToastService.Instance.Show("No Selection", "Select a booking to cancel.", ToastKind.Warning);
+                    return;
+               }
+
                var result = _bookingService.CancelBooking(SelectedBooking.BookingId);
-               OnLog?.Invoke(result.Success
-                   ? $"Cancelled: {SelectedBooking.BookingId}\n"
-                   : $"Failed: {result.Message}\n");
+               OnLog?.Invoke($"[Booking] Cancel {SelectedBooking.BookingId[..8]}...: {result.Message}");
+               RefreshBookings();
 
                if (result.Success)
-                    ToastService.Instance.Show("Booking Cancelled",
-                        $"ID {SelectedBooking.BookingId[..8]}� has been cancelled.",
-                        ToastKind.Warning);
+                    ToastService.Instance.Show("Booking Cancelled", result.Message, ToastKind.Info);
                else
                     ToastService.Instance.Show("Cancel Failed", result.Message, ToastKind.Error);
-
-               RefreshBookings();
           }
 
           public void RefreshBookings()
@@ -166,8 +166,5 @@ namespace HotelBookingSystem.ViewModels
                foreach (var b in _bookingRepository.GetAllBookings())
                     Bookings.Add(b);
           }
-
-          private static string Usd(decimal v) =>
-              v.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
      }
 }
