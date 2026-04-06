@@ -60,7 +60,6 @@
         </Style>
 
         <!-- ── Section label ── -->
-        <!-- FIX: Removed invalid 'LetterSpacing' property (WinUI3-only, not available in WPF) -->
         <Style x:Key="SectionLabel" TargetType="TextBlock">
             <Setter Property="FontSize" Value="10"/>
             <Setter Property="FontWeight" Value="Bold"/>
@@ -197,777 +196,794 @@
         </Style>
 
     </Window.Resources>
-
-    <!-- ════════════════ ROOT GRID ════════════════ -->
+    
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <!-- Use DataContext from MainViewModel for Login/Main views -->
+        <views:StaffLoginView DataContext="{Binding LoginCtrl}" 
+                              Panel.ZIndex="10"
+                              Visibility="{Binding DataContext.IsAuthenticated, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource InverseBoolToVisibilityConverter}}"/>
+        
+        <!-- ════════════════ ROOT GRID ════════════════ -->
+        <Grid Visibility="{Binding IsAuthenticated, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- ════════════ SIDEBAR ════════════ -->
-        <Border Grid.Column="0" Background="{StaticResource NavyBrush}">
-            <DockPanel>
+            <!-- ════════════ SIDEBAR ════════════ -->
+            <Border Grid.Column="0" Background="{StaticResource NavyBrush}">
+                <DockPanel>
 
-                <!-- ══ RG Hotel Premium — Brand Logo ══ -->
-                <Border DockPanel.Dock="Top"
-                        Background="#0B1C2C"
-                        CornerRadius="10"
-                        Margin="12,16,12,12"
-                        Padding="0">
+                    <!-- ══ RG Hotel Premium — Brand Logo ══ -->
+                    <Border DockPanel.Dock="Top"
+                            Background="#0B1C2C"
+                            CornerRadius="10"
+                            Margin="12,16,12,12"
+                            Padding="0">
 
-                    <!-- FIX: BorderBrush set only once via property element (removed duplicate attribute) -->
-                    <!-- FIX: CharacterSpacing is WinUI3-only — replaced with spaced text using Runs -->
-                    <Border CornerRadius="8" Margin="6" BorderThickness="0.8">
-                        <Border.BorderBrush>
-                            <SolidColorBrush Color="#C9A84C" Opacity="0.5"/>
-                        </Border.BorderBrush>
+                        <Border CornerRadius="8" Margin="6" BorderThickness="0.8">
+                            <Border.BorderBrush>
+                                <SolidColorBrush Color="#C9A84C" Opacity="0.5"/>
+                            </Border.BorderBrush>
 
-                        <StackPanel HorizontalAlignment="Center" Margin="12,14,12,12">
+                            <StackPanel HorizontalAlignment="Center" Margin="12,14,12,12">
 
-                            <!-- Hexagon monogram -->
-                            <Grid Width="60" Height="60" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                <Polygon Points="30,2 52,15 52,45 30,58 8,45 8,15"
-                                         Fill="Transparent"
-                                         Stroke="#C9A84C" StrokeThickness="1"/>
-                                <Polygon Points="30,8 48,19 48,41 30,52 12,41 12,19"
-                                         Fill="#C9A84C"/>
-                                <TextBlock Text="RG"
+                                <!-- Hexagon monogram -->
+                                <Grid Width="60" Height="60" HorizontalAlignment="Center" Margin="0,0,0,10">
+                                    <Polygon Points="30,2 52,15 52,45 30,58 8,45 8,15"
+                                             Fill="Transparent"
+                                             Stroke="#C9A84C" StrokeThickness="1"/>
+                                    <Polygon Points="30,8 48,19 48,41 30,52 12,41 12,19"
+                                             Fill="#C9A84C"/>
+                                    <TextBlock Text="RG"
+                                               FontFamily="Georgia, Times New Roman, serif"
+                                               FontSize="18" FontWeight="Bold"
+                                               Foreground="#0B1C2C"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <!-- Hotel name -->
+                                <TextBlock Text="RG Hotel Premium"
                                            FontFamily="Georgia, Times New Roman, serif"
-                                           FontSize="18" FontWeight="Bold"
-                                           Foreground="#0B1C2C"
+                                           FontSize="13" FontWeight="Bold"
+                                           Foreground="White"
                                            HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"/>
-                            </Grid>
+                                           Margin="0,0,0,5"/>
 
-                            <!-- Hotel name -->
-                            <TextBlock Text="RG Hotel Premium"
-                                       FontFamily="Georgia, Times New Roman, serif"
-                                       FontSize="13" FontWeight="Bold"
-                                       Foreground="White"
-                                       HorizontalAlignment="Center"
-                                       Margin="0,0,0,5"/>
+                                <!-- Gold divider line -->
+                                <Rectangle Height="0.7" Fill="#C9A84C"
+                                           Margin="10,0,10,5" Opacity="0.8"/>
 
-                            <!-- Gold divider line -->
-                            <Rectangle Height="0.7" Fill="#C9A84C"
-                                       Margin="10,0,10,5" Opacity="0.8"/>
+                                <!-- Subtitle -->
+                                <TextBlock HorizontalAlignment="Center"
+                                           FontFamily="Georgia, Times New Roman, serif"
+                                           FontSize="7.5" Foreground="#C9A84C"
+                                           Margin="0,0,0,6">
+                                    <Run Text="G"/><Run Text="R"/><Run Text="A"/><Run Text="N"/><Run Text="D"/>
+                                    <Run Text="  "/>
+                                    <Run Text="H"/><Run Text="O"/><Run Text="S"/><Run Text="P"/><Run Text="I"/>
+                                    <Run Text="T"/><Run Text="A"/><Run Text="L"/><Run Text="I"/><Run Text="T"/>
+                                    <Run Text="Y"/>
+                                </TextBlock>
 
-                            <!-- Subtitle — spaced via individual Run letters (WPF-compatible letter spacing) -->
-                            <TextBlock HorizontalAlignment="Center"
-                                       FontFamily="Georgia, Times New Roman, serif"
-                                       FontSize="7.5" Foreground="#C9A84C"
-                                       Margin="0,0,0,6">
-                                <Run Text="G"/><Run Text="R"/><Run Text="A"/><Run Text="N"/><Run Text="D"/>
-                                <Run Text="  "/>
-                                <Run Text="H"/><Run Text="O"/><Run Text="S"/><Run Text="P"/><Run Text="I"/>
-                                <Run Text="T"/><Run Text="A"/><Run Text="L"/><Run Text="I"/><Run Text="T"/>
-                                <Run Text="Y"/>
-                            </TextBlock>
+                                <!-- 5 Stars -->
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
+                                            Margin="0,0,0,6">
+                                    <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
+                                    <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
+                                    <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
+                                    <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
+                                    <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
+                                </StackPanel>
 
-                            <!-- 5 Stars -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"
-                                        Margin="0,0,0,6">
-                                <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
-                                <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
-                                <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
-                                <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
-                                <TextBlock Text="★" FontSize="9" Foreground="#C9A84C" Margin="1,0"/>
+                                <!-- Tagline -->
+                                <TextBlock HorizontalAlignment="Center"
+                                           FontFamily="Georgia, Times New Roman, serif"
+                                           FontSize="6.5" Foreground="#4A6080">
+                                    <Run Text="W H E R E  E L E G A N C E  M E E T S  C O M F O R T"/>
+                                </TextBlock>
+
                             </StackPanel>
+                        </Border>
+                    </Border>
 
-                            <!-- Tagline — spaced via Margin on each Run letter group -->
-                            <TextBlock HorizontalAlignment="Center"
-                                       FontFamily="Georgia, Times New Roman, serif"
-                                       FontSize="6.5" Foreground="#4A6080">
-                                <Run Text="W H E R E  E L E G A N C E  M E E T S  C O M F O R T"/>
-                            </TextBlock>
-
+                    <!-- Singleton info chip -->
+                    <Border DockPanel.Dock="Top" Background="{StaticResource NavyMidBrush}"
+                            Margin="12,0,12,16" CornerRadius="6" Padding="10,7">
+                        <StackPanel>
+                            <TextBlock Text="SINGLETON" FontSize="8" FontWeight="Bold"
+                                       Foreground="{StaticResource AccentBrush}" Margin="0,0,0,3"/>
+                            <TextBlock Text="{Binding SingletonInfo}" FontSize="9"
+                                       Foreground="#94A3B8" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
-                </Border>
+                    
 
-                <!-- Singleton info chip -->
-                <Border DockPanel.Dock="Top" Background="{StaticResource NavyMidBrush}"
-                        Margin="12,0,12,16" CornerRadius="6" Padding="10,7">
-                    <StackPanel>
-                        <TextBlock Text="SINGLETON" FontSize="8" FontWeight="Bold"
-                                   Foreground="{StaticResource AccentBrush}" Margin="0,0,0,3"/>
-                        <TextBlock Text="{Binding SingletonInfo}" FontSize="9"
-                                   Foreground="#94A3B8" TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
-                
-                
-
-                <!-- Staff badge at bottom -->
-                <Border DockPanel.Dock="Bottom" Background="{StaticResource NavyMidBrush}"
-                        Margin="12,0,12,16" CornerRadius="6" Padding="10,8">
-                    <StackPanel Orientation="Horizontal">
-                        <Border Background="{StaticResource AccentBrush}" CornerRadius="14"
-                                Width="28" Height="28" Margin="0,0,8,0">
-                            <TextBlock Text="SM" FontSize="10" FontWeight="Bold" Foreground="White"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Staff Member" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
-                            <TextBlock Text="Front Desk" FontSize="10" Foreground="#64748B"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-
-                <!-- Nav items -->
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <ScrollViewer.Resources>
-                        <Style TargetType="ScrollBar">
-                            <Setter Property="Width" Value="5"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ScrollBar">
-                                        <Grid Width="5" Background="Transparent">
-                                            <Track x:Name="PART_Track" IsDirectionReversed="True">
-                                                <Track.DecreaseRepeatButton>
-                                                    <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" Height="0"/>
-                                                </Track.DecreaseRepeatButton>
-                                                <Track.Thumb>
-                                                    <Thumb>
-                                                        <Thumb.Template>
-                                                            <ControlTemplate TargetType="Thumb">
-                                                                <Border Background="#334155" CornerRadius="3" Margin="1,0"/>
-                                                            </ControlTemplate>
-                                                        </Thumb.Template>
-                                                    </Thumb>
-                                                </Track.Thumb>
-                                                <Track.IncreaseRepeatButton>
-                                                    <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" Height="0"/>
-                                                </Track.IncreaseRepeatButton>
-                                            </Track>
-                                        </Grid>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ScrollViewer.Resources>
-
-                    <StackPanel Margin="8,0,4,16">
-
-                        <!-- Reservations section -->
-                        <TextBlock Text="RESERVATIONS" Style="{StaticResource SectionLabel}" Margin="14,4,0,8"/>
-
-                        <RadioButton x:Name="NavNewBooking" Style="{StaticResource NavButton}" IsChecked="True">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="＋" FontSize="14" Foreground="{StaticResource AccentBrush}"
-                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="New Booking" Foreground="White" FontSize="13"/>
-                            </StackPanel>
-                        </RadioButton>
-
-                        <RadioButton x:Name="NavBookings" Style="{StaticResource NavButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="≡" FontSize="14" Foreground="#64748B"
-                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="All Bookings" Foreground="White" FontSize="13"/>
-                            </StackPanel>
-                        </RadioButton>
-
-                        <Separator Background="#1E2D40" Margin="12,10"/>
-
-                        <!-- Operations section -->
-                        <TextBlock Text="OPERATIONS" Style="{StaticResource SectionLabel}"/>
-
-                        <RadioButton x:Name="NavPayment" Style="{StaticResource NavButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="$" FontSize="13" FontWeight="Bold"
-                                           Foreground="#64748B" VerticalAlignment="Center"
-                                           Width="16" TextAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="Payments" Foreground="White" FontSize="13"/>
-                            </StackPanel>
-                        </RadioButton>
-
-                        <RadioButton x:Name="NavServices" Style="{StaticResource NavButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="♦" FontSize="11" Foreground="#64748B"
-                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="Room Services" Foreground="White" FontSize="13"/>
-                            </StackPanel>
-                        </RadioButton>
-
-                        <RadioButton x:Name="NavHotelOps" Style="{StaticResource NavButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⌂" FontSize="13" Foreground="#64748B"
-                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="Hotel Ops" Foreground="White" FontSize="13"/>
-                            </StackPanel>
-                        </RadioButton>
-
-                        <Separator Background="#1E2D40" Margin="12,10"/>
-
-                        <!-- System section -->
-                        <TextBlock Text="SYSTEM" Style="{StaticResource SectionLabel}"/>
-
-                        <RadioButton x:Name="NavLog" Style="{StaticResource NavButton}">
-                            
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="⋮" FontSize="16" Foreground="#64748B"
-                                           VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="Activity Log" Foreground="White" FontSize="13"/>
-                            </StackPanel>
-                        </RadioButton>
-                        <Separator Background="#1E2D40" Margin="12,10"/>
-                        <TextBlock Text="LAB 5" Style="{StaticResource SectionLabel}"/>
-
-                        <RadioButton x:Name="NavLab5" Style="{StaticResource NavButton}">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="◈" FontSize="13" Foreground="#64748B"
-                   VerticalAlignment="Center" Margin="0,0,8,0"/>
-                                <TextBlock Text="Lab 5 Patterns" Foreground="White" FontSize="13"/>
-                            </StackPanel>
-                        </RadioButton>
-
-                        <Separator Background="#1E2D40" Margin="12,10"/>
-
-                        <!-- Pattern chips -->
-                        <TextBlock Text="PATTERNS" Style="{StaticResource SectionLabel}"/>
-                        <WrapPanel Margin="12,0,12,8">
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="SINGLETON" FontSize="8" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="PROTOTYPE" FontSize="8" FontWeight="Bold" Foreground="#34D399"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="BUILDER" FontSize="8" FontWeight="Bold" Foreground="#FB923C"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="FACTORY" FontSize="8" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="ADAPTER" FontSize="8" FontWeight="Bold" Foreground="#94A3B8"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="COMPOSITE" FontSize="8" FontWeight="Bold" Foreground="#34D399"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="FAÇADE" FontSize="8" FontWeight="Bold" Foreground="#C084FC"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="FLYWEIGHT" FontSize="8" FontWeight="Bold" Foreground="#C084FC"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="DECORATOR" FontSize="8" FontWeight="Bold" Foreground="#34D399"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="BRIDGE" FontSize="8" FontWeight="Bold" Foreground="#FB923C"/>
-                            </Border>
-                            <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
-                                <TextBlock Text="PROXY" FontSize="8" FontWeight="Bold" Foreground="#F59E0B"/>
-                            </Border>
-                        </WrapPanel>
-
-                    </StackPanel>
-                </ScrollViewer>
-            </DockPanel>
-        </Border>
-
-        <!-- ════════════ MAIN AREA ════════════ -->
-        <Grid Grid.Column="1">
-
-            <!-- Top header bar -->
-            <Grid.RowDefinitions>
-                <RowDefinition Height="56"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Border Grid.Row="0" Background="White"
-                    BorderBrush="{StaticResource BorderBrush2}" BorderThickness="0,0,0,1">
-                <Grid Margin="28,0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock x:Name="PageTitle" FontSize="18" FontWeight="SemiBold"
-                                   Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center">
-                            <TextBlock.Style>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Text" Value="New Booking"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
-                                            <Setter Property="Text" Value="Lab 5 — Flyweight · Decorator · Bridge · Proxy"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=NavBookings}" Value="True">
-                                            <Setter Property="Text" Value="All Bookings"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=NavPayment}" Value="True">
-                                            <Setter Property="Text" Value="Payments"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=NavServices}" Value="True">
-                                            <Setter Property="Text" Value="Room Services"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=NavHotelOps}" Value="True">
-                                            <Setter Property="Text" Value="Hotel Operations"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding IsChecked, ElementName=NavLog}" Value="True">
-                                            <Setter Property="Text" Value="Activity Log"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </TextBlock.Style>
-                        </TextBlock>
-                    </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Border Background="#F0FDF4" CornerRadius="16" Padding="12,4" Margin="0,0,12,0">
-                            <TextBlock FontSize="11" Foreground="#15803D" FontWeight="Medium">
-                                <Run Text="● "/>
-                                <Run Text="System Online"/>
-                            </TextBlock>
-                        </Border>
-                        <TextBlock Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='ddd, dd MMM yyyy'}"
-                                   FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Grid>
-            </Border>
-
-            <!-- Page content -->
-            <Grid Grid.Row="1" Margin="24,20,24,20">
-
-                <!-- ══════ PAGE: New Booking ══════ -->
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavNewBooking}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <TextBlock Grid.Row="0" Text="Complete all three steps to create a booking."
-                               FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16"/>
-
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <!-- Staff badge at bottom -->
+                    <Border DockPanel.Dock="Bottom" Background="{StaticResource NavyMidBrush}"
+                            Margin="12,0,12,16" CornerRadius="6" Padding="10,8">
                         <Grid>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
+                            
+                            <Border Grid.Column="0" Background="{StaticResource AccentBrush}" CornerRadius="14"
+                                    Width="28" Height="28" Margin="0,0,8,0">
+                                <TextBlock Text="SM" FontSize="10" FontWeight="Bold" Foreground="White"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            
 
-                            <!-- Step 1 — Guest -->
-                            <StackPanel Grid.Column="0">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <Border Background="{StaticResource AccentBrush}" CornerRadius="20"
-                                            Width="28" Height="28" Margin="0,0,10,0">
-                                        <TextBlock Text="1" Foreground="White" FontSize="13" FontWeight="Bold"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Register Guest" FontSize="14" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        <TextBlock Text="Guest details &amp; validation" FontSize="11"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Style="{StaticResource Card}">
-                                    <StackPanel>
-                                        <TextBlock Text="FULL NAME" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding GuestCtrl.GuestName, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource Field}"/>
-                                        <TextBlock Text="EMAIL ADDRESS" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding GuestCtrl.GuestEmail, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource Field}"/>
-                                        <TextBlock Text="NATIONALITY" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding GuestCtrl.GuestNationality, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource Field}"/>
-                                        <TextBlock Text="PASSPORT / ID" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding GuestCtrl.GuestPassport, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource Field}" Margin="0,0,0,18"/>
-                                        <Button Content="Register Guest" Command="{Binding CreateGuestCommand}"
-                                                Style="{StaticResource BtnPrimary}" HorizontalAlignment="Stretch"/>
-                                    </StackPanel>
-                                </Border>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Staff Member" FontSize="12" FontWeight="SemiBold" Foreground="White"/>
+                                <TextBlock Text="Front Desk" FontSize="10" Foreground="#64748B"/>
                             </StackPanel>
+                            
 
-                            <!-- Step 2 — Room -->
-                            <StackPanel Grid.Column="2">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <Border Background="{StaticResource AccentBrush}" CornerRadius="20"
-                                            Width="28" Height="28" Margin="0,0,10,0">
-                                        <TextBlock Text="2" Foreground="White" FontSize="13" FontWeight="Bold"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Assign Room" FontSize="14" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        <TextBlock Text="Prototype + Factory Method" FontSize="11"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Style="{StaticResource Card}">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                            <Border Background="#EFF6FF" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
-                                                <TextBlock Text="PROTOTYPE" FontSize="8" FontWeight="Bold" Foreground="#1D4ED8"/>
-                                            </Border>
-                                            <Border Background="#EFF6FF" CornerRadius="4" Padding="6,2">
-                                                <TextBlock Text="FACTORY METHOD" FontSize="8" FontWeight="Bold" Foreground="#1D4ED8"/>
-                                            </Border>
-                                        </StackPanel>
-                                        <TextBlock Text="ROOM NUMBER" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding RoomCtrl.RoomNumber, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource Field}"/>
-                                        <TextBlock Text="PRICE PER NIGHT (USD)" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding RoomCtrl.RoomPrice, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource Field}"/>
-                                        <TextBlock Text="{Binding RoomCtrl.CapacityLabel}" Style="{StaticResource FieldLabel}"/>
-                                        <TextBox Text="{Binding RoomCtrl.RoomCapacity, UpdateSourceTrigger=PropertyChanged}"
-                                                 Style="{StaticResource Field}"/>
-                                        <TextBlock Text="ROOM TYPE" Style="{StaticResource FieldLabel}"/>
-                                        <ComboBox ItemsSource="{Binding RoomCtrl.RoomTypes}"
-                                                  SelectedItem="{Binding RoomCtrl.SelectedRoomType, Mode=TwoWay}"
-                                                  Padding="10,8" Margin="0,0,0,4" Background="#FAFBFC"/>
-                                        <TextBlock Text="Selecting a type clones its Prototype template and auto-fills defaults."
-                                                   FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,18"/>
-                                        <Button Content="Assign Room" Command="{Binding CreateRoomCommand}"
-                                                Style="{StaticResource BtnPrimary}" HorizontalAlignment="Stretch"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
-
-                            <!-- Step 3 — Booking -->
-                            <StackPanel Grid.Column="4">
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
-                                    <Border Background="#15803D" CornerRadius="20"
-                                            Width="28" Height="28" Margin="0,0,10,0">
-                                        <TextBlock Text="3" Foreground="White" FontSize="13" FontWeight="Bold"
-                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Confirm Booking" FontSize="14" FontWeight="SemiBold"
-                                                   Foreground="{StaticResource TextPrimaryBrush}"/>
-                                        <TextBlock Text="Builder + Abstract Factory" FontSize="11"
-                                                   Foreground="{StaticResource TextSecondaryBrush}"/>
-                                    </StackPanel>
-                                </StackPanel>
-                                <Border Style="{StaticResource Card}">
-                                    <StackPanel>
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                            <Border Background="#FFF7ED" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
-                                                <TextBlock Text="BUILDER" FontSize="8" FontWeight="Bold" Foreground="#C2410C"/>
-                                            </Border>
-                                            <Border Background="#FFF7ED" CornerRadius="4" Padding="6,2">
-                                                <TextBlock Text="ABSTRACT FACTORY" FontSize="8" FontWeight="Bold" Foreground="#C2410C"/>
-                                            </Border>
-                                        </StackPanel>
-
-                                        <Border Background="#F0FDF4" CornerRadius="8" Padding="14,12" Margin="0,0,0,14">
-                                            <StackPanel>
-                                                <TextBlock Text="STAY DATES" Style="{StaticResource FieldLabel}"
-                                                           Margin="0,0,0,10"/>
-                                                <TextBlock Text="CHECK-IN" Style="{StaticResource FieldLabel}"/>
-                                                <DatePicker SelectedDate="{Binding BookingCtrl.CheckInDate, Mode=TwoWay}"
-                                                            DisplayDateStart="{x:Static sys:DateTime.Today}"
-                                                            Margin="0,0,0,10"/>
-                                                <TextBlock Text="CHECK-OUT" Style="{StaticResource FieldLabel}"/>
-                                                <DatePicker SelectedDate="{Binding BookingCtrl.CheckOutDate, Mode=TwoWay}"
-                                                            DisplayDateStart="{Binding BookingCtrl.CheckInDate}"
-                                                            Margin="0,0,0,10"/>
-                                                <StackPanel Orientation="Horizontal">
-                                                    <TextBlock Text="Nights:" FontSize="12"
-                                                               Foreground="{StaticResource TextSecondaryBrush}"
-                                                               VerticalAlignment="Center"/>
-                                                    <Border Background="{StaticResource AccentBrush}" CornerRadius="4"
-                                                            Padding="10,3" Margin="8,0,0,0">
-                                                        <TextBlock Text="{Binding BookingCtrl.Nights}"
-                                                                   Foreground="White" FontSize="12" FontWeight="Bold"/>
-                                                    </Border>
-                                                </StackPanel>
-                                            </StackPanel>
-                                        </Border>
-
-                                        <TextBlock Text="BOOKING TYPE" Style="{StaticResource FieldLabel}"/>
-                                        <ComboBox ItemsSource="{Binding BookingCtrl.BookingTypes}"
-                                                  SelectedItem="{Binding BookingCtrl.SelectedBookingType, Mode=TwoWay}"
-                                                  Padding="10,8" Margin="0,0,0,18"/>
-
-                                        <Button Content="Create Booking" Command="{Binding CreateBookingCommand}"
-                                                Style="{StaticResource BtnSuccess}" HorizontalAlignment="Stretch"
-                                                FontSize="14" Padding="20,13"/>
-                                    </StackPanel>
-                                </Border>
-                            </StackPanel>
+                            <Button Grid.Column="2" Content="Logout" Command="{Binding LogoutCommand}"
+                                    Background="Transparent" Foreground="#F43F5E" BorderThickness="0" 
+                                    FontSize="11" FontWeight="SemiBold" Cursor="Hand" Padding="4"/>
                         </Grid>
+                    </Border>
+
+                    <!-- Nav items -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <ScrollViewer.Resources>
+                            <Style TargetType="ScrollBar">
+                                <Setter Property="Width" Value="5"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ScrollBar">
+                                            <Grid Width="5" Background="Transparent">
+                                                <Track x:Name="PART_Track" IsDirectionReversed="True">
+                                                    <Track.DecreaseRepeatButton>
+                                                        <RepeatButton Command="ScrollBar.PageUpCommand" Opacity="0" Height="0"/>
+                                                    </Track.DecreaseRepeatButton>
+                                                    <Track.Thumb>
+                                                        <Thumb>
+                                                            <Thumb.Template>
+                                                                <ControlTemplate TargetType="Thumb">
+                                                                    <Border Background="#334155" CornerRadius="3" Margin="1,0"/>
+                                                                </ControlTemplate>
+                                                            </Thumb.Template>
+                                                        </Thumb>
+                                                    </Track.Thumb>
+                                                    <Track.IncreaseRepeatButton>
+                                                        <RepeatButton Command="ScrollBar.PageDownCommand" Opacity="0" Height="0"/>
+                                                    </Track.IncreaseRepeatButton>
+                                                </Track>
+                                            </Grid>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </ScrollViewer.Resources>
+
+                        <StackPanel Margin="8,0,4,16">
+
+                            <!-- Reservations section -->
+                            <TextBlock Text="RESERVATIONS" Style="{StaticResource SectionLabel}" Margin="14,4,0,8"/>
+
+                            <RadioButton x:Name="NavNewBooking" Style="{StaticResource NavButton}" IsChecked="True">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="＋" FontSize="14" Foreground="{StaticResource AccentBrush}"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="New Booking" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton x:Name="NavBookings" Style="{StaticResource NavButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="≡" FontSize="14" Foreground="#64748B"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="All Bookings" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <Separator Background="#1E2D40" Margin="12,10"/>
+
+                            <!-- Operations section -->
+                            <TextBlock Text="OPERATIONS" Style="{StaticResource SectionLabel}"/>
+
+                            <RadioButton x:Name="NavPayment" Style="{StaticResource NavButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="$" FontSize="13" FontWeight="Bold"
+                                               Foreground="#64748B" VerticalAlignment="Center"
+                                               Width="16" TextAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Payments" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton x:Name="NavServices" Style="{StaticResource NavButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="♦" FontSize="11" Foreground="#64748B"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Room Services" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <RadioButton x:Name="NavHotelOps" Style="{StaticResource NavButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⌂" FontSize="13" Foreground="#64748B"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Hotel Ops" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <Separator Background="#1E2D40" Margin="12,10"/>
+
+                            <!-- System section -->
+                            <TextBlock Text="SYSTEM" Style="{StaticResource SectionLabel}"/>
+
+                            <RadioButton x:Name="NavLog" Style="{StaticResource NavButton}">
+                                
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="⋮" FontSize="16" Foreground="#64748B"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Activity Log" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+                            <Separator Background="#1E2D40" Margin="12,10"/>
+                            <TextBlock Text="LAB 5" Style="{StaticResource SectionLabel}"/>
+
+                            <RadioButton x:Name="NavLab5" Style="{StaticResource NavButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="◈" FontSize="13" Foreground="#64748B"
+                       VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Lab 5 Patterns" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
+                            <Separator Background="#1E2D40" Margin="12,10"/>
+
+                            <!-- Pattern chips -->
+                            <TextBlock Text="PATTERNS" Style="{StaticResource SectionLabel}"/>
+                            <WrapPanel Margin="12,0,12,8">
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="SINGLETON" FontSize="8" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="PROTOTYPE" FontSize="8" FontWeight="Bold" Foreground="#34D399"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="BUILDER" FontSize="8" FontWeight="Bold" Foreground="#FB923C"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="FACTORY" FontSize="8" FontWeight="Bold" Foreground="{StaticResource AccentBrush}"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="ADAPTER" FontSize="8" FontWeight="Bold" Foreground="#94A3B8"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="COMPOSITE" FontSize="8" FontWeight="Bold" Foreground="#34D399"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="FAÇADE" FontSize="8" FontWeight="Bold" Foreground="#C084FC"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="FLYWEIGHT" FontSize="8" FontWeight="Bold" Foreground="#C084FC"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="DECORATOR" FontSize="8" FontWeight="Bold" Foreground="#34D399"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="BRIDGE" FontSize="8" FontWeight="Bold" Foreground="#FB923C"/>
+                                </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="PROXY" FontSize="8" FontWeight="Bold" Foreground="#F59E0B"/>
+                                </Border>
+                            </WrapPanel>
+
+                        </StackPanel>
                     </ScrollViewer>
-                </Grid>
-
-                <!-- ══════ PAGE: All Bookings ══════ -->
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavBookings}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-
-                    <!-- Info tip -->
-                    <Border Grid.Row="0" Background="#FFF9C4" CornerRadius="8" Padding="14,10"
-                            BorderBrush="#F9E44F" BorderThickness="1" Margin="0,0,0,14">
-                        <TextBlock FontSize="12" Foreground="#7C5100" TextWrapping="Wrap">
-                            <Run FontWeight="Bold">Tip:</Run>
-                            <Run>Select a booking and click Confirm before using Hotel Ops → Check In. The Façade requires status = Confirmed.</Run>
-                        </TextBlock>
-                    </Border>
-
-                    <!-- Toolbar -->
-                    <Border Grid.Row="1" Style="{StaticResource Card}" Padding="14,10" Margin="0,0,0,14">
-                        <StackPanel Orientation="Horizontal">
-                            <Button Content="↻  Refresh" Command="{Binding RefreshBookingsCommand}"
-                                    Style="{StaticResource BtnSecondary}" Padding="16,8" FontSize="12"/>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- Table -->
-                    <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" Margin="0,0,0,14">
-                        <DataGrid ItemsSource="{Binding BookingCtrl.Bookings}"
-                                  SelectedItem="{Binding BookingCtrl.SelectedBooking, Mode=TwoWay}"
-                                  IsReadOnly="True" SelectionMode="Single" AutoGenerateColumns="False"
-                                  BorderThickness="0" Background="White"
-                                  RowBackground="White" AlternatingRowBackground="#FAFBFC">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Booking ID" Width="2.5*">
-                                    <DataGridTextColumn.Binding>
-                                        <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Id"/>
-                                    </DataGridTextColumn.Binding>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Type" Width="*">
-                                    <DataGridTextColumn.Binding>
-                                        <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Type"/>
-                                    </DataGridTextColumn.Binding>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Check-in" Width="*">
-                                    <DataGridTextColumn.Binding>
-                                        <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="CheckIn"/>
-                                    </DataGridTextColumn.Binding>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Check-out" Width="*">
-                                    <DataGridTextColumn.Binding>
-                                        <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="CheckOut"/>
-                                    </DataGridTextColumn.Binding>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Status" Width="*">
-                                    <DataGridTextColumn.Binding>
-                                        <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Status"/>
-                                    </DataGridTextColumn.Binding>
-                                </DataGridTextColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                    </Border>
-
-                    <!-- Actions -->
-                    <Border Grid.Row="3" Style="{StaticResource Card}" Padding="14,12">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="✓  Confirm Booking" Command="{Binding ConfirmBookingCommand}"
-                                    Style="{StaticResource BtnSuccess}" Padding="20,10" Margin="0,0,10,0"/>
-                            <Button Content="✕  Cancel Booking" Command="{Binding CancelBookingCommand}"
-                                    Style="{StaticResource BtnDanger}" Padding="20,10"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
-
-                <!-- ══════ PAGE: Payment ══════ -->
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavPayment}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <views:PaymentView/>
-                </Grid>
-
-                <!-- ══════ PAGE: Room Services ══════ -->
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavServices}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <views:RoomServiceView/>
-                </Grid>
-
-                <!-- ══════ PAGE: Hotel Ops ══════ -->
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavHotelOps}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <views:FacadeView/>
-                </Grid>
-
-                <!-- ══════ PAGE: Activity Log ══════ -->
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavLog}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="16,10"
-                            BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" Margin="0,0,0,12">
-                        <WrapPanel>
-                            <TextBlock Text="Prefixes: " FontSize="11"
-                                       Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
-                            <Border Background="#14532D" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Prototype]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Background="#7C2D12" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Builder]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Background="#1E3A8A" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Abstract Factory]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Background="#1E3A8A" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Factory Method]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Background="#4C1D95" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Singleton]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Background="#1C3D4F" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Adapter]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Background="#14532D" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Composite]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                            <Border Background="#4A044E" CornerRadius="3" Padding="6,2" Margin="3,2">
-                                <TextBlock Text="[Facade]" FontSize="9" FontWeight="Bold" Foreground="White"/>
-                            </Border>
-                        </WrapPanel>
-                    </Border>
-
-                    <Border Grid.Row="1" Style="{StaticResource Card}" Padding="12,8" Margin="0,0,0,12">
-                        <Button Content="Clear Log" Command="{Binding ClearLogCommand}"
-                                Style="{StaticResource BtnSecondary}" Padding="14,7" FontSize="12"/>
-                    </Border>
-
-                    <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16">
-                        <Border Background="{StaticResource NavyBrush}" CornerRadius="8" Padding="20">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                                <TextBlock Text="{Binding LogCtrl.LogOutput}" TextWrapping="Wrap"
-                                           FontFamily="Cascadia Code, Consolas, Courier New"
-                                           FontSize="12" Foreground="#7DD3FC" LineHeight="20"/>
-                            </ScrollViewer>
-                        </Border>
-                    </Border>
-                </Grid>
-
-                <!-- ══════ PAGE: Lab 5 Patterns ══════ -->
-                <Grid>
-                    <Grid.Style>
-                        <Style TargetType="Grid">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Grid.Style>
-                    <views:PatternsLab5View/>
-                </Grid>
-
-            </Grid>
-            <!-- end page content grid -->
-
-            <!-- ════════ TOAST OVERLAY ════════ -->
-            <Border Grid.Row="1"
-                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                    Margin="0,0,28,24"
-                    MinWidth="320" MaxWidth="420"
-                    CornerRadius="10"
-                    Padding="0"
-                    Panel.ZIndex="100"
-                    Visibility="{Binding Toast.IsShowing, Converter={StaticResource BoolToVisibilityConverter}}">
-
-                <Border.Background>
-                    <Binding Path="Toast.Current.Kind" Converter="{StaticResource ToastBackgroundConverter}"/>
-                </Border.Background>
-
-                <Border.Effect>
-                    <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.35" Direction="270"/>
-                </Border.Effect>
-
-                <Grid Margin="16,14">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-
-                    <!-- Icon -->
-                    <Border Grid.Column="0" Background="#20FFFFFF" CornerRadius="20"
-                            Width="34" Height="34" Margin="0,0,12,0" VerticalAlignment="Center">
-                        <TextBlock FontSize="16" FontWeight="Bold" Foreground="White"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center"
-                                   Text="{Binding Toast.Current.Kind, Converter={StaticResource ToastIconConverter}}"/>
-                    </Border>
-
-                    <!-- Text -->
-                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Toast.Current.Title}"
-                                   FontSize="13" FontWeight="Bold" Foreground="White"
-                                   Margin="0,0,0,2"/>
-                        <TextBlock Text="{Binding Toast.Current.Message}"
-                                   FontSize="11" Foreground="#E0E0E0"
-                                   TextWrapping="Wrap"/>
-                    </StackPanel>
-
-                    <!-- Dismiss -->
-                    <Button Grid.Column="2" Content="✕" Command="{Binding DismissToastCommand}"
-                            VerticalAlignment="Top" Margin="10,0,0,0"
-                            Background="Transparent" BorderThickness="0"
-                            Foreground="#CCFFFFFF" FontSize="12" Cursor="Hand"
-                            Padding="4"/>
-                </Grid>
+                </DockPanel>
             </Border>
 
+            <!-- ════════════ MAIN AREA ════════════ -->
+            <Grid Grid.Column="1">
+
+                <!-- Top header bar -->
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="56"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <Border Grid.Row="0" Background="White"
+                        BorderBrush="{StaticResource BorderBrush2}" BorderThickness="0,0,0,1">
+                    <Grid Margin="28,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock x:Name="PageTitle" FontSize="18" FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="New Booking"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
+                                                <Setter Property="Text" Value="Lab 5 — Flyweight · Decorator · Bridge · Proxy"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavBookings}" Value="True">
+                                                <Setter Property="Text" Value="All Bookings"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavPayment}" Value="True">
+                                                <Setter Property="Text" Value="Payments"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavServices}" Value="True">
+                                                <Setter Property="Text" Value="Room Services"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavHotelOps}" Value="True">
+                                                <Setter Property="Text" Value="Hotel Operations"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavLog}" Value="True">
+                                                <Setter Property="Text" Value="Activity Log"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Border Background="#F0FDF4" CornerRadius="16" Padding="12,4" Margin="0,0,12,0">
+                                <TextBlock FontSize="11" Foreground="#15803D" FontWeight="Medium">
+                                    <Run Text="● "/>
+                                    <Run Text="System Online"/>
+                                </TextBlock>
+                            </Border>
+                            <TextBlock Text="{Binding Source={x:Static sys:DateTime.Now}, StringFormat='ddd, dd MMM yyyy'}"
+                                       FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Page content -->
+                <Grid Grid.Row="1" Margin="24,20,24,20">
+
+                    <!-- ══════ PAGE: New Booking ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavNewBooking}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Complete all three steps to create a booking."
+                                   FontSize="13" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,16"/>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="16"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Step 1 — Guest -->
+                                <StackPanel Grid.Column="0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Border Background="{StaticResource AccentBrush}" CornerRadius="20"
+                                                Width="28" Height="28" Margin="0,0,10,0">
+                                            <TextBlock Text="1" Foreground="White" FontSize="13" FontWeight="Bold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Register Guest" FontSize="14" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="Guest details &amp; validation" FontSize="11"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Border Style="{StaticResource Card}">
+                                        <StackPanel>
+                                            <TextBlock Text="FULL NAME" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding GuestCtrl.GuestName, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource Field}"/>
+                                            <TextBlock Text="EMAIL ADDRESS" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding GuestCtrl.GuestEmail, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource Field}"/>
+                                            <TextBlock Text="NATIONALITY" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding GuestCtrl.GuestNationality, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource Field}"/>
+                                            <TextBlock Text="PASSPORT / ID" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding GuestCtrl.GuestPassport, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource Field}" Margin="0,0,0,18"/>
+                                            <Button Content="Register Guest" Command="{Binding CreateGuestCommand}"
+                                                    Style="{StaticResource BtnPrimary}" HorizontalAlignment="Stretch"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Step 2 — Room -->
+                                <StackPanel Grid.Column="2">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Border Background="{StaticResource AccentBrush}" CornerRadius="20"
+                                                Width="28" Height="28" Margin="0,0,10,0">
+                                            <TextBlock Text="2" Foreground="White" FontSize="13" FontWeight="Bold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Assign Room" FontSize="14" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="Prototype + Factory Method" FontSize="11"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Border Style="{StaticResource Card}">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                                <Border Background="#EFF6FF" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
+                                                    <TextBlock Text="PROTOTYPE" FontSize="8" FontWeight="Bold" Foreground="#1D4ED8"/>
+                                                </Border>
+                                                <Border Background="#EFF6FF" CornerRadius="4" Padding="6,2">
+                                                    <TextBlock Text="FACTORY METHOD" FontSize="8" FontWeight="Bold" Foreground="#1D4ED8"/>
+                                                </Border>
+                                            </StackPanel>
+                                            <TextBlock Text="ROOM NUMBER" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding RoomCtrl.RoomNumber, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource Field}"/>
+                                            <TextBlock Text="PRICE PER NIGHT (USD)" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding RoomCtrl.RoomPrice, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource Field}"/>
+                                            <TextBlock Text="{Binding RoomCtrl.CapacityLabel}" Style="{StaticResource FieldLabel}"/>
+                                            <TextBox Text="{Binding RoomCtrl.RoomCapacity, UpdateSourceTrigger=PropertyChanged}"
+                                                     Style="{StaticResource Field}"/>
+                                            <TextBlock Text="ROOM TYPE" Style="{StaticResource FieldLabel}"/>
+                                            <ComboBox ItemsSource="{Binding RoomCtrl.RoomTypes}"
+                                                      SelectedItem="{Binding RoomCtrl.SelectedRoomType, Mode=TwoWay}"
+                                                      Padding="10,8" Margin="0,0,0,4" Background="#FAFBFC"/>
+                                            <TextBlock Text="Selecting a type clones its Prototype template and auto-fills defaults."
+                                                       FontSize="10" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,0,0,18"/>
+                                            <Button Content="Assign Room" Command="{Binding CreateRoomCommand}"
+                                                    Style="{StaticResource BtnPrimary}" HorizontalAlignment="Stretch"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+
+                                <!-- Step 3 — Booking -->
+                                <StackPanel Grid.Column="4">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                                        <Border Background="#15803D" CornerRadius="20"
+                                                Width="28" Height="28" Margin="0,0,10,0">
+                                            <TextBlock Text="3" Foreground="White" FontSize="13" FontWeight="Bold"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel VerticalAlignment="Center">
+                                            <TextBlock Text="Confirm Booking" FontSize="14" FontWeight="SemiBold"
+                                                       Foreground="{StaticResource TextPrimaryBrush}"/>
+                                            <TextBlock Text="Builder + Abstract Factory" FontSize="11"
+                                                       Foreground="{StaticResource TextSecondaryBrush}"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <Border Style="{StaticResource Card}">
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
+                                                <Border Background="#FFF7ED" CornerRadius="4" Padding="6,2" Margin="0,0,5,0">
+                                                    <TextBlock Text="BUILDER" FontSize="8" FontWeight="Bold" Foreground="#C2410C"/>
+                                                </Border>
+                                                <Border Background="#FFF7ED" CornerRadius="4" Padding="6,2">
+                                                    <TextBlock Text="ABSTRACT FACTORY" FontSize="8" FontWeight="Bold" Foreground="#C2410C"/>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <Border Background="#F0FDF4" CornerRadius="8" Padding="14,12" Margin="0,0,0,14">
+                                                <StackPanel>
+                                                    <TextBlock Text="STAY DATES" Style="{StaticResource FieldLabel}"
+                                                               Margin="0,0,0,10"/>
+                                                    <TextBlock Text="CHECK-IN" Style="{StaticResource FieldLabel}"/>
+                                                    <DatePicker SelectedDate="{Binding BookingCtrl.CheckInDate, Mode=TwoWay}"
+                                                                DisplayDateStart="{x:Static sys:DateTime.Today}"
+                                                                Margin="0,0,0,10"/>
+                                                    <TextBlock Text="CHECK-OUT" Style="{StaticResource FieldLabel}"/>
+                                                    <DatePicker SelectedDate="{Binding BookingCtrl.CheckOutDate, Mode=TwoWay}"
+                                                                DisplayDateStart="{Binding BookingCtrl.CheckInDate}"
+                                                                Margin="0,0,0,10"/>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="Nights:" FontSize="12"
+                                                                   Foreground="{StaticResource TextSecondaryBrush}"
+                                                                   VerticalAlignment="Center"/>
+                                                        <Border Background="{StaticResource AccentBrush}" CornerRadius="4"
+                                                                Padding="10,3" Margin="8,0,0,0">
+                                                            <TextBlock Text="{Binding BookingCtrl.Nights}"
+                                                                       Foreground="White" FontSize="12" FontWeight="Bold"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <TextBlock Text="BOOKING TYPE" Style="{StaticResource FieldLabel}"/>
+                                            <ComboBox ItemsSource="{Binding BookingCtrl.BookingTypes}"
+                                                      SelectedItem="{Binding BookingCtrl.SelectedBookingType, Mode=TwoWay}"
+                                                      Padding="10,8" Margin="0,0,0,18"/>
+
+                                            <Button Content="Create Booking" Command="{Binding CreateBookingCommand}"
+                                                    Style="{StaticResource BtnSuccess}" HorizontalAlignment="Stretch"
+                                                    FontSize="14" Padding="20,13"/>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- ══════ PAGE: All Bookings ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavBookings}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Info tip -->
+                        <Border Grid.Row="0" Background="#FFF9C4" CornerRadius="8" Padding="14,10"
+                                BorderBrush="#F9E44F" BorderThickness="1" Margin="0,0,0,14">
+                            <TextBlock FontSize="12" Foreground="#7C5100" TextWrapping="Wrap">
+                                <Run FontWeight="Bold">Tip:</Run>
+                                <Run>Select a booking and click Confirm before using Hotel Ops → Check In. The Façade requires status = Confirmed.</Run>
+                            </TextBlock>
+                        </Border>
+
+                        <!-- Toolbar -->
+                        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="14,10" Margin="0,0,0,14">
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="↻  Refresh" Command="{Binding RefreshBookingsCommand}"
+                                        Style="{StaticResource BtnSecondary}" Padding="16,8" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Table -->
+                        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="0" Margin="0,0,0,14">
+                            <DataGrid ItemsSource="{Binding BookingCtrl.Bookings}"
+                                      SelectedItem="{Binding BookingCtrl.SelectedBooking, Mode=TwoWay}"
+                                      IsReadOnly="True" SelectionMode="Single" AutoGenerateColumns="False"
+                                      BorderThickness="0" Background="White"
+                                      RowBackground="White" AlternatingRowBackground="#FAFBFC">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Booking ID" Width="2.5*">
+                                        <DataGridTextColumn.Binding>
+                                            <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Id"/>
+                                        </DataGridTextColumn.Binding>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Type" Width="*">
+                                        <DataGridTextColumn.Binding>
+                                            <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Type"/>
+                                        </DataGridTextColumn.Binding>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Check-in" Width="*">
+                                        <DataGridTextColumn.Binding>
+                                            <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="CheckIn"/>
+                                        </DataGridTextColumn.Binding>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Check-out" Width="*">
+                                        <DataGridTextColumn.Binding>
+                                            <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="CheckOut"/>
+                                        </DataGridTextColumn.Binding>
+                                    </DataGridTextColumn>
+                                    <DataGridTextColumn Header="Status" Width="*">
+                                        <DataGridTextColumn.Binding>
+                                            <Binding Converter="{StaticResource BookingDisplayConverter}" ConverterParameter="Status"/>
+                                        </DataGridTextColumn.Binding>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+
+                        <!-- Actions -->
+                        <Border Grid.Row="3" Style="{StaticResource Card}" Padding="14,12">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="✓  Confirm Booking" Command="{Binding ConfirmBookingCommand}"
+                                        Style="{StaticResource BtnSuccess}" Padding="20,10" Margin="0,0,10,0"/>
+                                <Button Content="✕  Cancel Booking" Command="{Binding CancelBookingCommand}"
+                                        Style="{StaticResource BtnDanger}" Padding="20,10"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- ══════ PAGE: Payment ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavPayment}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:PaymentView/>
+                    </Grid>
+
+                    <!-- ══════ PAGE: Room Services ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavServices}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:RoomServiceView/>
+                    </Grid>
+
+                    <!-- ══════ PAGE: Hotel Ops ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavHotelOps}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:FacadeView/>
+                    </Grid>
+
+                    <!-- ══════ PAGE: Activity Log ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavLog}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Background="White" CornerRadius="8" Padding="16,10"
+                                BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" Margin="0,0,0,12">
+                            <WrapPanel>
+                                <TextBlock Text="Prefixes: " FontSize="11"
+                                           Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                                <Border Background="#14532D" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Prototype]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#7C2D12" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Builder]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#1E3A8A" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Abstract Factory]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#1E3A8A" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Factory Method]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#4C1D95" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Singleton]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#1C3D4F" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Adapter]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#14532D" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Composite]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                                <Border Background="#4A044E" CornerRadius="3" Padding="6,2" Margin="3,2">
+                                    <TextBlock Text="[Facade]" FontSize="9" FontWeight="Bold" Foreground="White"/>
+                                </Border>
+                            </WrapPanel>
+                        </Border>
+
+                        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="12,8" Margin="0,0,0,12">
+                            <Button Content="Clear Log" Command="{Binding ClearLogCommand}"
+                                    Style="{StaticResource BtnSecondary}" Padding="14,7" FontSize="12"/>
+                        </Border>
+
+                        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="16">
+                            <Border Background="{StaticResource NavyBrush}" CornerRadius="8" Padding="20">
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                                    <TextBlock Text="{Binding LogCtrl.LogOutput}" TextWrapping="Wrap"
+                                               FontFamily="Cascadia Code, Consolas, Courier New"
+                                               FontSize="12" Foreground="#7DD3FC" LineHeight="20"/>
+                                </ScrollViewer>
+                            </Border>
+                        </Border>
+                    </Grid>
+
+                    <!-- ══════ PAGE: Lab 5 Patterns ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:PatternsLab5View/>
+                    </Grid>
+
+                </Grid>
+                <!-- end page content grid -->
+
+                <!-- ════════ TOAST OVERLAY ════════ -->
+                <Border Grid.Row="1"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                        Margin="0,0,28,24"
+                        MinWidth="320" MaxWidth="420"
+                        CornerRadius="10"
+                        Padding="0"
+                        Panel.ZIndex="100"
+                        Visibility="{Binding Toast.IsShowing, Converter={StaticResource BoolToVisibilityConverter}}">
+
+                    <Border.Background>
+                        <Binding Path="Toast.Current.Kind" Converter="{StaticResource ToastBackgroundConverter}"/>
+                    </Border.Background>
+
+                    <Border.Effect>
+                        <DropShadowEffect BlurRadius="24" ShadowDepth="4" Opacity="0.35" Direction="270"/>
+                    </Border.Effect>
+
+                    <Grid Margin="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Icon -->
+                        <Border Grid.Column="0" Background="#20FFFFFF" CornerRadius="20"
+                                Width="34" Height="34" Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBlock FontSize="16" FontWeight="Bold" Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Text="{Binding Toast.Current.Kind, Converter={StaticResource ToastIconConverter}}"/>
+                        </Border>
+
+                        <!-- Text -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Toast.Current.Title}"
+                                       FontSize="13" FontWeight="Bold" Foreground="White"
+                                       Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding Toast.Current.Message}"
+                                       FontSize="11" Foreground="#E0E0E0"
+                                       TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <!-- Dismiss -->
+                        <Button Grid.Column="2" Content="✕" Command="{Binding DismissToastCommand}"
+                                VerticalAlignment="Top" Margin="10,0,0,0"
+                                Background="Transparent" BorderThickness="0"
+                                Foreground="#CCFFFFFF" FontSize="12" Cursor="Hand"
+                                Padding="4"/>
+                    </Grid>
+                </Border>
+
+            </Grid>
+            <!-- end main area grid -->
         </Grid>
-        <!-- end main area grid -->
     </Grid>
 </Window>

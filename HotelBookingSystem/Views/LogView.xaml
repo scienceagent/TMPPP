@@ -1,0 +1,5 @@
+﻿<UserControl x:Class="HotelBookingSystem.Views.LogView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Rest of your original LogView.xaml content goes here. Below is a placeholder for the outer tag -->
+</UserControl>

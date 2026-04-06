@@ -16,6 +16,8 @@
             <converters:RoomServiceTypeLabelConverter  x:Key="RoomServiceTypeLabelConverter"/>
             <converters:RoomServiceTypeColorConverter  x:Key="RoomServiceTypeColorConverter"/>
             <converters:BoolToVisibilityConverter      x:Key="BoolToVisibilityConverter"/>
+            <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+            <converters:StringToVisibilityConverter    x:Key="StringToVisibilityConverter"/>
             <converters:ToastBackgroundConverter       x:Key="ToastBackgroundConverter"/>
             <converters:ToastIconConverter             x:Key="ToastIconConverter"/>
 
@@ -24,7 +26,7 @@
             ?????????????????????????????????????????? -->
             <FontFamily x:Key="DefaultFont">Segoe UI</FontFamily>
 
-    
+
             <SolidColorBrush x:Key="PrimaryColor"         Color="#2196F3"/>
             <SolidColorBrush x:Key="PrimaryDarkColor"     Color="#1976D2"/>
             <SolidColorBrush x:Key="PrimaryLightColor"    Color="#BBDEFB"/>
@@ -38,7 +40,7 @@
             <SolidColorBrush x:Key="TextSecondaryColor"   Color="#757575"/>
             <SolidColorBrush x:Key="DividerColor"         Color="#BDBDBD"/>
 
-           
+
 
             <!-- Sidebar / navigation -->
             <SolidColorBrush x:Key="NavyBrush"            Color="#0F1E2E"/>
@@ -58,7 +60,7 @@
             <!-- Borders -->
             <SolidColorBrush x:Key="BorderBrush2"         Color="#E2E8F0"/>
 
-           
+
 
             <Style TargetType="TextBlock">
                 <Setter Property="FontFamily" Value="{StaticResource DefaultFont}"/>

@@ -44,6 +44,7 @@ namespace HotelBookingSystem.ViewModels
           public DecoratorController DecoratorCtrl { get; }
           public BridgeController BridgeCtrl { get; }
           public ProxyController ProxyCtrl { get; }
+          public LoginViewModel LoginCtrl { get; }
 
           // ── Toast ─────────────────────────────────────────────────────────────
           public ToastService Toast => ToastService.Instance;
@@ -85,9 +86,26 @@ namespace HotelBookingSystem.ViewModels
           public ICommand GenerateReportCommand { get; }
           public ICommand TestCacheProxyCommand { get; }
           public ICommand TestAuthProxyCommand { get; }
+          public ICommand LogoutCommand { get; }
+
+          private bool _isAuthenticated;
+          public bool IsAuthenticated
+          {
+               get => _isAuthenticated;
+               set => SetProperty(ref _isAuthenticated, value);
+          }
 
           public MainViewModel()
           {
+               // ── Authentication ───────────────────────────────────────────────
+               LoginCtrl = new LoginViewModel();
+               LoginCtrl.OnLoginSuccess += () => IsAuthenticated = true;
+
+               LogoutCommand = new RelayCommand(_ => {
+                    IsAuthenticated = false;
+                    LoginCtrl.Clear();
+               });
+
                // ── Singleton ────────────────────────────────────────────────────
                _logger = HotelAuditLogger.Instance;
                SingletonInfo = $"[Singleton] HotelAuditLogger\nsame instance = {ReferenceEquals(_logger, HotelAuditLogger.Instance)}";
