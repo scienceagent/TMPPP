@@ -8,10 +8,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Compile Remove="Factories - Copy\**" />
-	  <EmbeddedResource Remove="Factories - Copy\**" />
-	  <None Remove="Factories - Copy\**" />
-	  <Page Remove="Factories - Copy\**" />
+		<Compile Remove="Factories - Copy\**" />
+		<EmbeddedResource Remove="Factories - Copy\**" />
+		<None Remove="Factories - Copy\**" />
+		<Page Remove="Factories - Copy\**" />
+	</ItemGroup>
+
+	<!-- Copy appsettings.json to output directory -->
+	<ItemGroup>
+		<None Update="appsettings.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>

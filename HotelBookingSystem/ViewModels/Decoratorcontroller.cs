@@ -10,6 +10,7 @@ namespace HotelBookingSystem.ViewModels
      public class DecoratorController : BaseViewModel
      {
           private readonly IBookingRepository _bookingRepository;
+          private readonly IUserRepository _userRepository; // Add this field
 
           private bool _useLogging = true;
           private bool _useEmail = true;
@@ -51,11 +52,12 @@ namespace HotelBookingSystem.ViewModels
 
           public event Action<string>? OnLog;
 
-          public DecoratorController(IBookingRepository bookingRepository)
+          public DecoratorController(IBookingRepository bookingRepository, IUserRepository userRepository)
           {
                _bookingRepository = bookingRepository;
+               _userRepository = userRepository;
           }
-
+          
           public void RefreshBookings()
           {
                BookingIds.Clear();
@@ -94,7 +96,7 @@ namespace HotelBookingSystem.ViewModels
 
                // Wrap with decorators in reverse order (innermost first)
                if (UseSms) service = new SmsNotificationDecorator(service, dispatchLog);
-               if (UseEmail) service = new EmailNotificationDecorator(service, dispatchLog);
+               if (UseEmail) service = new EmailNotificationDecorator(service, dispatchLog, _userRepository);
                if (UseLogging) service = new LoggingNotificationDecorator(service, dispatchLog);
 
                // ── FIRE ──────────────────────────────────────────────────────────

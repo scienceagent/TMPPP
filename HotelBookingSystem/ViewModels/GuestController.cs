@@ -1,6 +1,7 @@
-using System;
+﻿using System;
 using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models.User;
+using HotelBookingSystem.Email; // Add this using directive for GmailEmailService
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -75,10 +76,42 @@ namespace HotelBookingSystem.ViewModels
                OnLog?.Invoke($"[Guest] Registered: {GuestName} ({GuestEmail})");
                OnLog?.Invoke($"  ID: {guest.Id[..8]}...\n");
 
+               // Fire-and-forget: Send a welcome email to the newly created user using their provided email address
+               _ = SendWelcomeEmailAsync(guest);
+
                ToastService.Instance.Show(
                    "Guest Registered",
                    $"{GuestName} registered successfully.",
                    ToastKind.Success);
+          }
+
+          // Private method to handle the async email delivery without blocking the UI
+          private async System.Threading.Tasks.Task SendWelcomeEmailAsync(Guest guest)
+          {
+               var gmail = new GmailEmailService();
+               var emailMessage = new EmailMessage
+               {
+                    To = guest.Email,
+                    Subject = "Welcome to Grand Horizon Hotel PMS!",
+                    IsHtml = true,
+                    Body = $@"
+                        <h3>Welcome, {guest.Name}!</h3>
+                        <p>Thank you for registering with Grand Horizon Hotel.</p>
+                        <p>Your guest ID is <strong>{guest.Id[..8]}...</strong></p>
+                        <br/>
+                        <p>We look forward to serving you.</p>"
+               };
+
+               var result = await gmail.SendAsync(emailMessage);
+
+               if (result.Success)
+               {
+                    OnLog?.Invoke($"[Email] ✓ Welcome email sent to {guest.Email}");
+               }
+               else
+               {
+                    OnLog?.Invoke($"[Email] ✗ Failed to send welcome email to {guest.Email}: {result.Message}");
+               }
           }
      }
 }

@@ -1,14 +1,14 @@
-﻿namespace HotelBookingSystem.Bridge
+﻿using System.Threading.Tasks;
+
+namespace HotelBookingSystem.Bridge
 {
-     /// <summary>
-     /// Bridge — IMPLEMENTATION hierarchy.
-     /// Defines HOW a report is delivered (the "where it goes" dimension).
-     /// Completely independent from the format (the "what it looks like" dimension).
-     /// Adding a new delivery (e.g. FTP, S3, Slack) requires only a new class here —
-     /// zero changes to any report format class.
-     /// </summary>
+     // ── IMPLEMENTATION INTERFACE (Bridge implementor side) ────────────────────
+     // Defines HOW a report is delivered / stored / sent.
+     // Completely independent of WHAT the report contains.
+     //
+     // Changed to async Task so EmailDelivery can await real SMTP without blocking the UI.
      public interface IReportDelivery
      {
-          void Deliver(string content, string reportTitle);
+          Task DeliverAsync(string content, string reportTitle, string filename);
      }
 }

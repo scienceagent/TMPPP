@@ -3,12 +3,11 @@ using System.Windows.Input;
 using HotelBookingSystem.Adapter;
 using HotelBookingSystem.Builders;
 using HotelBookingSystem.Commands;
+using HotelBookingSystem.Config;
 using HotelBookingSystem.Decorator;
 using HotelBookingSystem.Facade;
 using HotelBookingSystem.Factories;
 using HotelBookingSystem.Interfaces;
-using HotelBookingSystem.Models;
-using HotelBookingSystem.Models.User;
 using HotelBookingSystem.Prototype;
 using HotelBookingSystem.Proxy;
 using HotelBookingSystem.Services;
@@ -18,22 +17,22 @@ namespace HotelBookingSystem.ViewModels
 {
      public class MainViewModel : BaseViewModel
      {
-          // ── infrastructure ────────────────────────────────────────────────────
+          // ── Infrastructure ────────────────────────────────────────────────────
           private readonly ILogger _logger;
           private readonly IBookingRepository _bookingRepository;
-          private readonly IRoomRepository _realRoomRepository;   // unwrapped
-          private readonly IRoomRepository _roomRepository;       // wrapped in caching proxy
+          private readonly IRoomRepository _realRoomRepository;
+          private readonly IRoomRepository _roomRepository;   // caching proxy
           private readonly IUserRepository _userRepository;
           private readonly IBookingService _bookingService;
           private readonly IPaymentService _paymentService;
           private readonly IRoomPricingService _pricingService;
           private readonly HotelFacade _facade;
 
-          // ── decorator notification service (Lab 5) ────────────────────────────
+          // ── Decorator notification chain ──────────────────────────────────────
           private IBookingNotificationService _notificationService;
           private readonly System.Collections.Generic.List<string> _notifLog = new();
 
-          // ── controllers ───────────────────────────────────────────────────────
+          // ── Controllers ───────────────────────────────────────────────────────
           public GuestController GuestCtrl { get; }
           public RoomController RoomCtrl { get; }
           public BookingController BookingCtrl { get; }
@@ -41,17 +40,15 @@ namespace HotelBookingSystem.ViewModels
           public RoomServiceController ServiceCtrl { get; }
           public FacadeController FacadeCtrl { get; }
           public LogController LogCtrl { get; }
-
-          // Lab 5
           public FlyweightController FlyweightCtrl { get; }
           public DecoratorController DecoratorCtrl { get; }
           public BridgeController BridgeCtrl { get; }
           public ProxyController ProxyCtrl { get; }
 
-          // ── toast ─────────────────────────────────────────────────────────────
+          // ── Toast ─────────────────────────────────────────────────────────────
           public ToastService Toast => ToastService.Instance;
 
-          // ── singleton display ─────────────────────────────────────────────────
+          // ── Config display strings ────────────────────────────────────────────
           private string _singletonInfo = "";
           public string SingletonInfo
           {
@@ -59,7 +56,10 @@ namespace HotelBookingSystem.ViewModels
                set => SetProperty(ref _singletonInfo, value);
           }
 
-          // ── commands ──────────────────────────────────────────────────────────
+          public string EmailInfo => $"From: {AppSettings.Instance.GmailDefaults.Email}";
+          public string ReportDirInfo => $"Reports → {AppSettings.Instance.ReportSettings.OutputDirectory}";
+
+          // ── Commands ──────────────────────────────────────────────────────────
           public ICommand CreateGuestCommand { get; }
           public ICommand CreateRoomCommand { get; }
           public ICommand CreateBookingCommand { get; }
@@ -77,8 +77,6 @@ namespace HotelBookingSystem.ViewModels
           public ICommand RefreshFacadeCommand { get; }
           public ICommand ClearLogCommand { get; }
           public ICommand DismissToastCommand { get; }
-
-          // Lab 5 commands
           public ICommand LoadAmenitiesCommand { get; }
           public ICommand NotifyCreatedCommand { get; }
           public ICommand NotifyConfirmedCommand { get; }
@@ -90,80 +88,71 @@ namespace HotelBookingSystem.ViewModels
 
           public MainViewModel()
           {
-               // ── Singleton logger ─────────────────────────────────────────────
+               // ── Singleton ────────────────────────────────────────────────────
                _logger = HotelAuditLogger.Instance;
-               var logger2 = HotelAuditLogger.Instance;
-               SingletonInfo = $"[Singleton] HotelAuditLogger\nsame instance = {ReferenceEquals(_logger, logger2)}";
+               SingletonInfo = $"[Singleton] HotelAuditLogger\nsame instance = {ReferenceEquals(_logger, HotelAuditLogger.Instance)}";
 
                // ── Repositories ─────────────────────────────────────────────────
                _bookingRepository = new InMemoryBookingRepository();
                _realRoomRepository = new InMemoryRoomRepository();
                _userRepository = new InMemoryUserRepository();
 
-               // Lab 5 — wrap real room repository in Caching Proxy
-               // All existing code that uses _roomRepository now goes through the proxy transparently
                var proxyLog = new System.Collections.Generic.List<string>();
-               _roomRepository = new CachingRoomRepositoryProxy(_realRoomRepository, proxyLog, ttlSeconds: 30);
+               _roomRepository = new CachingRoomRepositoryProxy(
+                   _realRoomRepository, proxyLog, ttlSeconds: 30);
 
                // ── Services ─────────────────────────────────────────────────────
                _pricingService = new RoomPricingService();
-               var confirmSvc = new BookingConfirmationService();
-               var userVal = new UserValidator();
-
                _bookingService = new BookingService(
                    _bookingRepository, _roomRepository, _userRepository,
-                   confirmSvc, userVal, _logger);
-
-               var stripe = new StripePaymentGateway();
-               _paymentService = new StripePaymentAdapter(stripe);
-
+                   new BookingConfirmationService(), new UserValidator(), _logger);
+               _paymentService = new StripePaymentAdapter(new StripePaymentGateway());
                _facade = new HotelFacade(
-                   _bookingService, _bookingRepository,
-                   _roomRepository, _userRepository,
-                   _paymentService, _logger);
+                   _bookingService, _bookingRepository, _roomRepository,
+                   _userRepository, _paymentService, _logger);
 
-               // Lab 5 — Decorator: build default notification chain
-               //   LoggingDecorator → EmailDecorator → CoreService
-               _notificationService = new LoggingNotificationDecorator(
-                   new EmailNotificationDecorator(
-                       new BookingNotificationService(), _notifLog),
-                   _notifLog);
+               // ── DECORATOR: real Gmail email chain ─────────────────────────────
+               // LoggingDecorator → EmailDecorator (real SMTP) → CoreService
+               _notificationService =
+                   new LoggingNotificationDecorator(
+                       new EmailNotificationDecorator(
+                           new BookingNotificationService(),
+                           _notifLog,
+                           _userRepository),  // <-- PASSED CORRECT DEPENDENCY
+                       _notifLog);
 
                // ── Sub-controllers ───────────────────────────────────────────────
-               var logCtrl = new LogController(_logger);
-               LogCtrl = logCtrl;
+               LogCtrl = new LogController(_logger);
+               LogCtrl.AddLog($"[Config] Gmail sender : {AppSettings.Instance.GmailDefaults.Email}");
+               LogCtrl.AddLog($"[Config] Report output: {AppSettings.Instance.ReportSettings.OutputDirectory}");
 
-               var registry = new RoomPrototypeRegistry();
                GuestCtrl = new GuestController(_userRepository);
-               RoomCtrl = new RoomController(_roomRepository, _pricingService, registry);
+               RoomCtrl = new RoomController(_roomRepository, _pricingService, new RoomPrototypeRegistry());
                BookingCtrl = new BookingController(_bookingService, _bookingRepository,
                                  new BookingDurationCalculator(), new BookingFactoryProvider());
                PaymentCtrl = new PaymentController(_paymentService);
                ServiceCtrl = new RoomServiceController();
                FacadeCtrl = new FacadeController(_facade, _bookingRepository, ServiceCtrl);
 
-               // Lab 5 controllers
                FlyweightCtrl = new FlyweightController(_roomRepository);
-               DecoratorCtrl = new DecoratorController(_bookingRepository);
+               DecoratorCtrl = new DecoratorController(_bookingRepository, _userRepository);
                BridgeCtrl = new BridgeController(_bookingRepository);
-               ProxyCtrl = new ProxyController(_realRoomRepository);   // uses unwrapped repo to show proxy behaviour clearly
+               ProxyCtrl = new ProxyController(_realRoomRepository);
 
-               // ── Wire log events ──────────────────────────────────────────────
+               // ── Log wiring ────────────────────────────────────────────────────
                void Log(string m) => LogCtrl.AddLog(m);
-
                GuestCtrl.OnLog += Log;
                RoomCtrl.OnLog += Log;
                BookingCtrl.OnLog += Log;
                PaymentCtrl.OnLog += Log;
                ServiceCtrl.OnLog += Log;
                FacadeCtrl.OnLog += Log;
-
                FlyweightCtrl.OnLog += Log;
                DecoratorCtrl.OnLog += Log;
                BridgeCtrl.OnLog += Log;
                ProxyCtrl.OnLog += Log;
 
-               // ── Commands ─────────────────────────────────────────────────────
+               // ── Commands ──────────────────────────────────────────────────────
                CreateGuestCommand = new RelayCommand(_ => CreateGuest());
                CreateRoomCommand = new RelayCommand(_ => RoomCtrl.CreateRoom());
                CreateBookingCommand = new RelayCommand(_ => CreateBooking());
@@ -182,37 +171,38 @@ namespace HotelBookingSystem.ViewModels
                ClearLogCommand = new RelayCommand(_ => LogCtrl.ClearLog());
                DismissToastCommand = new RelayCommand(_ => Toast.Dismiss());
 
-               // Lab 5 commands
                LoadAmenitiesCommand = new RelayCommand(_ => FlyweightCtrl.LoadRoomAmenities());
                NotifyCreatedCommand = new RelayCommand(_ => DecoratorCtrl.FireCreated());
                NotifyConfirmedCommand = new RelayCommand(_ => DecoratorCtrl.FireConfirmed());
                NotifyCancelledCommand = new RelayCommand(_ => DecoratorCtrl.FireCancelled());
                RefreshDecoratorCommand = new RelayCommand(_ => DecoratorCtrl.RefreshBookings());
-               GenerateReportCommand = new RelayCommand(_ => BridgeCtrl.GenerateReport());
+
+               // Async command — runs on thread pool, never blocks UI
+               GenerateReportCommand = new RelayCommand(
+                   async _ => await BridgeCtrl.GenerateReportAsync(),
+                   _ => !BridgeCtrl.IsBusy);
+
                TestCacheProxyCommand = new RelayCommand(_ => ProxyCtrl.TestCacheProxy());
                TestAuthProxyCommand = new RelayCommand(_ => ProxyCtrl.TestAuthProxy());
           }
 
-          // ── helpers ───────────────────────────────────────────────────────────
+          // ── Private helpers ───────────────────────────────────────────────────
 
           private void CreateGuest()
           {
                GuestCtrl.CreateGuest();
-               // Refresh decorator booking list whenever data changes
                DecoratorCtrl.RefreshBookings();
                FacadeCtrl.RefreshBookings();
           }
 
           private void CreateBooking()
           {
-               // Get current guest + room from sub-controllers
                var guestId = GuestCtrl.CurrentGuestId;
                var room = RoomCtrl.CurrentRoom;
 
                if (string.IsNullOrEmpty(guestId) || room == null)
                {
-                    ToastService.Instance.Show(
-                        "Missing Data",
+                    ToastService.Instance.Show("Missing Data",
                         "Register a guest (Step 1) and assign a room (Step 2) first.",
                         ToastKind.Warning);
                     return;
@@ -220,16 +210,14 @@ namespace HotelBookingSystem.ViewModels
 
                BookingCtrl.CreateBooking(guestId, room, _pricingService);
 
-               // Lab 5 Decorator — fire notification for booking created
+               // Fire decorator chain — real email sent via Gmail, fire-and-forget
                var bookings = _bookingRepository.GetAllBookings();
                if (bookings.Count > 0)
                {
-                    var newest = bookings[bookings.Count - 1];
-                    try { _notificationService.NotifyBookingCreated(newest); }
-                    catch { /* notification failures never break booking flow */ }
+                    try { _notificationService.NotifyBookingCreated(bookings[bookings.Count - 1]); }
+                    catch { /* notification never blocks booking */ }
 
-                    foreach (var line in _notifLog)
-                         LogCtrl.AddLog(line);
+                    foreach (var line in _notifLog) LogCtrl.AddLog(line);
                     _notifLog.Clear();
                }
 

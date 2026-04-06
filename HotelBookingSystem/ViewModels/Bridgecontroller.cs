@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using HotelBookingSystem.Bridge;
+using HotelBookingSystem.Config;
 using HotelBookingSystem.Interfaces;
-using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -14,9 +15,10 @@ namespace HotelBookingSystem.ViewModels
           private string _selectedFormat = "Text";
           private string _selectedDelivery = "Log";
           private string _result = "Choose a format + delivery, then click Generate Report.";
+          private bool _isBusy;
 
           public ObservableCollection<string> Formats { get; } = new() { "Text", "HTML", "CSV" };
-          public ObservableCollection<string> Deliveries { get; } = new() { "Log", "File", "Email" };
+          public ObservableCollection<string> Deliveries { get; } = new() { "Log", "File", "Email", "File + Email" };
 
           public string SelectedFormat
           {
@@ -36,6 +38,12 @@ namespace HotelBookingSystem.ViewModels
                set => SetProperty(ref _result, value);
           }
 
+          public bool IsBusy
+          {
+               get => _isBusy;
+               set => SetProperty(ref _isBusy, value);
+          }
+
           public event Action<string>? OnLog;
 
           public BridgeController(IBookingRepository bookingRepository)
@@ -43,12 +51,8 @@ namespace HotelBookingSystem.ViewModels
                _bookingRepository = bookingRepository;
           }
 
-          /// <summary>
-          /// Instantiates the correct format × delivery combination at runtime.
-          /// No switch on format inside delivery or vice versa — true Bridge separation.
-          /// 3 formats × 3 deliveries = 9 combinations with 6 classes total.
-          /// </summary>
-          public void GenerateReport()
+          // ── Main async entry point ─────────────────────────────────────────────
+          public async Task GenerateReportAsync()
           {
                var bookings = _bookingRepository.GetAllBookings();
                if (bookings.Count == 0)
@@ -57,39 +61,66 @@ namespace HotelBookingSystem.ViewModels
                     return;
                }
 
+               IsBusy = true;
+               Result = $"⏳ Generating {SelectedFormat} report via {SelectedDelivery}…";
+
                var dispatchLog = new List<string>();
                var now = DateTime.Now;
                var periodStart = now.AddDays(-30);
+               string managerEmail = AppSettings.Instance.GmailDefaults.Email;
 
-               // ── IMPLEMENTATION (delivery) ──────────────────────────────────────
-               IReportDelivery delivery = SelectedDelivery switch
+               try
                {
-                    "File" => new FileDelivery("/reports/hotel", dispatchLog),
-                    "Email" => new EmailDelivery("manager@hotel.md", dispatchLog),
-                    _ => new LogDelivery(dispatchLog)
-               };
+                    // ── BRIDGE IMPLEMENTATION (delivery) ─────────────────────────
+                    IReportDelivery delivery = SelectedDelivery switch
+                    {
+                         "File" => new FileDelivery(dispatchLog),
+                         "Email" => new EmailDelivery(managerEmail, dispatchLog),
+                         "File + Email" => new FileAndEmailDelivery(managerEmail, dispatchLog),
+                         _ => new LogDelivery(dispatchLog)
+                    };
 
-               // ── ABSTRACTION (format) — injected with the delivery via Bridge ───
-               HotelReport report = SelectedFormat switch
-               {
-                    "HTML" => new HtmlHotelReport(delivery),
-                    "CSV" => new CsvHotelReport(delivery),
-                    _ => new TextHotelReport(delivery)
-               };
+                    // ── BRIDGE ABSTRACTION (format) — injected with delivery ──────
+                    HotelReport report = SelectedFormat switch
+                    {
+                         "HTML" => new HtmlHotelReport(delivery),
+                         "CSV" => new CsvHotelReport(delivery),
+                         _ => new TextHotelReport(delivery)
+                    };
 
-               report.Generate(bookings, periodStart, now);
+                    await report.GenerateAsync(bookings, periodStart, now);
 
-               Result = $"✓ {SelectedFormat} report → {SelectedDelivery}\n" +
-                        $"  Bookings included: {bookings.Count}\n" +
-                        $"  Format class:   {SelectedFormat}HotelReport\n" +
-                        $"  Delivery class: {SelectedDelivery}Delivery\n\n" +
+                    // Build summary
+                    string outputInfo = SelectedDelivery switch
+                    {
+                         "File" => $"  Saved to: {AppSettings.Instance.ReportSettings.OutputDirectory}",
+                         "Email" => $"  Emailed to: {managerEmail}",
+                         "File + Email" => $"  Saved to: {AppSettings.Instance.ReportSettings.OutputDirectory}\n" +
+                                           $"  Emailed to: {managerEmail}",
+                         _ => "  Written to activity log"
+                    };
+
+                    Result =
+                        $"✓ {SelectedFormat} report generated via {SelectedDelivery}\n" +
+                        $"  Bookings: {bookings.Count}\n" +
+                        $"  Period  : {periodStart:dd MMM yyyy} — {now:dd MMM yyyy}\n" +
+                        $"{outputInfo}\n\n" +
                         string.Join("\n", dispatchLog);
 
-               OnLog?.Invoke($"[Bridge] {SelectedFormat}HotelReport → {SelectedDelivery}Delivery");
-               OnLog?.Invoke($"  Bookings: {bookings.Count}, Period: {periodStart:dd MMM} — {now:dd MMM}");
-               foreach (var line in dispatchLog)
-                    OnLog?.Invoke($"  {line}");
-               OnLog?.Invoke("");
+                    OnLog?.Invoke($"[Bridge] {SelectedFormat}Report × {SelectedDelivery}Delivery");
+                    foreach (var line in dispatchLog)
+                         OnLog?.Invoke($"  {line}");
+                    OnLog?.Invoke("");
+               }
+               catch (Exception ex)
+               {
+                    Result = $"✗ Report generation failed: {ex.Message}";
+                    OnLog?.Invoke($"[Bridge] ERROR: {ex.Message}");
+               }
+               finally
+               {
+                    IsBusy = false;
+               }
           }
      }
 }

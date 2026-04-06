@@ -426,8 +426,31 @@
                     <TextBlock FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,16"
                                Text="Report format (Text / HTML / CSV) and delivery (Log / File / Email) are two independent hierarchies. Bridge connects them via a reference — HotelReport holds IReportDelivery. 3 formats × 3 deliveries = 9 combinations with only 6 classes. Adding a new format or delivery never touches the other hierarchy."/>
 
-                    <!-- Bridge diagram -->
-                    <Border Style="{StaticResource InfoCard}">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                        <Border Background="#0F766E" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
+                            <TextBlock Text="BRIDGE" FontSize="10" FontWeight="Bold" Foreground="White"/>
+                        </Border>
+                        <TextBlock Text="Booking Reports" FontSize="22" FontWeight="SemiBold" Foreground="#0F172A"/>
+                    </StackPanel>
+                    <TextBlock FontSize="12" Foreground="#64748B" TextWrapping="Wrap" Margin="0,0,0,16"
+               Text="Report format (Text / HTML / CSV) × delivery (Log / File / Email / File+Email). File delivery saves to the Desktop folder configured in appsettings.json. Email delivery sends a real email with the report as an attachment via Gmail SMTP."/>
+
+                    <!-- Config info strip -->
+                    <Border Background="#ECFDF5" CornerRadius="8" Padding="14,10"
+            BorderBrush="#6EE7B7" BorderThickness="1" Margin="0,0,0,14">
+                        <StackPanel>
+                            <TextBlock FontSize="11" Foreground="#065F46" FontWeight="SemiBold"
+                       Text="Active configuration (from appsettings.json):"/>
+                            <TextBlock FontSize="11" Foreground="#065F46" Margin="0,4,0,0"
+                       Text="{Binding EmailInfo}"/>
+                            <TextBlock FontSize="11" Foreground="#065F46"
+                       Text="{Binding ReportDirInfo}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Bridge hierarchy diagram -->
+                    <Border Background="White" CornerRadius="10" Padding="20"
+            BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,14">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -435,47 +458,47 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Abstraction hierarchy -->
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="ABSTRACTION HIERARCHY (format)" Style="{StaticResource SLabel}"/>
+                                <TextBlock Text="ABSTRACTION — Report Format" FontSize="10" FontWeight="Bold"
+                           Foreground="#0F766E" Margin="0,0,0,8"/>
                                 <Border Background="#ECFDF5" CornerRadius="8" Padding="12,10">
                                     <StackPanel>
                                         <Border Background="#0F766E" CornerRadius="4" Padding="8,4" Margin="0,0,0,6">
                                             <TextBlock Text="HotelReport  (abstract)" FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="White" FontFamily="Consolas"/>
+                                       Foreground="White" FontFamily="Consolas"/>
                                         </Border>
                                         <TextBlock Text="  └─ TextHotelReport" FontSize="11" Foreground="#065F46" FontFamily="Consolas" Margin="0,2"/>
                                         <TextBlock Text="  └─ HtmlHotelReport" FontSize="11" Foreground="#065F46" FontFamily="Consolas" Margin="0,2"/>
                                         <TextBlock Text="  └─ CsvHotelReport"  FontSize="11" Foreground="#065F46" FontFamily="Consolas" Margin="0,2"/>
-                                        <TextBlock Text="Each override FormatContent()" FontSize="10"
-                                                   Foreground="#6B7280" Margin="0,8,0,0" FontStyle="Italic"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
 
-                            <!-- Bridge arrow -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <TextBlock Text="🌉" FontSize="20" HorizontalAlignment="Center"/>
-                                <TextBlock Text="Bridge" FontSize="9" FontWeight="Bold" Foreground="#0F766E"
-                                           HorizontalAlignment="Center"/>
-                                <TextBlock Text="IReport&#10;Delivery" FontSize="9" Foreground="#64748B"
-                                           HorizontalAlignment="Center" TextAlignment="Center"/>
+                                <TextBlock Text="🌉" FontSize="22" HorizontalAlignment="Center"/>
+                                <TextBlock Text="IReport" FontSize="9" FontWeight="Bold" Foreground="#0F766E"
+                           HorizontalAlignment="Center"/>
+                                <TextBlock Text="Delivery" FontSize="9" Foreground="#64748B"
+                           HorizontalAlignment="Center"/>
                             </StackPanel>
 
-                            <!-- Implementation hierarchy -->
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="IMPLEMENTATION HIERARCHY (delivery)" Style="{StaticResource SLabel}"/>
+                                <TextBlock Text="IMPLEMENTATION — Delivery Method" FontSize="10" FontWeight="Bold"
+                           Foreground="#B45309" Margin="0,0,0,8"/>
                                 <Border Background="#FFF7ED" CornerRadius="8" Padding="12,10">
                                     <StackPanel>
                                         <Border Background="#B45309" CornerRadius="4" Padding="8,4" Margin="0,0,0,6">
                                             <TextBlock Text="IReportDelivery  (interface)" FontSize="11" FontWeight="SemiBold"
-                                                       Foreground="White" FontFamily="Consolas"/>
+                                       Foreground="White" FontFamily="Consolas"/>
                                         </Border>
-                                        <TextBlock Text="  └─ LogDelivery"   FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
-                                        <TextBlock Text="  └─ FileDelivery"  FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
-                                        <TextBlock Text="  └─ EmailDelivery" FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
-                                        <TextBlock Text="Each implement Deliver(content, title)" FontSize="10"
-                                                   Foreground="#6B7280" Margin="0,8,0,0" FontStyle="Italic"/>
+                                        <TextBlock Text="  └─ LogDelivery          → Activity log"
+                                   FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="  └─ FileDelivery         → Desktop\rapoarte"
+                                   FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="  └─ EmailDelivery        → Gmail SMTP"
+                                   FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
+                                        <TextBlock Text="  └─ FileAndEmailDelivery → Both"
+                                   FontSize="11" Foreground="#92400E" FontFamily="Consolas" Margin="0,2"/>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -483,7 +506,8 @@
                     </Border>
 
                     <!-- Controls -->
-                    <Border Style="{StaticResource InfoCard}">
+                    <Border Background="White" CornerRadius="10" Padding="20"
+            BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,14">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -494,36 +518,89 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="REPORT FORMAT" Style="{StaticResource FLabel}"/>
+                                <TextBlock Text="REPORT FORMAT" FontSize="11" FontWeight="SemiBold"
+                           Foreground="#64748B" Margin="0,0,0,4"/>
                                 <ComboBox ItemsSource="{Binding BridgeCtrl.Formats}"
-                                          SelectedItem="{Binding BridgeCtrl.SelectedFormat, Mode=TwoWay}"
-                                          Padding="10,8" Background="#FAFAFA"/>
+                          SelectedItem="{Binding BridgeCtrl.SelectedFormat, Mode=TwoWay}"
+                          Padding="10,8" Background="#FAFAFA"/>
+                                <TextBlock FontSize="10" Foreground="#94A3B8" Margin="0,4,0,0"
+                           Text="Text · HTML (coloured) · CSV (spreadsheet-ready)"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="DELIVERY DESTINATION" Style="{StaticResource FLabel}"/>
+                                <TextBlock Text="DELIVERY METHOD" FontSize="11" FontWeight="SemiBold"
+                           Foreground="#64748B" Margin="0,0,0,4"/>
                                 <ComboBox ItemsSource="{Binding BridgeCtrl.Deliveries}"
-                                          SelectedItem="{Binding BridgeCtrl.SelectedDelivery, Mode=TwoWay}"
-                                          Padding="10,8" Background="#FAFAFA"/>
+                          SelectedItem="{Binding BridgeCtrl.SelectedDelivery, Mode=TwoWay}"
+                          Padding="10,8" Background="#FAFAFA"/>
+                                <TextBlock FontSize="10" Foreground="#94A3B8" Margin="0,4,0,0"
+                           Text="File + Email → saves locally AND sends to Gmail"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
-                                <Button Content="▶  Generate Report"
-                                        Command="{Binding GenerateReportCommand}"
-                                        Background="#0F766E" Style="{StaticResource ActionBtn}"
-                                        Padding="20,10"/>
+                                <Button Command="{Binding GenerateReportCommand}"
+                        Background="#0F766E" Foreground="White"
+                        FontSize="12" FontWeight="SemiBold"
+                        Padding="20,10" BorderThickness="0" Cursor="Hand">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="#0F766E"/>
+                                            <Setter Property="Foreground" Value="White"/>
+                                            <Setter Property="FontSize" Value="12"/>
+                                            <Setter Property="FontWeight" Value="SemiBold"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="bg" Background="{TemplateBinding Background}"
+                                                CornerRadius="6" Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True">
+                                                                <Setter TargetName="bg" Property="Background" Value="#115E59"/>
+                                                            </Trigger>
+                                                            <Trigger Property="IsEnabled" Value="False">
+                                                                <Setter TargetName="bg" Property="Background" Value="#CBD5E1"/>
+                                                            </Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </Button.Style>
+                                    <Button.Content>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock VerticalAlignment="Center">
+                                                <TextBlock.Style>
+                                                    <Style TargetType="TextBlock">
+                                                        <Setter Property="Text" Value="▶  Generate Report"/>
+                                                        <Style.Triggers>
+                                                            <DataTrigger Binding="{Binding BridgeCtrl.IsBusy}" Value="True">
+                                                                <Setter Property="Text" Value="⏳ Sending…"/>
+                                                            </DataTrigger>
+                                                        </Style.Triggers>
+                                                    </Style>
+                                                </TextBlock.Style>
+                                            </TextBlock>
+                                        </StackPanel>
+                                    </Button.Content>
+                                </Button>
                             </StackPanel>
                         </Grid>
                     </Border>
 
                     <!-- Result terminal -->
-                    <Border Style="{StaticResource Terminal}">
-                        <TextBlock Text="{Binding BridgeCtrl.Result}"
-                                   FontFamily="Cascadia Code, Consolas, Courier New"
-                                   FontSize="12" Foreground="#6EE7B7" TextWrapping="Wrap" LineHeight="20"/>
+                    <Border Background="#1E293B" CornerRadius="8" Padding="16" MinHeight="100">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="240">
+                            <TextBlock Text="{Binding BridgeCtrl.Result}"
+                       FontFamily="Cascadia Code, Consolas, Courier New"
+                       FontSize="12" Foreground="#6EE7B7" TextWrapping="Wrap" LineHeight="20"/>
+                        </ScrollViewer>
                     </Border>
 
                 </StackPanel>
+
+             
 
                 <!-- ══════════════════════════════════════════════
                      PAGE: PROXY
@@ -680,7 +757,7 @@
                             </StackPanel>
                         </Border>
                     </Grid>
-
+    
                     <!-- Proxy vs Decorator note -->
                     <Border Background="#FFF9C4" CornerRadius="8" Padding="14,10"
                             BorderBrush="#F9E44F" BorderThickness="1">
