@@ -15,7 +15,8 @@ namespace HotelBookingSystem.Views
         {
             if (DataContext is LoginViewModel vm && sender is PasswordBox pb)
             {
-                vm.Password = pb.Password;
+                // Pass the SecureString to the ViewModel (ViewModel will copy/dispose as needed)
+                vm.SetSecurePassword(pb.SecurePassword);
             }
         }
     }
