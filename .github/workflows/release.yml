@@ -1,0 +1,40 @@
+name: Build and Release WPF App
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+jobs:
+  build_and_release:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: dotnet restore HotelBookingSystem.sln
+
+    - name: Build
+      run: dotnet build HotelBookingSystem.sln --configuration Release --no-restore
+
+    - name: Publish
+      run: dotnet publish HotelBookingSystem\HotelBookingSystem.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o .\publish
+
+    - name: Zip Output
+      run: Compress-Archive -Path .\publish\* -DestinationPath HotelBookingSystem_Release.zip
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: HotelBookingSystem_Release.zip
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
