@@ -569,6 +569,40 @@ public sealed class RoomPricingCalculator
 
 ---
 
+#### 14. Observer — `BookingEventMonitor`
+
+**Problem:** Multiple independent system components (auditing, alerts, dashboards, revenue tracking, occupancy monitoring) need to react when a booking is created, confirmed, or cancelled. Hard-coding calls to all these components inside the booking service creates tight coupling, violates the Single Responsibility Principle, and makes it difficult to add new reactive components later.
+
+**Solution:** Implement the Observer pattern. The `BookingEventMonitor` acts as the Subject, publishing events to a list of registered `IBookingObserver` instances. Five independent concrete observers (Occupancy, Revenue, Alerts, Audit Log, Dashboard) subscribe to the monitor and react to events without the booking core knowing anything about them.
+
+```csharp
+public class BookingEventMonitor
+{
+    private readonly List<IBookingObserver> _observers = new();
+
+    public void Subscribe(IBookingObserver observer) => _observers.Add(observer);
+
+    public void NotifyBookingCreated(Booking booking)
+    {
+        var evt = new BookingEvent(...);
+        foreach (var obs in _observers) obs.OnBookingEvent(evt);
+    }
+}
+```
+
+```csharp
+public sealed class AlertObserver : IBookingObserver
+{
+    public void OnBookingEvent(BookingEvent evt)
+    {
+        if (evt.TotalValue >= 1500m)
+             AddAlert(AlertSeverity.Warning, "High-value booking");
+    }
+}
+```
+
+---
+
 ## How to Run
 
 ```
@@ -591,9 +625,10 @@ public sealed class RoomPricingCalculator
 | Charge payment | Payments | Adapter |
 | Check in | Hotel Ops | Facade + Adapter + Singleton |
 | Check out | Hotel Ops | Facade + Composite + Adapter + Singleton |
+| View live dashboard | Lab 6 → Live Dashboard | Observer (5 views) |
 | Generate report | Lab 5 → Bridge | Bridge (File/Email/Both) |
 | Calculate pricing | Lab 6 → Pricing Strategy | Strategy (6 algorithms) |
-| Review all events | Activity Log | All 13 patterns prefixed |
+| Review all events | Activity Log | All 14 patterns prefixed |
 
 The sidebar shows a live Singleton proof: `same instance = True`.  
 The Activity Log prefixes every entry: `[Prototype]`, `[Builder]`, `[Abstract Factory]`, `[Factory Method]`, `[Singleton]`, `[Adapter]`, `[Composite]`, `[Facade]`.
