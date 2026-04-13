@@ -195,6 +195,11 @@
             <Setter Property="Margin" Value="0,0,5,0"/>
         </Style>
 
+        <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
+        <converters:StringToVisibilityConverter    x:Key="StringToVisibilityConverter"/>
+        <converters:StringEqualConverter           x:Key="StringEqualConverter"/>
+        <converters:ToastBackgroundConverter       x:Key="ToastBackgroundConverter"/>
+
     </Window.Resources>
     
     <Grid>
@@ -437,6 +442,20 @@
                                 </StackPanel>
                             </RadioButton>
 
+                            <!-- ── LAB 6 section ── -->
+                            <Separator Background="#1E2D40" Margin="12,10"/>
+
+                            <TextBlock Text="LAB 6" Style="{StaticResource SectionLabel}"/>
+
+                            <RadioButton x:Name="NavStrategy" Style="{StaticResource NavButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="%" FontSize="13" FontWeight="Bold"
+                                               Foreground="#64748B" VerticalAlignment="Center"
+                                               Width="16" TextAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Pricing Strategy" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
                             <Separator Background="#1E2D40" Margin="12,10"/>
 
                             <!-- Pattern chips -->
@@ -475,6 +494,9 @@
                                 <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
                                     <TextBlock Text="PROXY" FontSize="8" FontWeight="Bold" Foreground="#F59E0B"/>
                                 </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="STRATEGY" FontSize="8" FontWeight="Bold" Foreground="#7DD3FC"/>
+                                </Border>
                             </WrapPanel>
 
                         </StackPanel>
@@ -501,6 +523,9 @@
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Text" Value="New Booking"/>
                                         <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavStrategy}" Value="True">
+                                                <Setter Property="Text" Value="Pricing Calculator — Strategy Pattern"/>
+                                            </DataTrigger>
                                             <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
                                                 <Setter Property="Text" Value="Lab 5 — Flyweight · Decorator · Bridge · Proxy"/>
                                             </DataTrigger>
@@ -925,6 +950,21 @@
                             </Style>
                         </Grid.Style>
                         <views:PatternsLab5View/>
+                    </Grid>
+
+                    <!-- ══════ PAGE: Lab 6 Strategy Pattern ══════ -->
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavStrategy}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:StrategyView/>
                     </Grid>
 
                 </Grid>

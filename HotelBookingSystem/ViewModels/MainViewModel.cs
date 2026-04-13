@@ -44,6 +44,7 @@ namespace HotelBookingSystem.ViewModels
           public DecoratorController DecoratorCtrl { get; }
           public BridgeController BridgeCtrl { get; }
           public ProxyController ProxyCtrl { get; }
+          public StrategyController StrategyCtrl { get; }
           public LoginViewModel LoginCtrl { get; }
 
           // ── Toast ─────────────────────────────────────────────────────────────
@@ -156,6 +157,7 @@ namespace HotelBookingSystem.ViewModels
                DecoratorCtrl = new DecoratorController(_bookingRepository, _userRepository);
                BridgeCtrl = new BridgeController(_bookingRepository);
                ProxyCtrl = new ProxyController(_realRoomRepository);
+               StrategyCtrl = new StrategyController();
 
                // ── Log wiring ────────────────────────────────────────────────────
                void Log(string m) => LogCtrl.AddLog(m);
@@ -169,6 +171,7 @@ namespace HotelBookingSystem.ViewModels
                DecoratorCtrl.OnLog += Log;
                BridgeCtrl.OnLog += Log;
                ProxyCtrl.OnLog += Log;
+               StrategyCtrl.OnLog += Log;
 
                // ── Commands ──────────────────────────────────────────────────────
                CreateGuestCommand = new RelayCommand(_ => CreateGuest());

@@ -18,8 +18,10 @@
             <converters:BoolToVisibilityConverter      x:Key="BoolToVisibilityConverter"/>
             <converters:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibilityConverter"/>
             <converters:StringToVisibilityConverter    x:Key="StringToVisibilityConverter"/>
+            <converters:StringEqualConverter           x:Key="StringEqualConverter"/>
             <converters:ToastBackgroundConverter       x:Key="ToastBackgroundConverter"/>
             <converters:ToastIconConverter             x:Key="ToastIconConverter"/>
+            <converters:DecimalInputConverter          x:Key="DecimalInputConverter"/>
 
             <!-- ??????????????????????????????????????????
                  FONTS
