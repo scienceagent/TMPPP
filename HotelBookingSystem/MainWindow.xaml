@@ -200,6 +200,9 @@
         <converters:StringEqualConverter           x:Key="StringEqualConverter"/>
         <converters:ToastBackgroundConverter       x:Key="ToastBackgroundConverter"/>
 
+        <converters:PriceFormatConverter           x:Key="PriceFormatConverter"/>
+        <converters:BookingDisplayConverter        x:Key="BookingDisplayConverter"/>
+
     </Window.Resources>
     
     <Grid>
@@ -456,6 +459,14 @@
                                 </StackPanel>
                             </RadioButton>
 
+                            <RadioButton x:Name="NavObserver" Style="{StaticResource NavButton}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="◉" FontSize="13" Foreground="#F59E0B"
+                                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                    <TextBlock Text="Live Dashboard" Foreground="White" FontSize="13"/>
+                                </StackPanel>
+                            </RadioButton>
+
                             <Separator Background="#1E2D40" Margin="12,10"/>
 
                             <!-- Pattern chips -->
@@ -497,6 +508,9 @@
                                 <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
                                     <TextBlock Text="STRATEGY" FontSize="8" FontWeight="Bold" Foreground="#7DD3FC"/>
                                 </Border>
+                                <Border Background="#1E3A52" CornerRadius="4" Padding="5,2" Margin="2">
+                                    <TextBlock Text="OBSERVER" FontSize="8" FontWeight="Bold" Foreground="#FDE68A"/>
+                                </Border>
                             </WrapPanel>
 
                         </StackPanel>
@@ -525,6 +539,9 @@
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding IsChecked, ElementName=NavStrategy}" Value="True">
                                                 <Setter Property="Text" Value="Pricing Calculator — Strategy Pattern"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding IsChecked, ElementName=NavObserver}" Value="True">
+                                                <Setter Property="Text" Value="Live Dashboard — Observer Pattern"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding IsChecked, ElementName=NavLab5}" Value="True">
                                                 <Setter Property="Text" Value="Lab 5 — Flyweight · Decorator · Bridge · Proxy"/>
@@ -965,6 +982,20 @@
                             </Style>
                         </Grid.Style>
                         <views:StrategyView/>
+                    </Grid>
+
+                    <Grid>
+                        <Grid.Style>
+                            <Style TargetType="Grid">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsChecked, ElementName=NavObserver}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Grid.Style>
+                        <views:ObserverView/>
                     </Grid>
 
                 </Grid>

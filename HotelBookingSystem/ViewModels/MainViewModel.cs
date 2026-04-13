@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Input;
 using HotelBookingSystem.Adapter;
 using HotelBookingSystem.Builders;
@@ -8,10 +9,12 @@ using HotelBookingSystem.Decorator;
 using HotelBookingSystem.Facade;
 using HotelBookingSystem.Factories;
 using HotelBookingSystem.Interfaces;
+using HotelBookingSystem.Observer;
 using HotelBookingSystem.Prototype;
 using HotelBookingSystem.Proxy;
 using HotelBookingSystem.Services;
 using HotelBookingSystem.Singleton;
+
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -46,6 +49,9 @@ namespace HotelBookingSystem.ViewModels
           public ProxyController ProxyCtrl { get; }
           public StrategyController StrategyCtrl { get; }
           public LoginViewModel LoginCtrl { get; }
+
+          private readonly BookingEventMonitor _bookingMonitor;
+          public ObserverController ObserverCtrl { get; }
 
           // ── Toast ─────────────────────────────────────────────────────────────
           public ToastService Toast => ToastService.Instance;
@@ -159,6 +165,22 @@ namespace HotelBookingSystem.ViewModels
                ProxyCtrl = new ProxyController(_realRoomRepository);
                StrategyCtrl = new StrategyController();
 
+               // ── OBSERVER: Create the subject ─────────────────────────────────────────
+               _bookingMonitor = new BookingEventMonitor(
+                   _bookingRepository,
+                   _roomRepository,
+                   _userRepository);
+
+               // Register all 5 concrete observers
+               _bookingMonitor.Subscribe(new OccupancyObserver());
+               _bookingMonitor.Subscribe(new RevenueObserver());
+               _bookingMonitor.Subscribe(new AlertObserver());
+               _bookingMonitor.Subscribe(new AuditLogObserver());
+               _bookingMonitor.Subscribe(new DashboardObserver());
+
+               // Create the ViewModel that drives the dashboard page
+               ObserverCtrl = new ObserverController(_bookingMonitor, _bookingRepository);
+
                // ── Log wiring ────────────────────────────────────────────────────
                void Log(string m) => LogCtrl.AddLog(m);
                GuestCtrl.OnLog += Log;
@@ -172,21 +194,72 @@ namespace HotelBookingSystem.ViewModels
                BridgeCtrl.OnLog += Log;
                ProxyCtrl.OnLog += Log;
                StrategyCtrl.OnLog += Log;
+               _bookingMonitor.OnLog += Log;
+               ObserverCtrl.OnLog += Log;
 
                // ── Commands ──────────────────────────────────────────────────────
                CreateGuestCommand = new RelayCommand(_ => CreateGuest());
                CreateRoomCommand = new RelayCommand(_ => RoomCtrl.CreateRoom());
                CreateBookingCommand = new RelayCommand(_ => CreateBooking());
-               ConfirmBookingCommand = new RelayCommand(_ => BookingCtrl.ConfirmBooking());
-               CancelBookingCommand = new RelayCommand(_ => BookingCtrl.CancelBooking());
+               
+               ConfirmBookingCommand = new RelayCommand(_ =>
+               {
+                    BookingCtrl.ConfirmBooking();
+                    var confirmed = _bookingRepository.GetAllBookings()
+                        .FirstOrDefault(b => b.Status == Models.BookingStatus.Confirmed);
+                    if (confirmed != null)
+                    {
+                        _bookingMonitor.NotifyBookingConfirmed(confirmed);
+                        ObserverCtrl.RefreshAll();
+                    }
+               });
+
+               CancelBookingCommand = new RelayCommand(_ =>
+               {
+                    var toCancel = BookingCtrl.SelectedBooking;
+                    BookingCtrl.CancelBooking();
+                    if (toCancel != null)
+                    {
+                        _bookingMonitor.NotifyBookingCancelled(toCancel);
+                        ObserverCtrl.RefreshAll();
+                    }
+               });
+               
                RefreshBookingsCommand = new RelayCommand(_ => BookingCtrl.RefreshBookings());
                ProcessPaymentCommand = new RelayCommand(_ => PaymentCtrl.ProcessPayment(GuestCtrl.CurrentGuestId));
                RefundPaymentCommand = new RelayCommand(_ => PaymentCtrl.RefundPayment(GuestCtrl.CurrentGuestId));
                AddServiceCommand = new RelayCommand(_ => ServiceCtrl.AddToOrder());
                RemoveServiceCommand = new RelayCommand(_ => ServiceCtrl.RemoveSelected());
                ClearServicesCommand = new RelayCommand(_ => ServiceCtrl.ClearOrder());
-               CheckInCommand = new RelayCommand(_ => FacadeCtrl.CheckIn());
-               CheckOutCommand = new RelayCommand(_ => FacadeCtrl.CheckOut());
+               
+               CheckInCommand = new RelayCommand(_ =>
+               {
+                   FacadeCtrl.CheckIn();
+                   if (FacadeCtrl.SelectedBookingId != null)
+                   {
+                       var booking = _bookingRepository.FindById(FacadeCtrl.SelectedBookingId);
+                       if (booking != null)
+                       {
+                           _bookingMonitor.NotifyGuestCheckedIn(booking);
+                           ObserverCtrl.RefreshAll();
+                       }
+                   }
+               });
+
+               CheckOutCommand = new RelayCommand(_ =>
+               {
+                   FacadeCtrl.CheckOut();
+                   if (FacadeCtrl.SelectedBookingId != null)
+                   {
+                       var booking = _bookingRepository.FindById(FacadeCtrl.SelectedBookingId);
+                       if (booking != null)
+                       {
+                           _bookingMonitor.NotifyGuestCheckedOut(booking);
+                           ObserverCtrl.RefreshAll();
+                       }
+                   }
+               });
+
                ShowSummaryCommand = new RelayCommand(_ => FacadeCtrl.ShowSummary());
                RefreshFacadeCommand = new RelayCommand(_ => FacadeCtrl.RefreshBookings());
                ClearLogCommand = new RelayCommand(_ => LogCtrl.ClearLog());
@@ -240,6 +313,14 @@ namespace HotelBookingSystem.ViewModels
 
                     foreach (var line in _notifLog) LogCtrl.AddLog(line);
                     _notifLog.Clear();
+               }
+
+               var createdBookings2 = _bookingRepository.GetAllBookings();
+               if (createdBookings2.Count > 0)
+               {
+                   var newest2 = createdBookings2[createdBookings2.Count - 1];
+                   _bookingMonitor.NotifyBookingCreated(newest2);
+                   ObserverCtrl.RefreshAll();   // refresh dashboard metrics
                }
 
                DecoratorCtrl.RefreshBookings();
