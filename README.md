@@ -1,6 +1,6 @@
-# 🏨 Hotel Booking System
+# 🏨 Grand Horizon Hotel — Property Management System
 
-A WPF desktop application built with **C# / .NET 8** that simulates a hotel booking workflow while demonstrating **eight GoF design patterns** across two labs — five creational (Lab 3) and three structural (Lab 4).
+A full-featured WPF desktop application built with **C# 12 / .NET 8** that simulates a real hotel booking and operations workflow. The system covers the complete guest lifecycle — registration, room assignment, booking creation, payment processing, room services, check-in, check-out, reporting, and dynamic pricing — while demonstrating **thirteen GoF design patterns** across three labs.
 
 ---
 
@@ -10,9 +10,11 @@ A WPF desktop application built with **C# / .NET 8** that simulates a hotel book
 |---|---|
 | Language | C# 12 / .NET 8 |
 | UI Framework | WPF (Windows Presentation Foundation) |
-| Architecture | MVVM |
-| UI Library | MaterialDesignThemes |
-| Pattern | Dependency Inversion via constructor injection |
+| Architecture | MVVM (Model-View-ViewModel) |
+| UI Polish | MaterialDesignThemes 4.9 |
+| Email | System.Net.Mail — Gmail SMTP with app password |
+| Config | System.Text.Json — appsettings.json |
+| Auth | Mock AuthenticationService + SecureString |
 
 ---
 
@@ -21,38 +23,67 @@ A WPF desktop application built with **C# / .NET 8** that simulates a hotel book
 ```
 HotelBookingSystem/
 │
-├── Adapter/                            # Lab 4 — Adapter pattern
-│   ├── IPaymentService.cs              # Target interface (our system expects)
-│   ├── StripePaymentGateway.cs         # Adaptee (incompatible external class)
-│   └── StripePaymentAdapter.cs         # Adapter (translates IPaymentService → Stripe)
+├── Adapter/                                      # Lab 4 — Adapter
+│   ├── IPaymentService.cs                        # Target interface
+│   ├── StripePaymentGateway.cs                   # Adaptee (external, incompatible)
+│   └── StripePaymentAdapter.cs                   # Object adapter
 │
-├── Builders/                           # Lab 3 — Builder pattern
+├── Bridge/                                       # Lab 5 — Bridge
+│   ├── IReportDelivery.cs                        # Implementation interface (delivery)
+│   ├── HotelReports.cs                           # Abstraction hierarchy (format)
+│   │   ├── HotelReport  (abstract)
+│   │   ├── TextHotelReport
+│   │   ├── HtmlHotelReport
+│   │   └── CsvHotelReport
+│   └── ReportDeliveries.cs                       # Implementation hierarchy
+│       ├── LogDelivery
+│       ├── FileDelivery    → Desktop\rapoarte
+│       ├── EmailDelivery   → Gmail SMTP
+│       └── FileAndEmailDelivery
+│
+├── Builders/                                     # Lab 3 — Builder
 │   ├── IBookingBuilder.cs
 │   ├── BookingBuilder.cs
-│   ├── BookingDirector.cs
-│   └── BookingRequest.cs
+│   ├── BookingDirector.cs                        # Standard / Premium / VIP presets
+│   └── BookingRequest.cs                         # Constructed product
 │
 ├── Commands/
-│   └── RelayCommand.cs                 # ICommand implementation for MVVM bindings
+│   └── RelayCommand.cs                           # ICommand for MVVM bindings
 │
-├── Composite/                          # Lab 4 — Composite pattern
-│   ├── RoomServiceComponent.cs         # Abstract component (leaf + composite share this)
-│   ├── RoomServiceItem.cs              # Leaf (single service item)
-│   ├── RoomServicePackage.cs           # Composite (holds children, applies discount)
-│   └── RoomServiceCatalog.cs           # Pre-built catalog with nested packages
+├── Composite/                                    # Lab 4 — Composite
+│   ├── RoomServiceComponent.cs                   # Abstract component
+│   ├── RoomServiceItem.cs                        # Leaf — single item, fixed price
+│   ├── RoomServicePackage.cs                     # Composite — recursive GetPrice()
+│   └── RoomServiceCatalog.cs                     # Pre-built two-level catalog
+│
+├── Config/
+│   └── AppSettings.cs                            # Typed loader for appsettings.json
 │
 ├── Converters/
 │   ├── BookingDisplayConverter.cs
 │   ├── BoolToVisibilityConverter.cs
 │   ├── PriceFormatConverter.cs
-│   ├── RoomServiceConverters.cs        # Lab 4 — PKG/LEAF badge + price converters
-│   └── StatusToColorConverter.cs
+│   ├── RoomServiceConverters.cs
+│   ├── StatusToColorConverter.cs
+│   ├── StringEqualConverter.cs                   # Lab 6 — RadioButton ↔ string binding
+│   └── ToastConverters.cs
 │
-├── Facade/                             # Lab 4 — Façade pattern
-│   ├── HotelFacade.cs                  # Façade (CheckInGuest, CheckOutGuest, GetBookingSummary)
-│   └── FacadeResults.cs                # Result DTOs (CheckInResult, CheckOutResult)
+├── Decorator/                                    # Lab 5 — Decorator
+│   ├── IBookingNotificationService.cs            # Component interface
+│   ├── BookingNotificationService.cs             # Core concrete component
+│   ├── BookingNotificationDecorator.cs           # Base decorator
+│   ├── LoggingNotificationDecorator.cs           # Adds audit log entries
+│   ├── EmailNotificationDecorator.cs             # Sends real Gmail emails
+│   └── SmsNotificationDecorator.cs               # Simulates SMS gateway
 │
-├── Factories/                          # Lab 3 — Abstract Factory + Factory Method
+├── Email/
+│   └── GmailEmailService.cs                      # Real SMTP sender (SmtpClient)
+│
+├── Facade/                                       # Lab 4 — Facade
+│   ├── HotelFacade.cs                            # CheckInGuest / CheckOutGuest / Summary
+│   └── FacadeResults.cs                          # CheckInResult / CheckOutResult DTOs
+│
+├── Factories/                                    # Labs 3-4 — Abstract Factory + Factory Method
 │   ├── Booking/
 │   │   ├── BookingFactoryProvider.cs
 │   │   ├── StandardBookingFactory.cs
@@ -64,14 +95,20 @@ HotelBookingSystem/
 │   │   │   └── VipConfirmationHandler.cs
 │   │   └── Pricing/
 │   │       ├── StandardPricingStrategy.cs
-│   │       ├── PremiumPricingStrategy.cs
-│   │       └── VipPricingStrategy.cs
+│   │       ├── PremiumPricingStrategy.cs         # 10% discount
+│   │       └── VipPricingStrategy.cs             # 20% + 1 free night / 5
 │   └── Room/
-│       ├── RoomCreator.cs              # Abstract creator (factory method lives here)
+│       ├── RoomCreator.cs                        # Abstract creator
 │       ├── StandardRoomCreator.cs
 │       ├── DeluxeRoomCreator.cs
 │       ├── SuiteRoomCreator.cs
 │       └── RoomCreatorProvider.cs
+│
+├── Flyweight/                                    # Lab 5 — Flyweight
+│   ├── IRoomAmenityFlyweight.cs
+│   ├── RoomAmenityFlyweight.cs                   # Intrinsic state (shared)
+│   ├── RoomAmenityFactory.cs                     # Cache — one object per amenity type
+│   └── RoomAmenityRenderer.cs                    # Entries hold extrinsic state per room
 │
 ├── Interfaces/
 │   ├── Booking/
@@ -95,23 +132,29 @@ HotelBookingSystem/
 │   ├── Booking/
 │   │   ├── Booking.cs
 │   │   ├── BookingResult.cs
-│   │   └── Enums.cs
+│   │   └── Enums.cs (BookingStatus)
 │   ├── Room/
-│   │   ├── Room.cs
+│   │   ├── Room.cs  (abstract)
 │   │   ├── StandardRoom.cs
 │   │   ├── DeluxeRoom.cs
 │   │   └── Suite.cs
 │   └── User/
-│       ├── User.cs
+│       ├── User.cs  (abstract)
 │       ├── Guest.cs
 │       └── Admin.cs
 │
-├── Prototype/                          # Lab 3 — Prototype pattern
+├── Prototype/                                    # Lab 3 — Prototype
 │   ├── IPrototype.cs
-│   ├── RoomPrototypes.cs               # StandardRoomPrototype, DeluxeRoomPrototype, SuitePrototype
-│   └── RoomPrototypeRegistry.cs
+│   ├── RoomPrototypes.cs                         # Standard/Deluxe/Suite templates
+│   └── RoomPrototypeRegistry.cs                  # Registry — returns clones only
+│
+├── Proxy/                                        # Lab 5 — Proxy
+│   ├── CachingRoomRepositoryProxy.cs             # Virtual proxy — 30s TTL cache
+│   └── ProtectionRoomRepositoryProxy.cs          # Protection proxy — StaffRole checks
 │
 ├── Services/
+│   ├── AuthenticationService.cs
+│   ├── IAuthService.cs
 │   ├── Booking/
 │   │   ├── BookingConfirmationService.cs
 │   │   ├── BookingDurationCalculator.cs
@@ -125,24 +168,46 @@ HotelBookingSystem/
 │       ├── InMemoryUserRepository.cs
 │       └── UserValidator.cs
 │
-├── Singleton/                          # Lab 3 — Singleton pattern
-│   └── HotelAuditLogger.cs
+├── Singleton/                                    # Lab 3 — Singleton
+│   └── HotelAuditLogger.cs                       # Lazy<T>, thread-safe, ILogger
+│
+├── Strategy/                                     # Lab 6 — Strategy
+│   ├── IRoomPricingStrategy.cs                   # Strategy interface + PricingResult DTO
+│   ├── ConcreteStrategies.cs                     # 6 concrete algorithms
+│   │   ├── StandardRateStrategy                  # base × nights, no adjustment
+│   │   ├── WeekendSurgeStrategy                  # Fri/Sat nights ×1.5 surcharge
+│   │   ├── EarlyBirdStrategy                     # 30+ days: 20% off; 14-29: 10% off
+│   │   ├── LastMinuteDealStrategy                # 0-3 days: 25% off; 4-7: 15% off
+│   │   ├── LongStayStrategy                      # 7n:5%; 14n:10%; 21n:15%; 28n+:20%
+│   │   └── SeasonalRateStrategy                  # Summer+40%, Winter+30%, Spring+5% per-night
+│   └── RoomPricingCalculator.cs                  # Context — SetStrategy() / CalculatePrice()
 │
 ├── ViewModels/
-│   ├── BaseViewModel.cs                # INotifyPropertyChanged base
+│   ├── BaseViewModel.cs
 │   ├── BookingController.cs
-│   ├── FacadeController.cs             # Lab 4 — Façade demo VM
+│   ├── BridgeController.cs                       # Lab 5 async report generation
+│   ├── DecoratorController.cs                    # Lab 5 runtime chain builder
+│   ├── FacadeController.cs                       # Lab 4 CheckIn/CheckOut/Summary
+│   ├── FlyweightController.cs                    # Lab 5 amenity entry loader
 │   ├── GuestController.cs
-│   ├── LogController.cs                # Activity log (capped at 300 lines)
-│   ├── MainViewModel.cs                # Root VM — wires all controllers + commands
-│   ├── PaymentController.cs            # Lab 4 — Adapter demo VM
+│   ├── LogController.cs
+│   ├── LoginViewModel.cs
+│   ├── MainViewModel.cs                          # Root VM — wires all controllers
+│   ├── PaymentController.cs
+│   ├── ProxyController.cs                        # Lab 5 cache + auth proxy demos
 │   ├── RoomController.cs
-│   └── RoomServiceController.cs        # Lab 4 — Composite demo VM
+│   ├── RoomServiceController.cs
+│   ├── StrategyController.cs                     # Lab 6 pricing calculator VM
+│   └── ToastService.cs
 │
 ├── Views/
-│   ├── FacadeView.xaml / .cs           # Lab 4 — Hotel Ops page
-│   ├── PaymentView.xaml / .cs          # Lab 4 — Payment page
-│   └── RoomServiceView.xaml / .cs      # Lab 4 — Room Services page
+│   ├── FacadeView.xaml / .cs
+│   ├── LogView.xaml / .cs
+│   ├── LoginView.xaml / .cs
+│   ├── PatternsLab5View.xaml / .cs               # Tabbed: Flyweight/Decorator/Bridge/Proxy
+│   ├── PaymentView.xaml / .cs
+│   ├── RoomServiceView.xaml / .cs
+│   └── StrategyView.xaml / .cs                   # Lab 6 — Pricing Calculator
 │
 ├── Lab2_AbstractFactory.puml
 ├── Lab2_FactoryMethod.puml
@@ -152,7 +217,9 @@ HotelBookingSystem/
 ├── Lab4_Adapter.puml
 ├── Lab4_Composite.puml
 ├── Lab4_Facade.puml
+├── Lab6_Strategy.puml
 │
+├── appsettings.json
 ├── App.xaml / App.xaml.cs
 ├── MainWindow.xaml / MainWindow.xaml.cs
 ├── AssemblyInfo.cs
@@ -201,7 +268,7 @@ The result is displayed live in the sidebar.
 
 ---
 
-#### 2. Prototype — `RoomPrototype` + `RoomPrototypeRegistry`
+#### 2. Prototype — `RoomPrototypeRegistry`
 
 **Problem:** Each room type (Standard, Deluxe, Suite) has pre-configured defaults — price, capacity, amenities. Re-entering them manually every time is error-prone and repetitive.
 
@@ -310,7 +377,7 @@ public class VipBookingFactory : IBookingFactory
 
 ---
 
-### Lab 4 — Structural Patterns
+### Lab 4 — Structural Patterns I
 
 ---
 
@@ -437,8 +504,6 @@ VIP Welcome Bundle (20% off)           ← RoomServicePackage
 
 Calling `GetPrice()` on the VIP bundle traverses the whole tree and returns the correctly discounted total — the client code is a single loop with no `if` statements.
 
-**Where it's used:** `RoomServiceController` drives the Room Services page. `HotelFacade.CheckOutGuest()` receives the ordered items list and calls `GetPrice()` on each to total the room services bill, then charges via the Adapter.
-
 ---
 
 #### 8. Façade — `HotelFacade`
@@ -482,87 +547,266 @@ public class HotelFacade
 }
 ```
 
-**What the ViewModel sees vs what the Façade does:**
+---
 
-| ViewModel call | Façade orchestrates |
-|---|---|
-| `CheckInGuest(id)` | validate → find entities → charge via Adapter → log via Singleton |
-| `CheckOutGuest(id, services)` | sum via Composite → charge via Adapter → release room → log via Singleton |
-| `GetBookingSummary(id)` | query 3 repositories → format summary string |
-
-**Patterns converging in `CheckOutGuest`:**
-- **Composite** calculates each service total (`GetPrice()`)
-- **Adapter** charges the total (`IPaymentService` → `StripePaymentGateway`)
-- **Singleton** logs the operation (`HotelAuditLogger.Instance`)
-- **Façade** coordinates all three behind a single method call
+### Lab 5 — Structural Patterns II
 
 ---
 
-## Pattern Interaction Map
+#### 9. Flyweight — `RoomAmenityFlyweight`
 
+**Problem:** The hotel has 200 rooms, and each can have up to 5 amenities (WiFi, Pool, Gym, etc.). Creating a new object for every amenity in every room would result in 1,000 duplicated `RoomAmenity` objects, wasting memory since intrinsic properties (icon, name, color) never change.
+
+**Solution:** Intrinsic state (`AmenityType`, `Icon`, `Color`, `Category`) is stored once per unique amenity type in `RoomAmenityFlyweight`. `RoomAmenityFactory` caches these flyweights. Rooms store only references. The extrinsic state (`roomId`, `roomPrice`) is passed in when needed for rendering.
+
+```csharp
+public class RoomAmenityFlyweight : IRoomAmenityFlyweight
+{
+    // Intrinsic state (shared, immutable)
+    public string AmenityType { get; }
+    public string Icon { get; }
+    public string Color { get; }
+    public string Category { get; }
+
+    public RoomAmenityFlyweight(string amenityType, string icon, string color, string category)
+    {
+        AmenityType = amenityType;
+        Icon = icon;
+        Color = color;
+        Category = category;
+    }
+
+    // Operation — uses intrinsic state + extrinsic params
+    public string Render(string roomId, decimal roomPrice)
+    {
+        return $"[{Icon} {AmenityType}] Room:{roomId} @${roomPrice:F0} ({Category})";
+    }
+}
 ```
-User selects room type
-        │
-        ▼
-[PROTOTYPE] RoomPrototypeRegistry.GetClone()
-        │  returns cloned template — price/capacity pre-filled
-        ▼
-[FACTORY METHOD] RoomCreator.CreateRoom()
-        │  creates the Room domain object
-        ▼
-User fills dates + booking type
-        │
-        ▼
-[BUILDER] BookingDirector.Build{Standard|Premium|Vip}()
-        │  assembles BookingRequest step by step
-        ▼
-[ABSTRACT FACTORY] IBookingFactory.Create*()
-        │  creates Booking + Pricing + Confirmation as a matched family
-        ▼
-[SINGLETON] HotelAuditLogger.Instance.Info()
-        │  every step above is logged through the single logger instance
-        ▼
-Booking saved — status: Pending
-        │
-        ▼
-User confirms booking on Bookings page
-        │
-        ▼  (optionally)
-[COMPOSITE] RoomServiceCatalog / RoomServicePackage.GetPrice()
-        │  guest orders services — packages nest recursively
-        ▼
-[FAÇADE] HotelFacade.CheckInGuest()
-        │  validates + charges room cost
-        ├──► [ADAPTER] StripePaymentAdapter.ProcessPayment()
-        │       translates decimal/guestId → Stripe ChargeCard(token, cents, USD)
-        └──► [SINGLETON] HotelAuditLogger.Instance.Info()
-        ▼
-[FAÇADE] HotelFacade.CheckOutGuest(services)
-        ├──► [COMPOSITE] sums all service totals via GetPrice()
-        ├──► [ADAPTER] charges services total via StripePaymentAdapter
-        └──► [SINGLETON] logs checkout + releases room
+
+---
+
+#### 10. Decorator — `BookingNotificationDecorator`
+
+**Problem:** When a booking is finalized, we need to send notifications. Standard booking logic shouldn't be cluttered with emails, SMS, and logging. Some guests want emails, others want SMS, others want both. Adding inherited subclasses for every combination of notification types would lead to class explosion.
+
+**Solution:** Decorator pattern wraps notification services around each other dynamically at runtime. 
+`BookingNotificationDecorator` implements `IBookingNotificationService` and forwards calls to an inner component. Concrete decorators (`EmailNotificationDecorator`, `LoggingNotificationDecorator`, `SmsNotificationDecorator`) add their specific behavior before or after delegating.
+
+```csharp
+public abstract class BookingNotificationDecorator : IBookingNotificationService
+{
+    protected readonly IBookingNotificationService _inner;
+
+    protected BookingNotificationDecorator(IBookingNotificationService inner)
+    {
+        _inner = inner;
+    }
+
+    public virtual void NotifyBookingCreated(Booking booking)
+        => _inner.NotifyBookingCreated(booking);
+        
+    // and other notification methods...
+}
 ```
+
+---
+
+#### 11. Bridge — `HotelReport × IReportDelivery`
+
+**Problem:** We need report generation. Reports have formats (Text, HTML, CSV) and deliveries (File, Email, Log, File+Email). Using inheritance would require `FileTextReport`, `EmailTextReport`, `FileHtmlReport`, etc., resulting in a M×N class explosion.
+
+**Solution:** Bridge pattern separates the Abstraction (`HotelReport` handling the format) from the Implementation (`IReportDelivery` handling the sending mechanism). `HotelReport` has a reference to `IReportDelivery`.
+
+```csharp
+public abstract class HotelReport
+{
+    protected readonly IReportDelivery _delivery; // The Bridge
+
+    protected HotelReport(IReportDelivery delivery) => _delivery = delivery;
+
+    public async Task GenerateAsync(IReadOnlyList<Booking> bookings, 
+                                    DateTime periodStart, DateTime periodEnd)
+    {
+        string title = GetTitle(periodStart, periodEnd);
+        string content = FormatContent(bookings, periodStart, periodEnd);
+        string filename = GetFilename(periodStart);
+
+        await _delivery.DeliverAsync(content, title, filename); // BRIDGE call
+    }
+
+    protected abstract string FormatContent(IReadOnlyList<Booking> bookings, DateTime from, DateTime to); 
+}
+```
+
+---
+
+#### 12. Proxy — `CachingRoomRepositoryProxy`
+
+**Problem:** Fetching all available rooms can be expensive if we query the repository repeatedly. Furthermore, we might need security checks without putting caching and authorization directly inside `RoomRepository` (violating SRP).
+
+**Solution:** A Proxy class intercepts calls. `CachingRoomRepositoryProxy` implements `IRoomRepository` and holds a reference to the real repository. It caches `GetAvailableRooms()` for 30s, and intercepts `Save()` to invalidate the cache.
+
+```csharp
+public class CachingRoomRepositoryProxy : IRoomRepository
+{
+    private readonly IRoomRepository _real;
+    private List<Room>? _availableRoomsCache;
+    private DateTime _availExpires = DateTime.MinValue;
+
+    public List<Room> GetAvailableRooms()
+    {
+        if (_availableRoomsCache != null && DateTime.UtcNow < _availExpires)
+        {
+            return new List<Room>(_availableRoomsCache); // Cache Hit
+        }
+
+        // Cache Miss
+        _availableRoomsCache = _real.GetAvailableRooms();
+        _availExpires = DateTime.UtcNow.AddSeconds(30);
+        return new List<Room>(_availableRoomsCache);
+    }
+}
+```
+
+---
+
+### Lab 6 — Behavioral Patterns I
+
+---
+
+#### 13. Strategy — `RoomPricingCalculator`
+
+**Problem:** Without Strategy, the pricing algorithm had a huge `switch`/`if-else` statement to handle Weekend Surge, Seasonal Rates, Early Bird deals, etc. Adding a new pricing rule required modifying the calculator class, which violates the Open/Closed Principle.
+
+**Solution:** We extracted pricing rules into 6 distinct classes that implement `IRoomPricingStrategy`. The `RoomPricingCalculator` (Context) holds an `IRoomPricingStrategy` and delegates the actual logic to it.
+
+```csharp
+public sealed class RoomPricingCalculator
+{
+    private IRoomPricingStrategy _strategy;
+
+    public RoomPricingCalculator(IRoomPricingStrategy initialStrategy)
+    {
+        _strategy = initialStrategy;
+    }
+
+    // Swap strategy at runtime — zero other code changes needed
+    public void SetStrategy(IRoomPricingStrategy strategy)
+    {
+        _strategy = strategy;
+    }
+
+    public PricingResult CalculatePrice(decimal basePrice, DateTime checkIn, DateTime checkOut)
+    {
+        // ALL pricing logic lives in _strategy, not here
+        return _strategy.Calculate(basePrice, checkIn, checkOut);
+    }
+}
+```
+
+**All 5 SOLID principles respected:**
+
+| Principle | Explanation |
+|---|---|
+| **S** | Each ConcreteStrategy owns one algorithm. Context owns zero pricing logic. |
+| **O** | Add strategy 7 with zero changes to Context or any existing class. |
+| **L** | Any ConcreteStrategy substitutes IRoomPricingStrategy without breaking Context. |
+| **I** | IRoomPricingStrategy declares exactly one method: Calculate(). |
+| **D** | Context depends on IRoomPricingStrategy (abstraction), never on concrete strategies. |
+
+**Pricing Calculator UI features:**
+- Base price input + date pickers + live nights counter
+- Live strategy badge (coloured) showing the active algorithm
+- 6 radio-button strategy selector — click to swap at runtime
+- Step-by-step breakdown terminal (per-night breakdown for Seasonal / Weekend Surge)
+- All 6 strategies evaluated simultaneously in a comparison table
+- ACTIVE badge on current row, BEST badge on cheapest row
+- Smart tip: "You could save $X by switching to X strategy"
+
+---
+
+## Configuration
+
+### appsettings.json
+```json
+{
+  "GmailDefaults": {
+    "Email": "your@gmail.com",
+    "AppPassword": "xxxx xxxx xxxx xxxx",
+    "DisplayName": "Grand Horizon Hotel PMS"
+  },
+  "ReportSettings": {
+    "OutputDirectory": "C:\\Users\\yourname\\Desktop\\rapoarte"
+  }
+}
+```
+
+### Demo login credentials
+| Username | Password |
+|---|---|
+| `admin` | `admin` |
+| `staff` | `staff` |
 
 ---
 
 ## How to Run
 
-1. Open `HotelBookingSystem.sln` in Visual Studio 2022
-2. Set `HotelBookingSystem` as the startup project
-3. Press `F5`
+```
+1. Open HotelBookingSystem.sln in Visual Studio 2022
+2. Confirm appsettings.json is in HotelBookingSystem/
+3. Set HotelBookingSystem as startup project
+4. Press F5
+```
 
-### Workflow
+### Full workflow
 
-| Step | Page | Patterns activated |
+| Step | Page | Patterns |
 |---|---|---|
-| Register a guest | New Booking | — |
-| Assign a room | New Booking | Prototype, Factory Method |
-| Create a booking | New Booking | Builder, Abstract Factory |
-| Confirm the booking | Bookings | — |
-| Add room services | Room Services (Composite) | Composite |
-| Charge a payment | Payment (Adapter) | Adapter |
-| Check in / Check out | Hotel Ops (Façade) | Façade + Adapter + Composite + Singleton |
-| Review all activations | Activity Log | all patterns prefixed |
+| Sign in | Login | — |
+| Register guest | New Booking | Decorator (welcome email) |
+| Assign room | New Booking | Prototype, Factory Method |
+| Create booking | New Booking | Builder, Abstract Factory, Decorator |
+| Confirm booking | All Bookings | — |
+| Add room services | Room Services | Composite |
+| Charge payment | Payments | Adapter |
+| Check in | Hotel Ops | Facade + Adapter + Singleton |
+| Check out | Hotel Ops | Facade + Composite + Adapter + Singleton |
+| Generate report | Lab 5 → Bridge | Bridge (File/Email/Both) |
+| Calculate pricing | Lab 6 → Pricing Strategy | Strategy (6 algorithms) |
+| Review all events | Activity Log | All 13 patterns prefixed |
 
 The sidebar shows a live Singleton proof: `same instance = True`.  
 The Activity Log prefixes every entry: `[Prototype]`, `[Builder]`, `[Abstract Factory]`, `[Factory Method]`, `[Singleton]`, `[Adapter]`, `[Composite]`, `[Facade]`.
+
+## Configuration
+
+### appsettings.json
+```json
+{
+  "GmailDefaults": {
+    "Email": "your@gmail.com",
+    "AppPassword": "xxxx xxxx xxxx xxxx",
+    "DisplayName": "Grand Horizon Hotel PMS"
+  },
+  "ReportSettings": {
+    "OutputDirectory": "C:\\Users\\yourname\\Desktop\\rapoarte"
+  }
+}
+```
+
+### Demo login credentials
+| Username | Password |
+|---|---|
+| `admin` | `admin` |
+| `staff` | `staff` |
+
+---
+
+## GitHub Actions Release
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+Triggers `.github/workflows/release.yml` → builds → self-contained `win-x64` publish → ZIP → GitHub Release.
