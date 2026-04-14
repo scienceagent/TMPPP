@@ -14,7 +14,7 @@ using HotelBookingSystem.Prototype;
 using HotelBookingSystem.Proxy;
 using HotelBookingSystem.Services;
 using HotelBookingSystem.Singleton;
-
+using HotelBookingSystem.Command;
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -52,6 +52,10 @@ namespace HotelBookingSystem.ViewModels
 
           private readonly BookingEventMonitor _bookingMonitor;
           public ObserverController ObserverCtrl { get; }
+
+          private readonly BookingCommandInvoker _commandInvoker;
+          private readonly BookingOperationReceiver _commandReceiver;
+          public CommandController CommandCtrl { get; }
 
           // ── Toast ─────────────────────────────────────────────────────────────
           public ToastService Toast => ToastService.Instance;
@@ -181,6 +185,23 @@ namespace HotelBookingSystem.ViewModels
                // Create the ViewModel that drives the dashboard page
                ObserverCtrl = new ObserverController(_bookingMonitor, _bookingRepository);
 
+               // ── COMMAND: Receiver + Invoker ─────────────────────────────────────────────
+               _commandReceiver = new BookingOperationReceiver(
+                   _bookingRepository,
+                   _roomRepository,          // the REAL repo, not the proxy
+                   _bookingService);
+
+               _commandInvoker = new BookingCommandInvoker();
+               _commandInvoker.OnLog += Log;
+
+               CommandCtrl = new CommandController(
+                   _commandInvoker,
+                   _commandReceiver,
+                   _bookingRepository,
+                   _roomRepository);
+
+               CommandCtrl.OnLog += Log;
+
                // ── Log wiring ────────────────────────────────────────────────────
                void Log(string m) => LogCtrl.AddLog(m);
                GuestCtrl.OnLog += Log;
@@ -196,6 +217,7 @@ namespace HotelBookingSystem.ViewModels
                StrategyCtrl.OnLog += Log;
                _bookingMonitor.OnLog += Log;
                ObserverCtrl.OnLog += Log;
+               CommandCtrl.OnLog += Log;
 
                // ── Commands ──────────────────────────────────────────────────────
                CreateGuestCommand = new RelayCommand(_ => CreateGuest());

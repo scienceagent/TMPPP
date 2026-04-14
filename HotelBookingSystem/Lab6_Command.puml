@@ -1,0 +1,154 @@
+﻿@startuml Lab6_Command
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #F5F3FF
+}
+skinparam interface {
+    BackgroundColor #EDE9FE
+    BorderColor #7C3AED
+}
+
+title <b>Command Pattern — Hotel Operations with Undo/Redo</b>\nLab 6  ·  HotelBookingSystem ·  C# WPF
+
+note as N1
+  <b>Without Command:</b>
+  Undo logic scattered across ViewModels.
+  Each ViewModel knows how to reverse its own operations.
+  Adding Undo to any new operation = modify that ViewModel.
+
+  <b>With Command:</b>
+  Every operation encapsulates its own Undo().
+  Invoker holds a generic Stack<IHotelCommand>.
+  Adding operation 6 = 1 new class, zero Invoker changes.
+end note
+
+' ── COMMAND INTERFACE ────────────────────────────────────────────────────────
+interface IHotelCommand {
+    + Description : string
+    + Category    : string
+    + CanUndo     : bool
+    + ExecutedAt  : DateTime?
+    + Execute()   : void
+    + Undo()      : void
+}
+
+' ── RECEIVER ────────────────────────────────────────────────────────────────
+class BookingOperationReceiver {
+    - _bookingRepo    : IBookingRepository
+    - _roomRepo       : IRoomRepository
+    - _bookingService : IBookingService
+    --
+    + SaveBooking(booking) : void
+    + RemoveBooking(bookingId) : void
+    + ConfirmBooking(bookingId) : void
+    + RevertBookingToPending(bookingId) : void
+    + CancelBooking(bookingId) : void
+    + RestoreBookingStatus(bookingId, status) : void
+    + GetRoomBasePrice(roomId) : decimal
+    + SetRoomBasePrice(roomId, price) : void
+    note: performs the ACTUAL work\ncommands delegate here
+}
+
+' ── CONCRETE COMMANDS ────────────────────────────────────────────────────────
+abstract class HotelCommandBase {
+    # _receiver : BookingOperationReceiver
+    + ExecutedAt : DateTime?
+    + Execute() : void     <<sets timestamp>>
+    # DoExecute() : void   <<abstract>>
+    + Undo() : void        <<abstract>>
+}
+
+class CreateBookingCommand {
+    - _booking : Booking
+    + Execute() → SaveBooking()
+    + Undo()    → RemoveBooking()
+}
+
+class ConfirmBookingCommand {
+    - _bookingId    : string
+    - _prevStatus   : BookingStatus
+    + Execute() → ConfirmBooking()    <<snapshots status first>>
+    + Undo()    → RevertToPending()
+}
+
+class CancelBookingCommand {
+    - _bookingId    : string
+    - _prevStatus   : BookingStatus
+    + Execute() → CancelBooking()     <<snapshots status first>>
+    + Undo()    → RestoreStatus()
+}
+
+class AdjustRoomPriceCommand {
+    - _roomId   : string
+    - _newPrice : decimal
+    - _oldPrice : decimal             <<snapshot>>
+    + Execute() → SetRoomBasePrice(new)
+    + Undo()    → SetRoomBasePrice(old)
+    note: undo restores exact snapshot\nnot "subtract delta"
+}
+
+class RebookGuestCommand {
+    - _originalBookingId : string
+    - _newBooking        : Booking
+    - _executedSubCmds   : Stack<IHotelCommand>
+    + Execute() → CancelCmd + CreateCmd  <<atomic>>
+    + Undo()    → Pop and undo all sub-cmds in reverse
+    note: Macro — composite of\n2 sub-commands with\natomic Undo
+}
+
+' ── INVOKER ─────────────────────────────────────────────────────────────────
+class BookingCommandInvoker {
+    - _undoStack : Stack<IHotelCommand>
+    - _redoStack : Stack<IHotelCommand>
+    - _history   : List<CommandHistoryEntry>
+    --
+    + Execute(command)                  : void
+    + Undo()                            : bool
+    + Redo()                            : bool
+    + UndoAll()                         : void
+    + ExecuteTransaction(cmds, label)   : bool
+    note: knows NOTHING about what\ncommands do — pure stack management
+}
+
+' ── CLIENT / VIEWMODEL ──────────────────────────────────────────────────────
+class CommandController {
+    - _invoker   : BookingCommandInvoker
+    - _receiver  : BookingOperationReceiver
+    + UndoCount  : int
+    + RedoCount  : int
+    + HistoryRows : ObservableCollection
+    + ConfirmBookingCommand : ICommand
+    + CancelBookingCommand  : ICommand
+    + AdjustPriceCommand    : ICommand
+    + RebookCommand         : ICommand
+    + UndoCommand / RedoCommand : ICommand
+    + DemoTransactionCommand : ICommand
+}
+
+' ── RELATIONS ────────────────────────────────────────────────────────────────
+IHotelCommand <|.. HotelCommandBase
+HotelCommandBase <|-- CreateBookingCommand
+HotelCommandBase <|-- ConfirmBookingCommand
+HotelCommandBase <|-- CancelBookingCommand
+HotelCommandBase <|-- AdjustRoomPriceCommand
+HotelCommandBase <|-- RebookGuestCommand
+
+HotelCommandBase       --> BookingOperationReceiver : "_receiver\n<<delegates work>>"
+RebookGuestCommand o--> IHotelCommand              : "sub-commands\n(atomic Undo)"
+
+BookingCommandInvoker o--> "0..*" IHotelCommand : "_undoStack / _redoStack"
+
+CommandController --> BookingCommandInvoker     : "_invoker\nExecute / Undo / Redo"
+CommandController --> BookingOperationReceiver  : "_receiver\n(creates commands with it)"
+
+@enduml
