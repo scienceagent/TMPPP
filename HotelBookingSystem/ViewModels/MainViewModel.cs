@@ -15,6 +15,7 @@ using HotelBookingSystem.Proxy;
 using HotelBookingSystem.Services;
 using HotelBookingSystem.Singleton;
 using HotelBookingSystem.Command;
+using HotelBookingSystem.Memento;
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -56,6 +57,8 @@ namespace HotelBookingSystem.ViewModels
           private readonly BookingCommandInvoker _commandInvoker;
           private readonly BookingOperationReceiver _commandReceiver;
           public CommandController CommandCtrl { get; }
+
+          public MementoController MementoCtrl { get; }
 
           // ── Toast ─────────────────────────────────────────────────────────────
           public ToastService Toast => ToastService.Instance;
@@ -201,6 +204,22 @@ namespace HotelBookingSystem.ViewModels
                    _roomRepository);
 
                CommandCtrl.OnLog += Log;
+
+               MementoCtrl = new MementoController(
+                   _bookingRepository,
+                   _roomRepository,
+                   _userRepository,
+                   _bookingService);
+
+               MementoCtrl.OnLog += Log;
+               MementoCtrl.OnFormSubmitted += () =>
+               {
+                   // Refresh dependent controllers after a booking is created via the form
+                   BookingCtrl.RefreshBookings();
+                   DecoratorCtrl.RefreshBookings();
+                   FacadeCtrl.RefreshBookings();
+                   ObserverCtrl?.RefreshAll();
+               };
 
                // ── Log wiring ────────────────────────────────────────────────────
                void Log(string m) => LogCtrl.AddLog(m);
