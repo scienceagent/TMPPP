@@ -16,6 +16,7 @@ using HotelBookingSystem.Services;
 using HotelBookingSystem.Singleton;
 using HotelBookingSystem.Command;
 using HotelBookingSystem.Memento;
+using HotelBookingSystem.Iterator;
 
 namespace HotelBookingSystem.ViewModels
 {
@@ -59,6 +60,7 @@ namespace HotelBookingSystem.ViewModels
           public CommandController CommandCtrl { get; }
 
           public MementoController MementoCtrl { get; }
+          public IteratorController IteratorCtrl { get; }
 
           // ── Toast ─────────────────────────────────────────────────────────────
           public ToastService Toast => ToastService.Instance;
@@ -221,6 +223,12 @@ namespace HotelBookingSystem.ViewModels
                    ObserverCtrl?.RefreshAll();
                };
 
+               IteratorCtrl = new IteratorController(
+                   _bookingRepository,
+                   _roomRepository,
+                   _userRepository);
+               IteratorCtrl.OnLog += Log;
+
                // ── Log wiring ────────────────────────────────────────────────────
                void Log(string m) => LogCtrl.AddLog(m);
                GuestCtrl.OnLog += Log;
@@ -266,7 +274,11 @@ namespace HotelBookingSystem.ViewModels
                     }
                });
                
-               RefreshBookingsCommand = new RelayCommand(_ => BookingCtrl.RefreshBookings());
+               RefreshBookingsCommand = new RelayCommand(_ => 
+               {
+                   BookingCtrl.RefreshBookings();
+                   IteratorCtrl.RefreshStats();
+               });
                ProcessPaymentCommand = new RelayCommand(_ => PaymentCtrl.ProcessPayment(GuestCtrl.CurrentGuestId));
                RefundPaymentCommand = new RelayCommand(_ => PaymentCtrl.RefundPayment(GuestCtrl.CurrentGuestId));
                AddServiceCommand = new RelayCommand(_ => ServiceCtrl.AddToOrder());
@@ -366,6 +378,7 @@ namespace HotelBookingSystem.ViewModels
 
                DecoratorCtrl.RefreshBookings();
                FacadeCtrl.RefreshBookings();
+               IteratorCtrl.RefreshStats();
           }
      }
 }

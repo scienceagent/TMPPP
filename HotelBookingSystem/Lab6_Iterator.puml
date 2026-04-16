@@ -1,0 +1,147 @@
+﻿@startuml Lab6_Iterator
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #ECFDF5
+}
+skinparam interface {
+    BackgroundColor #D1FAE5
+    BorderColor #059669
+}
+
+title <b>Iterator Pattern — Booking Collection Traversal</b>\nLab 6  ·  HotelBookingSystem  ·  Raevschi Grigore TI-231
+
+note as N1
+  <b>Without Iterator:</b>
+  BookingReportEngine imports List<Booking>, calls LINQ directly.
+  Changing storage from List to DB breaks every report.
+
+  <b>With Iterator:</b>
+  ReportEngine only calls HasNext() / Next().
+  Changing storage or adding traversal strategy = zero report changes.
+  6 independent iterators run simultaneously on the same collection.
+end note
+
+' ── ITERATOR INTERFACE ──────────────────────────────────────────────────────
+interface IBookingIterator {
+    + HasNext()      : bool
+    + Next()         : Booking
+    + Reset()        : void
+    + Peek()         : Booking?
+    + CurrentIndex   : int
+    + TotalCount     : int
+    + IteratorName   : string
+}
+
+' ── AGGREGATE INTERFACE ─────────────────────────────────────────────────────
+interface IBookingCollection {
+    + CreateSequentialIterator()             : IBookingIterator
+    + CreateChronologicalIterator()          : IBookingIterator
+    + CreateStatusFilterIterator(status)     : IBookingIterator
+    + CreateDateRangeIterator(from, to)      : IBookingIterator
+    + CreateRecentIterator(count)            : IBookingIterator
+    + CreateTypeFilterIterator(bookingType)  : IBookingIterator
+    + AsEnumerable()                        : IEnumerable<Booking>
+}
+
+' ── CONCRETE AGGREGATE ──────────────────────────────────────────────────────
+class BookingCollection {
+    - _repository : IBookingRepository
+    --
+    + TotalCount : int
+    + CreateSequentialIterator()            : IBookingIterator
+    + CreateChronologicalIterator()         : IBookingIterator
+    + CreateStatusFilterIterator(status)    : IBookingIterator
+    + CreateDateRangeIterator(from, to)     : IBookingIterator
+    + CreateRecentIterator(count)           : IBookingIterator
+    + CreateTypeFilterIterator(type)        : IBookingIterator
+    + GetEnumerator()                       : IEnumerator<Booking>
+    note: wraps IBookingRepository\nexposes only iterator factory methods\nclient never sees List<Booking>
+}
+
+' ── CONCRETE ITERATORS ───────────────────────────────────────────────────────
+abstract class BookingIteratorBase {
+    # _items    : IReadOnlyList<Booking>
+    # _position : int
+    + HasNext() / Next() / Reset() / Peek()
+    + CurrentIndex / TotalCount
+}
+
+class SequentialBookingIterator {
+    + IteratorName = "Sequential (creation order)"
+    note: insertion order · no sort
+}
+
+class ChronologicalBookingIterator {
+    + IteratorName = "Chronological (check-in ASC)"
+    note: sorted by CheckInDate at ctor
+}
+
+class StatusFilterIterator {
+    - _status   : BookingStatus
+    - _filtered : List<Booking>
+    + IteratorName = "Status Filter ({status})"
+    note: Pending / Confirmed / Cancelled
+}
+
+class DateRangeIterator {
+    - _from / _to : DateTime
+    + IteratorName = "Date Range (dd MMM – dd MMM)"
+    note: check-in within [from, to]
+}
+
+class RecentBookingsIterator {
+    - _count  : int
+    - _recent : IReadOnlyList<Booking>
+    + IteratorName = "Recent ({count}, newest first)"
+    note: lazy stop after N · newest first
+}
+
+class TypeFilterIterator {
+    - _bookingType : string
+    + IteratorName = "Type Filter ({type})"
+    note: Standard / Premium / VIP
+}
+
+' ── CLIENT ───────────────────────────────────────────────────────────────────
+class BookingReportEngine {
+    + GenerateSummaryReport(collection, userRepo, roomRepo) : string
+    + GenerateOccupancyTimeline(collection, roomRepo)       : string
+    + GenerateRevenueByTypeReport(collection, roomRepo)     : string
+    + GenerateStatusReport(collection, roomRepo)            : string
+    + GenerateRecentReport(collection, roomRepo, count)     : string
+    + GenerateDateRangeReport(collection, roomRepo, f, t)   : string
+    note: uses ONLY IBookingIterator\nnever imports List or repository
+}
+
+' ── RELATIONS ────────────────────────────────────────────────────────────────
+IBookingIterator <|.. BookingIteratorBase
+BookingIteratorBase <|-- SequentialBookingIterator
+BookingIteratorBase <|-- ChronologicalBookingIterator
+BookingIteratorBase <|-- DateRangeIterator
+BookingIteratorBase <|-- TypeFilterIterator
+IBookingIterator <|.. StatusFilterIterator
+IBookingIterator <|.. RecentBookingsIterator
+
+IBookingCollection <|.. BookingCollection
+
+BookingCollection ..> SequentialBookingIterator     : <<creates>>
+BookingCollection ..> ChronologicalBookingIterator  : <<creates>>
+BookingCollection ..> StatusFilterIterator          : <<creates>>
+BookingCollection ..> DateRangeIterator             : <<creates>>
+BookingCollection ..> RecentBookingsIterator        : <<creates>>
+BookingCollection ..> TypeFilterIterator            : <<creates>>
+
+BookingReportEngine --> IBookingCollection  : "requests iterators"
+BookingReportEngine --> IBookingIterator   : "HasNext() / Next()"
+
+@enduml

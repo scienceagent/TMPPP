@@ -1,0 +1,136 @@
+﻿@startuml Lab6_Strategy
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #EFF6FF
+}
+skinparam interface {
+    BackgroundColor #DBEAFE
+    BorderColor #2563EB
+}
+
+title <b>Strategy Pattern — Room Pricing Algorithms</b>\nLab 6  ·  HotelBookingSystem  ·  Raevschi Grigore TI-231
+
+note as N1
+  <b>Without Strategy:</b>
+  RoomPricingCalculator would contain a switch/if-else
+  with 6 branches. Adding branch 7 modifies the class.
+
+  <b>With Strategy:</b>
+  Calculator has ZERO pricing logic.
+  Adding algorithm 7 = add 1 new class only.
+  Zero changes to calculator or existing strategies.
+end note
+
+' ── STRATEGY INTERFACE ─────────────────────────────────────────────────────
+interface IRoomPricingStrategy {
+    + Name        : string
+    + Description : string
+    + ColorHex    : string
+    + Calculate(basePrice, checkIn, checkOut) : PricingResult
+}
+
+' ── RESULT DTO ──────────────────────────────────────────────────────────────
+class PricingResult {
+    + StrategyName         : string
+    + BaseTotal            : decimal
+    + FinalTotal           : decimal
+    + Discount             : decimal
+    + DiscountPercent      : decimal
+    + Nights               : int
+    + EffectiveNightlyRate : decimal
+    + Breakdown            : string
+}
+
+' ── CONTEXT ─────────────────────────────────────────────────────────────────
+class RoomPricingCalculator {
+    - _strategy : IRoomPricingStrategy
+    --
+    + RoomPricingCalculator(initialStrategy)
+    + SetStrategy(strategy) : void          <<runtime swap>>
+    + CurrentStrategy : IRoomPricingStrategy
+    + CalculatePrice(basePrice, checkIn, checkOut) : PricingResult
+    + CompareAllStrategies(...) : IReadOnlyList<PricingResult>
+    note: contains ZERO pricing logic\ndelegates entirely to _strategy
+}
+
+' ── CONCRETE STRATEGIES ─────────────────────────────────────────────────────
+class StandardRateStrategy {
+    + Name     = "Standard Rate"
+    + ColorHex = "#2E9CCA"
+    + Calculate(...) : PricingResult
+    note: base × nights, no adjustment
+}
+
+class WeekendSurgeStrategy {
+    + Name     = "Weekend Surge"
+    + ColorHex = "#F59E0B"
+    + Calculate(...) : PricingResult
+    note: Fri+Sat nights ×1.5
+}
+
+class EarlyBirdStrategy {
+    + Name     = "Early Bird"
+    + ColorHex = "#10B981"
+    + Calculate(...) : PricingResult
+    note: 30+ days: 20% off\n14-29 days: 10% off
+}
+
+class LastMinuteDealStrategy {
+    + Name     = "Last Minute Deal"
+    + ColorHex = "#EF4444"
+    + Calculate(...) : PricingResult
+    note: 0-3 days: 25% off\n4-7 days: 15% off
+}
+
+class LongStayStrategy {
+    + Name     = "Long Stay Discount"
+    + ColorHex = "#8B5CF6"
+    + Calculate(...) : PricingResult
+    note: 7n: 5% · 14n: 10%\n21n: 15% · 28n+: 20%
+}
+
+class SeasonalRateStrategy {
+    + Name     = "Seasonal Rate"
+    + ColorHex = "#F97316"
+    + Calculate(...) : PricingResult
+    note: Summer +40% · Winter +30%\nSpring +5% · Autumn std (per-night)
+}
+
+' ── CLIENT / VIEW MODEL ─────────────────────────────────────────────────────
+class StrategyController {
+    - _allStrategies : List<IRoomPricingStrategy>
+    - _calculator    : RoomPricingCalculator
+    + BasePrice             : decimal
+    + CheckIn / CheckOut    : DateTime
+    + SelectedStrategyName  : string
+    + ComparisonRows        : ObservableCollection<StrategyComparisonRow>
+    + BestOptionNote        : string
+    + RunCalculation()      : void
+}
+
+' ── RELATIONS ───────────────────────────────────────────────────────────────
+IRoomPricingStrategy <|.. StandardRateStrategy
+IRoomPricingStrategy <|.. WeekendSurgeStrategy
+IRoomPricingStrategy <|.. EarlyBirdStrategy
+IRoomPricingStrategy <|.. LastMinuteDealStrategy
+IRoomPricingStrategy <|.. LongStayStrategy
+IRoomPricingStrategy <|.. SeasonalRateStrategy
+
+RoomPricingCalculator o--> IRoomPricingStrategy  : "_strategy\n<<delegates to>>"
+RoomPricingCalculator ..>  PricingResult          : <<returns>>
+IRoomPricingStrategy  ..>  PricingResult          : <<produces>>
+
+StrategyController --> RoomPricingCalculator     : uses Context
+StrategyController o--> IRoomPricingStrategy     : "_allStrategies[6]"
+
+@enduml

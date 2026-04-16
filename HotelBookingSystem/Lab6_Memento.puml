@@ -1,0 +1,136 @@
+﻿@startuml Lab6_Memento
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #F5F3FF
+}
+skinparam interface {
+    BackgroundColor #EDE9FE
+    BorderColor #7C3AED
+}
+
+title <b>Memento Pattern — Smart Booking Form with Undo/Redo</b>\nLab 6  ·  HotelBookingSystem  ·  Raevschi Grigore TI-231
+
+note as N1
+  <b>Command vs Memento:</b>
+  Command Undo: executes the INVERSE operation (revert to Pending).
+              Knows HOW to undo the operation.
+  Memento Undo: restores the RAW SAVED STATE (all 17 form fields).
+              Knows WHAT the state was, not how to undo it.
+  Memento is the right choice here because calculating the
+  "inverse" of 8 simultaneous field edits is impractical.
+end note
+
+' ── MEMENTO ─────────────────────────────────────────────────────────────────
+class BookingFormSnapshot <<sealed>> {
+    .. Public (Caretaker visible) ..
+    + Label     : string
+    + SavedAt   : DateTime
+    + StepIndex : int
+    + Summary   : string
+    + TimestampFmt : string
+    + AgeLabel     : string
+    .. Internal (Originator only) ..
+    ~~ GuestId, GuestName, GuestEmail ~~
+    ~~ GuestNationality, GuestPassport ~~
+    ~~ RoomId, RoomNumber, RoomType ~~
+    ~~ RoomPrice, RoomCapacity ~~
+    ~~ CheckIn, CheckOut, BookingType ~~
+    ~~ BreakfastIncluded, AirportTransfer ~~
+    ~~ SpecialRequest, Notes ~~
+    --
+    <<internal>> BookingFormSnapshot(...)
+    note: internal ctor + internal fields\nCaretaker sees ONLY metadata\nOriginator sees ALL state
+}
+
+' ── ORIGINATOR ───────────────────────────────────────────────────────────────
+class BookingFormOriginator <<sealed>> {
+    .. Step 1 — Guest ..
+    + GuestId, GuestName, GuestEmail : string
+    + GuestNationality, GuestPassport : string
+    .. Step 2 — Room ..
+    + RoomId, RoomNumber, RoomType   : string
+    + RoomPrice   : decimal
+    + RoomCapacity : int
+    .. Step 3 — Details ..
+    + CheckIn / CheckOut    : DateTime
+    + BookingType           : string
+    + BreakfastIncluded     : bool
+    + AirportTransfer       : bool
+    + SpecialRequest, Notes : string
+    .. Derived ..
+    + IsGuestValid / IsRoomValid / IsDatesValid : bool
+    + IsFormComplete : bool
+    + Nights : int
+    --
+    + Save(label?) : BookingFormSnapshot   <<creates Memento>>
+    + Restore(snapshot) : void             <<reads internal fields>>
+    + Reset() : void
+    - AutoLabel() : string
+}
+
+' ── CARETAKER ────────────────────────────────────────────────────────────────
+class BookingFormHistory <<sealed>> {
+    - _undoStack      : Stack<BookingFormSnapshot>
+    - _redoStack      : Stack<BookingFormSnapshot>
+    - _namedCheckpoints : List<NamedCheckpoint>
+    - MaxSnapshots    : int = 50
+    --
+    + UndoCount / RedoCount / NamedCount : int
+    + SaveState(originator, label?) : void   <<push to undo stack>>
+    + Undo(originator)              : bool   <<pop undo, push redo>>
+    + Redo(originator)              : bool   <<pop redo, push undo>>
+    + SaveNamedCheckpoint(originator, name) : void
+    + JumpToCheckpoint(originator, name)   : bool
+    + ClearAll()  : void
+    note: treats snapshots as OPAQUE tokens\nreads only Label/SavedAt/Summary\nNEVER accesses form field data
+}
+
+class NamedCheckpoint {
+    + Name     : string
+    + Snapshot : BookingFormSnapshot
+    + TimeFmt  : string
+    + AgeFmt   : string
+    + Summary  : string
+}
+
+' ── CLIENT / VIEWMODEL ───────────────────────────────────────────────────────
+class MementoController {
+    - _originator : BookingFormOriginator
+    - _caretaker  : BookingFormHistory
+    --
+    + GuestName / GuestEmail / ...   : string  <<proxies to Originator>>
+    + CheckIn / CheckOut             : DateTime
+    + UndoCount / RedoCount          : int
+    + CheckpointTimeline             : ObservableCollection<BookingFormSnapshot>
+    + NamedCheckpoints               : ObservableCollection<NamedCheckpoint>
+    --
+    + UndoCommand / RedoCommand      : ICommand
+    + SaveCheckpointCommand          : ICommand
+    + JumpCheckpointCommand          : ICommand
+    + SubmitCommand                  : ICommand
+    - AutoSave()                     : void  <<called on every field change>>
+    - PushOriginatorToUI()           : void  <<called after Undo/Redo>>
+}
+
+' ── RELATIONS ────────────────────────────────────────────────────────────────
+BookingFormOriginator ..>  BookingFormSnapshot  : <<creates via Save()>>
+BookingFormOriginator ..>  BookingFormSnapshot  : <<reads via Restore()>>
+
+BookingFormHistory    o-->  "0..*" BookingFormSnapshot : "_undoStack / _redoStack\n(opaque tokens)"
+BookingFormHistory    o-->  "0..*" NamedCheckpoint
+NamedCheckpoint       -->  BookingFormSnapshot
+
+MementoController --> BookingFormOriginator : "_originator"
+MementoController --> BookingFormHistory    : "_caretaker"
+
+@enduml

@@ -1,0 +1,161 @@
+﻿@startuml Lab6_Observer
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #FFFBEB
+}
+skinparam interface {
+    BackgroundColor #FEF3C7
+    BorderColor #D97706
+}
+
+title <b>Observer Pattern — Booking Event Monitoring</b>\nLab 6  ·  HotelBookingSystem  ·  Raevschi Grigore TI-231
+
+note as N1
+  <b>One event, five independent reactions.</b>
+  Subject fires BookingCreated →
+    OccupancyObserver  updates room counts
+    RevenueObserver    accumulates revenue
+    AlertObserver      checks thresholds
+    AuditLogObserver   writes audit entry
+    DashboardObserver  refreshes KPI counters
+  None know about each other.
+  Adding observer 6 = add 1 class, zero other changes.
+end note
+
+' ── BOOKING EVENT (data object) ─────────────────────────────────────────────
+class BookingEvent <<record>> {
+    + EventId       : string
+    + EventType     : BookingEventType
+    + BookingId     : string
+    + BookingType   : string
+    + GuestName     : string
+    + RoomNumber    : string
+    + BasePrice     : decimal
+    + CheckIn       : DateTime
+    + CheckOut      : DateTime
+    + Nights        : int
+    + TotalValue    : decimal
+    + OccurredAt    : DateTime
+    --
+    + {static} From(type, booking, ...) : BookingEvent
+}
+
+' ── OBSERVER INTERFACE ──────────────────────────────────────────────────────
+interface IBookingObserver {
+    + Name        : string
+    + Description : string
+    + ColorHex    : string
+    + OnBookingEvent(evt : BookingEvent) : void
+}
+
+' ── SUBJECT ─────────────────────────────────────────────────────────────────
+class BookingEventMonitor {
+    - _observers : List<IBookingObserver>
+    --
+    + Subscribe(observer)             : void
+    + Unsubscribe(observer)           : void
+    + ObserverCount                   : int
+    + NotifyBookingCreated(booking)   : void
+    + NotifyBookingConfirmed(booking) : void
+    + NotifyBookingCancelled(booking) : void
+    + NotifyGuestCheckedIn(booking)   : void
+    + NotifyGuestCheckedOut(booking)  : void
+    - Notify(type, booking)           : void <<broadcasts to all>>
+    note: never knows concrete\nobserver types
+}
+
+' ── CONCRETE OBSERVERS ──────────────────────────────────────────────────────
+class OccupancyObserver {
+    - _reserved  : int
+    - _occupied  : int
+    - _cancelled : int
+    + Reserved / Occupied / Available : int
+    + OccupancyRate : decimal
+    + OnBookingEvent(evt) : void
+}
+
+class RevenueObserver {
+    - _totalRevenue     : decimal
+    - _confirmedRevenue : decimal
+    - _revenueByType    : Dictionary<string,decimal>
+    + TotalRevenue     : decimal
+    + AvgNightlyRate   : decimal
+    + TopRevenueType   : string
+    + OnBookingEvent(evt) : void
+}
+
+class AlertObserver {
+    - _cancellationCount : int
+    - _reservedRooms     : HashSet<string>
+    - _alerts            : List<AlertEntry>
+    + AlertCount         : int
+    + Alerts             : IReadOnlyList<AlertEntry>
+    + OnBookingEvent(evt) : void
+    note: high-value, cancellation\nburst, double-booking
+}
+
+class AuditLogObserver {
+    - _entries : List<AuditEntry>
+    + Entries  : IReadOnlyList<AuditEntry>
+    + OnBookingEvent(evt) : void
+}
+
+class DashboardObserver {
+    - _totalCreated   : int
+    - _totalConfirmed : int
+    - _totalCancelled : int
+    - _totalRevenue   : decimal
+    + ConfirmationRate : decimal
+    + AvgStayNights    : decimal
+    + OnBookingEvent(evt) : void
+}
+
+' ── CLIENT / VIEWMODEL ──────────────────────────────────────────────────────
+class MainViewModel {
+    + ObserverCtrl : ObserverController
+    - _monitor     : BookingEventMonitor
+    - CreateGuest() : void
+    - CreateBooking() : void   <<calls monitor.NotifyBookingCreated>>
+}
+
+class ObserverController {
+    - _monitor    : BookingEventMonitor
+    - _dashboard  : DashboardObserver
+    - _occupancy  : OccupancyObserver
+    - _revenue    : RevenueObserver
+    + KpiBookings / KpiRevenue / KpiOccupancy / KpiAlerts : KpiCard
+    + AuditEntries : ObservableCollection
+    + AlertEntries : ObservableCollection
+    + RefreshAll() : void
+}
+
+' ── RELATIONS ───────────────────────────────────────────────────────────────
+IBookingObserver <|.. OccupancyObserver
+IBookingObserver <|.. RevenueObserver
+IBookingObserver <|.. AlertObserver
+IBookingObserver <|.. AuditLogObserver
+IBookingObserver <|.. DashboardObserver
+
+BookingEventMonitor o--> "0..*" IBookingObserver : "_observers\n<<notifies all>>"
+BookingEventMonitor ..> BookingEvent              : <<creates + passes>>
+IBookingObserver    ..> BookingEvent              : <<receives>>
+
+MainViewModel  --> BookingEventMonitor : "_monitor\ncalls Notify*()"
+ObserverController --> BookingEventMonitor : reads observers
+ObserverController --> DashboardObserver
+ObserverController --> OccupancyObserver
+ObserverController --> RevenueObserver
+ObserverController --> AlertObserver
+ObserverController --> AuditLogObserver
+
+@enduml
