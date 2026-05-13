@@ -1,27 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Observer
 {
-     // ══════════════════════════════════════════════════════════════════════════
-     // SUBJECT (Observable)
-     // BookingEventMonitor maintains the list of registered IBookingObserver
-     // instances and notifies ALL of them when a booking state change occurs.
-     //
-     // Key design decisions:
-     //   • Subscribe / Unsubscribe at runtime — observers can be added/removed
-     //     without modifying this class (OCP respected)
-     //   • Subject knows nothing about concrete observers — it only holds
-     //     IBookingObserver references (DIP respected)
-     //   • Notification is synchronous and ordered by subscription position
-     //   • A defensive copy is iterated so an observer can unsubscribe itself
-     //     from within OnBookingEvent without ConcurrentModificationException
-     //   • All domain lookups (guest name, room number) happen HERE so observers
-     //     receive fully resolved data and never need to call repositories
-     // ══════════════════════════════════════════════════════════════════════════
-     public sealed class BookingEventMonitor
+     // --------------------------------------------------------------------------
+     // SUBIECTUL (Observable) - BookingEventMonitor
+     // Mentine o lista de ascultatori inregistrati la care trimite mesaje la nivel global.
+     // Notifica toti ascultatorii la evenimente specifice prin functia `Notify`.
+     // Rezolva el relatiile la inregistrare si trimite pachetul catre toti fara exceptie.
+     // --------------------------------------------------------------------------
+     public class BookingEventMonitor
      {
           private readonly List<IBookingObserver> _observers = new();
 
@@ -42,7 +32,7 @@ namespace HotelBookingSystem.Observer
                _userRepository = userRepository;
           }
 
-          // ── Observer registration ──────────────────────────────────────────────
+          // -- Observer registration ----------------------------------------------
 
           public void Subscribe(IBookingObserver observer)
           {
@@ -62,7 +52,7 @@ namespace HotelBookingSystem.Observer
           public IReadOnlyList<IBookingObserver> Observers => _observers;
           public int ObserverCount => _observers.Count;
 
-          // ── Notification entry points ──────────────────────────────────────────
+          // -- Notification entry points ------------------------------------------
           // These are called by MainViewModel whenever a booking state changes.
           // The Subject resolves names from repositories so observers get full data.
 
@@ -81,30 +71,30 @@ namespace HotelBookingSystem.Observer
           public void NotifyGuestCheckedOut(Booking booking)
               => Notify(BookingEventType.GuestCheckedOut, booking);
 
-          // ── Core dispatch ─────────────────────────────────────────────────────
+          // -- Core dispatch -----------------------------------------------------
 
           private void Notify(BookingEventType type, Booking booking)
           {
-               // Resolve names once — observers receive complete, ready-to-use data
+               // Resolve names once � observers receive complete, ready-to-use data
                string guestName = _userRepository.FindById(booking.UserId)?.Name ?? "Unknown Guest";
                var room = _roomRepository.FindById(booking.RoomId);
-               string roomNumber = room?.RoomNumber ?? "—";
+               string roomNumber = room?.RoomNumber ?? "�";
                decimal basePrice = room?.BasePrice ?? 0m;
 
                var evt = BookingEvent.From(type, booking, guestName, roomNumber, basePrice);
 
                OnLog?.Invoke(
-                   $"[Observer:Subject] {type} → firing to {_observers.Count} observer(s)  " +
-                   $"[{booking.BookingId[..8]}… · {guestName} · Room {roomNumber}]");
+                   $"[Observer:Subject] {type} ? firing to {_observers.Count} observer(s)  " +
+                   $"[{booking.BookingId[..8]}� � {guestName} � Room {roomNumber}]");
 
-               // Defensive copy — safe if an observer unsubscribes itself during iteration
+               // Defensive copy � safe if an observer unsubscribes itself during iteration
                var snapshot = new List<IBookingObserver>(_observers);
                foreach (var observer in snapshot)
                {
                     try
                     {
                          observer.OnBookingEvent(evt);
-                         OnLog?.Invoke($"  [{observer.Name}] notified ✓");
+                         OnLog?.Invoke($"  [{observer.Name}] notified ?");
                     }
                     catch (Exception ex)
                     {
@@ -115,3 +105,4 @@ namespace HotelBookingSystem.Observer
           }
      }
 }
+

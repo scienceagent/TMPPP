@@ -1,0 +1,103 @@
+@startuml Lab7_TemplateMethod
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #EFF6FF
+}
+skinparam interface {
+    BackgroundColor #DBEAFE
+    BorderColor #2563EB
+}
+
+title <b>Template Method Pattern — Report & Invoice Generation</b>\nLab 7  ·  HotelBookingSystem  ·  Raevschi Grigore TI-231
+
+note as N1
+  <b>Definition:</b>
+  Template Method defines the skeleton of an 
+  algorithm in a base class, letting subclasses 
+  override specific steps without changing 
+  the overall structure.
+
+  <b>Hollywood Principle:</b>
+  "Don't call us, we'll call you."
+end note
+
+' ── ABSTRACT CLASS ──────────────────────────────────────────────────────────
+abstract class InvoiceGenerator {
+    + GenerateInvoice(booking, room): string  <<Template Method>>
+    --
+    # {abstract} FormatHeader(booking): string
+    # {abstract} FormatGuestInfo(booking): string
+    # {abstract} FormatRoomCharges(booking, room): string
+    # {abstract} FormatTotal(booking, room): string
+    # {abstract} SendToGuest(booking, content): void
+    # FormatFooter(): string <<virtual>>
+    # OnBeforeGeneration(b, sb): void <<hook>>
+    # OnAfterGeneration(b, sb): void <<hook>>
+}
+
+' ── CONCRETE CLASSES ────────────────────────────────────────────────────────
+class EmailInvoiceGenerator {
+    # FormatHeader(booking): string
+    # FormatGuestInfo(booking): string
+    # FormatRoomCharges(booking, room): string
+    # FormatTotal(booking, room): string
+    # SendToGuest(booking, content): void
+    # OnBeforeGeneration(b, sb): void
+    # OnAfterGeneration(b, sb): void
+}
+
+class PdfInvoiceGenerator {
+    # FormatHeader(booking): string
+    # FormatGuestInfo(booking): string
+    # FormatRoomCharges(booking, room): string
+    # FormatTotal(booking, room): string
+    # SendToGuest(booking, content): void
+}
+
+' ── RELATIONS ──────────────────────────────────────────────────────────────
+InvoiceGenerator <|-- EmailInvoiceGenerator
+InvoiceGenerator <|-- PdfInvoiceGenerator
+
+' ── SECOND HIERARCHY (AUDIT) ────────────────────────────────────────────────
+package "Audit Reporting (Banking Example)" <<Rectangle>> {
+    abstract class AuditReportGenerator {
+        + GenerateReport(reportId, period): void <<sealed Template Method>>
+        --
+        # {abstract} FetchData(id, period): IEnumerable<AuditEntry>
+        # {abstract} ProcessData(data): ReportSummary
+        # {abstract} FormatReport(id, summary): string
+        # {abstract} Export(content, reportId): void
+        # OnBeforeExport(reportId): void <<hook>>
+        # OnAfterExport(reportId): void <<hook>>
+    }
+
+    class PdfAuditReportGenerator {
+        # FetchData(...)
+        # ProcessData(...)
+        # FormatReport(...)
+        # Export(...)
+        # OnAfterExport(...)
+    }
+
+    class CsvAuditReportGenerator {
+        # FetchData(...)
+        # ProcessData(...)
+        # FormatReport(...)
+        # Export(...)
+    }
+
+    AuditReportGenerator <|-- PdfAuditReportGenerator
+    AuditReportGenerator <|-- CsvAuditReportGenerator
+}
+
+@enduml

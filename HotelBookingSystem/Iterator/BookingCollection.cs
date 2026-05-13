@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -8,27 +8,27 @@ using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Iterator
 {
-     // ══════════════════════════════════════════════════════════════════════════
-     // CONCRETE AGGREGATE — BookingCollection
-     // Wraps IBookingRepository and exposes factory methods that produce
-     // typed iterators. The caller never sees a List<Booking>, IQueryable, or
-     // any other internal structure — only the IBookingIterator abstraction.
-     //
-     // Also implements IEnumerable<Booking> so native C# foreach works:
-     //   foreach (var booking in collection) { ... }
-     // ══════════════════════════════════════════════════════════════════════════
-     public sealed class BookingCollection : IBookingCollection, IEnumerable<Booking>
+     // --------------------------------------------------------------------------
+     // CE FACE: Aceasta este clasa esen?ial? ("Agregatul" sau Container-ul principal) 
+     // care implementeaz? IBookingCollection. Ruleaz? interog?ri direct la Repository 
+     // ?i �ntoarce la cerere iteratoare distincte, �n mod anonim.
+     // DE CE R?SPUNDE: O singur? clas? BookingCollection poate �ntoarce 6 tipuri 
+     // separate de "scannere" ale listei. De aici rezult? Single Responsibility: colec?ia 
+     // pur ?i simplu de?ine elementele ?i �ntoarce instrumentele ("Create....Iterator") ce 
+     // le acceseaz? succesiv. (?i permite clientul s? nu ?tie c? ea folose?te IBookingRepository).
+     // --------------------------------------------------------------------------
+     public class BookingCollection : IBookingCollection, IEnumerable<Booking>
      {
           private readonly IBookingRepository _repository;
 
           public BookingCollection(IBookingRepository repository)
               => _repository = repository;
 
-          // ── Snapshot helper — always get a fresh list from the repo ───────────
+          // -- Snapshot helper � always get a fresh list from the repo -----------
           private IReadOnlyList<Booking> Snapshot()
               => _repository.GetAllBookings().AsReadOnly();
 
-          // ── Aggregate interface — iterator factory methods ────────────────────
+          // -- Aggregate interface � iterator factory methods --------------------
 
           public IBookingIterator CreateSequentialIterator()
               => new SequentialBookingIterator(Snapshot());
@@ -48,7 +48,7 @@ namespace HotelBookingSystem.Iterator
           public IBookingIterator CreateTypeFilterIterator(string bookingType)
               => new TypeFilterIterator(Snapshot(), bookingType);
 
-          // ── C# IEnumerable — enables: foreach (var b in collection) ──────────
+          // -- C# IEnumerable � enables: foreach (var b in collection) ----------
           public IEnumerable<Booking> AsEnumerable()
               => _repository.GetAllBookings();
 
@@ -58,28 +58,25 @@ namespace HotelBookingSystem.Iterator
           System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
               => GetEnumerator();
 
-          // ── Convenience properties ─────────────────────────────────────────────
+          // -- Convenience properties ---------------------------------------------
           public int TotalCount => _repository.GetAllBookings().Count;
      }
 
-     // ══════════════════════════════════════════════════════════════════════════
-     // CLIENT — BookingReportEngine
-     // Uses iterators exclusively — never accesses List<Booking> directly,
-     // never calls LINQ on a raw list, never knows the repository's internals.
-     // All traversal is done through IBookingIterator.HasNext() / Next().
-     //
-     // This is the key separation: the REPORT ENGINE knows how to format a
-     // report; the ITERATORS know how to traverse the collection. Neither
-     // knows about the other's implementation.
-     // ══════════════════════════════════════════════════════════════════════════
-     public sealed class BookingReportEngine
+     // --------------------------------------------------------------------------
+     // CE FACE: BookingReportEngine este "Clientul". Are doar ni?te func?ii care imprim?
+     // pe ecran/creeaz? texte pentru rapoarte, �n func?ie de rezerv?rile procesate.  
+     // DE CE R?SPUNDE: Formateaz? rezultatul afirmativ (design grafic de consol?) ?i consum?   
+     // iteratorii (`iter.HasNext()`). Astfel, niciodat? Clientul nu va cere repo-ului liste.    
+     // El cunoa?te strict abstrac?ia iteratorului (indiferent care din cei 6 iteratori a fost pasat).
+     // --------------------------------------------------------------------------
+     public class BookingReportEngine
      {
           private static readonly CultureInfo En = CultureInfo.GetCultureInfo("en-US");
           private static string Usd(decimal v) => v.ToString("C", En);
 
-          // ── REPORT 1: Full Summary ────────────────────────────────────────────
+          // -- REPORT 1: Full Summary --------------------------------------------
           // Uses: SequentialBookingIterator
-          // Traverses all bookings in creation order — counts by status, sums revenue.
+          // Traverses all bookings in creation order � counts by status, sums revenue.
           public string GenerateSummaryReport(IBookingCollection collection,
                                                IUserRepository userRepo,
                                                IRoomRepository roomRepo)
@@ -87,19 +84,19 @@ namespace HotelBookingSystem.Iterator
                var iter = collection.CreateSequentialIterator();
                var sb = new StringBuilder();
 
-               sb.AppendLine("╔══════════════════════════════════════════════════════════╗");
-               sb.AppendLine("║           GRAND HORIZON HOTEL — BOOKING SUMMARY          ║");
-               sb.AppendLine("╚══════════════════════════════════════════════════════════╝");
+               sb.AppendLine("+----------------------------------------------------------+");
+               sb.AppendLine("�           GRAND HORIZON HOTEL � BOOKING SUMMARY          �");
+               sb.AppendLine("+----------------------------------------------------------+");
                sb.AppendLine($"  Generated : {DateTime.Now:dd MMM yyyy  HH:mm:ss}");
                sb.AppendLine($"  Iterator  : {iter.IteratorName}");
                sb.AppendLine($"  Total     : {iter.TotalCount} booking(s)");
-               sb.AppendLine(new string('─', 64));
+               sb.AppendLine(new string('-', 64));
 
                int pending = 0, confirmed = 0, cancelled = 0;
                decimal revenue = 0m;
                int processed = 0;
 
-               while (iter.HasNext())        // ← iterator drives the loop
+               while (iter.HasNext())        // ? iterator drives the loop
                {
                     var b = iter.Next();
                     var room = roomRepo.FindById(b.RoomId);
@@ -108,10 +105,10 @@ namespace HotelBookingSystem.Iterator
                     decimal value = (room?.BasePrice ?? 0m) * nights;
 
                     sb.AppendLine(
-                        $"  [{++processed,2}] {b.BookingId[..8]}… · " +
-                        $"{b.BookingType,-9} · {b.Status,-10} · " +
-                        $"{b.CheckInDate:dd MMM} → {b.CheckOutDate:dd MMM} " +
-                        $"({nights}n) · {Usd(value)}");
+                        $"  [{++processed,2}] {b.BookingId[..8]}� � " +
+                        $"{b.BookingType,-9} � {b.Status,-10} � " +
+                        $"{b.CheckInDate:dd MMM} ? {b.CheckOutDate:dd MMM} " +
+                        $"({nights}n) � {Usd(value)}");
 
                     switch (b.Status)
                     {
@@ -121,7 +118,7 @@ namespace HotelBookingSystem.Iterator
                     }
                }
 
-               sb.AppendLine(new string('═', 64));
+               sb.AppendLine(new string('-', 64));
                sb.AppendLine($"  Pending   : {pending}");
                sb.AppendLine($"  Confirmed : {confirmed}");
                sb.AppendLine($"  Cancelled : {cancelled}");
@@ -129,20 +126,20 @@ namespace HotelBookingSystem.Iterator
                return sb.ToString();
           }
 
-          // ── REPORT 2: Occupancy Timeline ─────────────────────────────────────
+          // -- REPORT 2: Occupancy Timeline -------------------------------------
           // Uses: ChronologicalBookingIterator
-          // Yields bookings sorted by check-in — perfect for timeline/Gantt output.
+          // Yields bookings sorted by check-in � perfect for timeline/Gantt output.
           public string GenerateOccupancyTimeline(IBookingCollection collection,
                                                    IRoomRepository roomRepo)
           {
                var iter = collection.CreateChronologicalIterator();
                var sb = new StringBuilder();
 
-               sb.AppendLine("╔══════════════════════════════════════════════════════════╗");
-               sb.AppendLine("║          OCCUPANCY TIMELINE (by check-in date)           ║");
-               sb.AppendLine("╚══════════════════════════════════════════════════════════╝");
+               sb.AppendLine("+----------------------------------------------------------+");
+               sb.AppendLine("�          OCCUPANCY TIMELINE (by check-in date)           �");
+               sb.AppendLine("+----------------------------------------------------------+");
                sb.AppendLine($"  Iterator  : {iter.IteratorName}");
-               sb.AppendLine(new string('─', 64));
+               sb.AppendLine(new string('-', 64));
 
                if (!iter.HasNext()) { sb.AppendLine("  No bookings."); return sb.ToString(); }
 
@@ -156,10 +153,10 @@ namespace HotelBookingSystem.Iterator
                     int barLen = Math.Min(nights, 20);
                     string bar = b.Status switch
                     {
-                         BookingStatus.Confirmed => new string('█', barLen),
-                         BookingStatus.Pending => new string('░', barLen),
-                         BookingStatus.Cancelled => new string('×', barLen),
-                         _ => new string('·', barLen)
+                         BookingStatus.Confirmed => new string('�', barLen),
+                         BookingStatus.Pending => new string('�', barLen),
+                         BookingStatus.Cancelled => new string('�', barLen),
+                         _ => new string('�', barLen)
                     };
 
                     sb.AppendLine(
@@ -170,30 +167,30 @@ namespace HotelBookingSystem.Iterator
                return sb.ToString();
           }
 
-          // ── REPORT 3: Revenue by Booking Type ────────────────────────────────
-          // Uses: TypeFilterIterator (called 3 times — Standard, Premium, VIP)
+          // -- REPORT 3: Revenue by Booking Type --------------------------------
+          // Uses: TypeFilterIterator (called 3 times � Standard, Premium, VIP)
           // Demonstrates multiple INDEPENDENT iterators on the same collection.
           public string GenerateRevenueByTypeReport(IBookingCollection collection,
                                                      IRoomRepository roomRepo)
           {
                var sb = new StringBuilder();
-               sb.AppendLine("╔══════════════════════════════════════════════════════════╗");
-               sb.AppendLine("║           REVENUE BREAKDOWN BY BOOKING TYPE              ║");
-               sb.AppendLine("╚══════════════════════════════════════════════════════════╝");
+               sb.AppendLine("+----------------------------------------------------------+");
+               sb.AppendLine("�           REVENUE BREAKDOWN BY BOOKING TYPE              �");
+               sb.AppendLine("+----------------------------------------------------------+");
 
                decimal grandTotal = 0m;
 
                foreach (var type in new[] { "Standard", "Premium", "VIP" })
                {
-                    // Each call to CreateTypeFilterIterator is a SEPARATE iterator —
+                    // Each call to CreateTypeFilterIterator is a SEPARATE iterator �
                     // independent state, independent cursor, same collection.
                     var iter = collection.CreateTypeFilterIterator(type);
                     decimal sub = 0m;
                     int cnt = 0;
 
-                    sb.AppendLine($"\n  ▸ {type.ToUpper()} bookings  [{iter.TotalCount}]");
+                    sb.AppendLine($"\n  ? {type.ToUpper()} bookings  [{iter.TotalCount}]");
                     sb.AppendLine($"  Iterator: {iter.IteratorName}");
-                    sb.AppendLine(new string('─', 48));
+                    sb.AppendLine(new string('-', 48));
 
                     while (iter.HasNext())
                     {
@@ -204,28 +201,28 @@ namespace HotelBookingSystem.Iterator
                          if (b.Status != BookingStatus.Cancelled) sub += val;
                          cnt++;
                          sb.AppendLine(
-                             $"    {b.BookingId[..8]}… · {b.Status,-10} · " +
-                             $"{nights}n · {Usd(val)}");
+                             $"    {b.BookingId[..8]}� � {b.Status,-10} � " +
+                             $"{nights}n � {Usd(val)}");
                     }
 
                     sb.AppendLine($"  Subtotal ({type}): {Usd(sub)}");
                     grandTotal += sub;
                }
 
-               sb.AppendLine(new string('═', 48));
+               sb.AppendLine(new string('-', 48));
                sb.AppendLine($"  Grand Total : {Usd(grandTotal)}");
                return sb.ToString();
           }
 
-          // ── REPORT 4: Status Report ───────────────────────────────────────────
-          // Uses: StatusFilterIterator — one iterator per status
+          // -- REPORT 4: Status Report -------------------------------------------
+          // Uses: StatusFilterIterator � one iterator per status
           public string GenerateStatusReport(IBookingCollection collection,
                                               IRoomRepository roomRepo)
           {
                var sb = new StringBuilder();
-               sb.AppendLine("╔══════════════════════════════════════════════════════════╗");
-               sb.AppendLine("║                   BOOKINGS BY STATUS                    ║");
-               sb.AppendLine("╚══════════════════════════════════════════════════════════╝");
+               sb.AppendLine("+----------------------------------------------------------+");
+               sb.AppendLine("�                   BOOKINGS BY STATUS                    �");
+               sb.AppendLine("+----------------------------------------------------------+");
 
                foreach (var status in Enum.GetValues<BookingStatus>())
                {
@@ -234,14 +231,14 @@ namespace HotelBookingSystem.Iterator
 
                     string marker = status switch
                     {
-                         BookingStatus.Confirmed => "✓",
-                         BookingStatus.Pending => "⏳",
-                         BookingStatus.Cancelled => "✕",
-                         BookingStatus.Completed => "★",
-                         _ => "·"
+                         BookingStatus.Confirmed => "?",
+                         BookingStatus.Pending => "?",
+                         BookingStatus.Cancelled => "?",
+                         BookingStatus.Completed => "?",
+                         _ => "�"
                     };
 
-                    sb.AppendLine($"\n  {marker} {status.ToString().ToUpper()} — {iter.TotalCount} booking(s)");
+                    sb.AppendLine($"\n  {marker} {status.ToString().ToUpper()} � {iter.TotalCount} booking(s)");
                     sb.AppendLine($"  Iterator: {iter.IteratorName}");
 
                     decimal total = 0m;
@@ -253,9 +250,9 @@ namespace HotelBookingSystem.Iterator
                          decimal val = (room?.BasePrice ?? 0m) * nights;
                          total += val;
                          sb.AppendLine(
-                             $"    {b.BookingId[..8]}… · {b.BookingType,-9} · " +
-                             $"{b.CheckInDate:dd MMM} → {b.CheckOutDate:dd MMM} " +
-                             $"({nights}n) · {Usd(val)}");
+                             $"    {b.BookingId[..8]}� � {b.BookingType,-9} � " +
+                             $"{b.CheckInDate:dd MMM} ? {b.CheckOutDate:dd MMM} " +
+                             $"({nights}n) � {Usd(val)}");
                     }
 
                     sb.AppendLine($"    Total value: {Usd(total)}");
@@ -264,8 +261,8 @@ namespace HotelBookingSystem.Iterator
                return sb.ToString();
           }
 
-          // ── REPORT 5: Recent Bookings (lazy iterator) ─────────────────────────
-          // Uses: RecentBookingsIterator — stops after N without scanning full list
+          // -- REPORT 5: Recent Bookings (lazy iterator) -------------------------
+          // Uses: RecentBookingsIterator � stops after N without scanning full list
           public string GenerateRecentReport(IBookingCollection collection,
                                               IRoomRepository roomRepo,
                                               int count = 10)
@@ -273,11 +270,11 @@ namespace HotelBookingSystem.Iterator
                var iter = collection.CreateRecentIterator(count);
                var sb = new StringBuilder();
 
-               sb.AppendLine("╔══════════════════════════════════════════════════════════╗");
-               sb.AppendLine($"║          LAST {count} BOOKINGS (newest first, lazy stop)        ║");
-               sb.AppendLine("╚══════════════════════════════════════════════════════════╝");
+               sb.AppendLine("+----------------------------------------------------------+");
+               sb.AppendLine($"�          LAST {count} BOOKINGS (newest first, lazy stop)        �");
+               sb.AppendLine("+----------------------------------------------------------+");
                sb.AppendLine($"  Iterator : {iter.IteratorName}");
-               sb.AppendLine(new string('─', 64));
+               sb.AppendLine(new string('-', 64));
 
                if (!iter.HasNext()) { sb.AppendLine("  No bookings yet."); return sb.ToString(); }
 
@@ -288,15 +285,15 @@ namespace HotelBookingSystem.Iterator
                     var room = roomRepo.FindById(b.RoomId);
                     int nights = (b.CheckOutDate - b.CheckInDate).Days;
                     sb.AppendLine(
-                        $"  #{++i,2}  {b.BookingId[..8]}… · {b.BookingType,-9} · " +
-                        $"{b.Status,-10} · Room {room?.RoomNumber ?? "?"} · " +
+                        $"  #{++i,2}  {b.BookingId[..8]}� � {b.BookingType,-9} � " +
+                        $"{b.Status,-10} � Room {room?.RoomNumber ?? "?"} � " +
                         $"{b.CheckInDate:dd MMM} ({nights}n)");
                }
 
                return sb.ToString();
           }
 
-          // ── REPORT 6: Date Range ──────────────────────────────────────────────
+          // -- REPORT 6: Date Range ----------------------------------------------
           // Uses: DateRangeIterator
           public string GenerateDateRangeReport(IBookingCollection collection,
                                                  IRoomRepository roomRepo,
@@ -305,13 +302,13 @@ namespace HotelBookingSystem.Iterator
                var iter = collection.CreateDateRangeIterator(from, to);
                var sb = new StringBuilder();
 
-               sb.AppendLine("╔══════════════════════════════════════════════════════════╗");
-               sb.AppendLine("║              DATE RANGE OCCUPANCY REPORT                 ║");
-               sb.AppendLine("╚══════════════════════════════════════════════════════════╝");
-               sb.AppendLine($"  Range    : {from:dd MMM yyyy} – {to:dd MMM yyyy}");
+               sb.AppendLine("+----------------------------------------------------------+");
+               sb.AppendLine("�              DATE RANGE OCCUPANCY REPORT                 �");
+               sb.AppendLine("+----------------------------------------------------------+");
+               sb.AppendLine($"  Range    : {from:dd MMM yyyy} � {to:dd MMM yyyy}");
                sb.AppendLine($"  Iterator : {iter.IteratorName}");
                sb.AppendLine($"  Found    : {iter.TotalCount} booking(s) in range");
-               sb.AppendLine(new string('─', 64));
+               sb.AppendLine(new string('-', 64));
 
                if (!iter.HasNext()) { sb.AppendLine("  No bookings in this date range."); return sb.ToString(); }
 
@@ -324,13 +321,14 @@ namespace HotelBookingSystem.Iterator
                     decimal val = (room?.BasePrice ?? 0m) * nights;
                     total += val;
                     sb.AppendLine(
-                        $"  {b.BookingId[..8]}… · Room {room?.RoomNumber ?? "?",4} · " +
-                        $"{b.BookingType,-9} · {b.Status,-10} · {Usd(val)}");
+                        $"  {b.BookingId[..8]}� � Room {room?.RoomNumber ?? "?",4} � " +
+                        $"{b.BookingType,-9} � {b.Status,-10} � {Usd(val)}");
                }
 
-               sb.AppendLine(new string('═', 64));
+               sb.AppendLine(new string('-', 64));
                sb.AppendLine($"  Total value in range: {Usd(total)}");
                return sb.ToString();
           }
      }
 }
+

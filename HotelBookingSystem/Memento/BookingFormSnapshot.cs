@@ -1,31 +1,22 @@
-﻿using System;
+using System;
 
 namespace HotelBookingSystem.Memento
 {
-     // ══════════════════════════════════════════════════════════════════════════
-     // MEMENTO — BookingFormSnapshot
-     //
-     // Stores the complete internal state of BookingFormOriginator at a single
-     // point in time. Every property is read-only — the snapshot is immutable.
-     //
-     // The constructor is `internal` so only code inside the Memento namespace
-     // (i.e. BookingFormOriginator) can create snapshots. The Caretaker
-     // (BookingFormHistory) receives and stores them as opaque tokens — it can
-     // read Label/SavedAt for display but cannot inspect or mutate the form data.
-     //
-     // This respects the fundamental Memento encapsulation rule:
-     //   Originator → creates Mementos and restores from them (full access)
-     //   Caretaker  → holds Mementos but never reads their internal state
-     // ══════════════════════════════════════════════════════════════════════════
-     public sealed class BookingFormSnapshot
+     // --------------------------------------------------------------------------
+     // MEMENTO - BookingFormSnapshot
+     // Aceasta clasa este practic un recipient inchis etans in care incap absolut toate datele din formular.
+     // Toate constantele devin imutabile si nu pot fi adaugate la o instanta decat o singura data, la initiere.
+     // Respecta principiul Memento pentru ca pazeste variabilele limitand accesul cu un `internal`.
+     // --------------------------------------------------------------------------
+     public class BookingFormSnapshot
      {
-          // ── Metadata (visible to Caretaker for display) ───────────────────────
+          // -- Metadata (visible to Caretaker for display) -----------------------
           public string Label { get; }      // auto-generated or user-named
           public DateTime SavedAt { get; }
           public int StepIndex { get; }      // which wizard step was active
 
-          // ── Form state (accessible only via Originator.Restore) ──────────────
-          // These are effectively "protected" — only Originator reads them via
+          // -- Form state (accessible only via Originator.Restore) --------------
+          // These are effectively "protected" � only Originator reads them via
           // the internal accessor properties below.
 
           internal string GuestId { get; }
@@ -46,7 +37,7 @@ namespace HotelBookingSystem.Memento
           internal string SpecialRequest { get; }
           internal string Notes { get; }
 
-          // ── Internal constructor — ONLY BookingFormOriginator may call this ───
+          // -- Internal constructor � ONLY BookingFormOriginator may call this ---
           internal BookingFormSnapshot(
               string label,
               int stepIndex,
@@ -90,14 +81,14 @@ namespace HotelBookingSystem.Memento
                Notes = notes;
           }
 
-          // ── Display helpers (Caretaker-visible) ──────────────────────────────
+          // -- Display helpers (Caretaker-visible) ------------------------------
           public string TimestampFmt => SavedAt.ToString("HH:mm:ss");
 
           public string Summary =>
               $"Step {StepIndex + 1}: {Label}" +
-              (string.IsNullOrEmpty(GuestName) ? "" : $" · {GuestName}") +
-              (string.IsNullOrEmpty(RoomNumber) ? "" : $" · Room {RoomNumber}") +
-              (CheckOut > CheckIn ? $" · {(CheckOut - CheckIn).Days}n" : "");
+              (string.IsNullOrEmpty(GuestName) ? "" : $" � {GuestName}") +
+              (string.IsNullOrEmpty(RoomNumber) ? "" : $" � Room {RoomNumber}") +
+              (CheckOut > CheckIn ? $" � {(CheckOut - CheckIn).Days}n" : "");
 
           // How many seconds ago was this snapshot taken
           public string AgeLabel
@@ -114,3 +105,4 @@ namespace HotelBookingSystem.Memento
           public override string ToString() => $"[{TimestampFmt}] {Summary}";
      }
 }
+

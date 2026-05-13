@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 
 namespace HotelBookingSystem.Strategy
 {
-     // ══════════════════════════════════════════════════════════════════════════
-     // STRATEGY INTERFACE
-     // Declares the contract that every pricing algorithm must satisfy.
-     // Context (RoomPricingCalculator) depends exclusively on this abstraction —
-     // never on a concrete strategy class. Dependency Inversion Principle.
-     // ══════════════════════════════════════════════════════════════════════════
+     // --------------------------------------------------------------------------
+     // Interfa?a comun? pentru to?i algoritmii de calcul al pre?urilor.
+     // Define?te metoda de baz? Calculate(...) ?i atribute vizuale (Name, Color).
+     // Permite �nlocuirea instantanee a oric?rei strategii de pre?uri f?r? s?
+     // afecteze structura calculatorului principal (Context).
+     // --------------------------------------------------------------------------
      public interface IRoomPricingStrategy
      {
           /// <summary>Human-readable name shown in the UI selector and comparison table.</summary>
@@ -21,21 +21,19 @@ namespace HotelBookingSystem.Strategy
 
           /// <summary>
           /// Calculates the total price for a stay.
-          /// All logic lives HERE — Context contains zero pricing logic.
+          /// All logic lives HERE � Context contains zero pricing logic.
           /// </summary>
           PricingResult Calculate(decimal basePrice, DateTime checkIn, DateTime checkOut);
      }
 
-     // ══════════════════════════════════════════════════════════════════════════
-     // PRICING RESULT DTO
-     // Immutable value object returned by every strategy.
-     // Carries enough detail for the UI to render a full breakdown without
-     // knowing which concrete strategy produced it.
-     // ══════════════════════════════════════════════════════════════════════════
-     public sealed class PricingResult
+     // --------------------------------------------------------------------------
+     // O structur?/obiect stabil (imutabil) folosit pentru afi?ajul detaliat al rezultatelor.
+     // Re?ine date ob?inute de la Strategia activ? f?r? s? ?tie care este ea exact (rezumatul UI).
+     // --------------------------------------------------------------------------
+     public class PricingResult
      {
           public string StrategyName { get; }
-          public decimal BaseTotal { get; }   // basePrice × nights, no modifiers
+          public decimal BaseTotal { get; }   // basePrice � nights, no modifiers
           public decimal FinalTotal { get; }   // after all adjustments
           public decimal Discount { get; }   // positive = saving; negative = surcharge
           public decimal DiscountPercent { get; }   // percentage vs base
@@ -58,3 +56,5 @@ namespace HotelBookingSystem.Strategy
           }
      }
 }
+
+

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models.User;
 using HotelBookingSystem.Email; // Add this using directive for GmailEmailService
@@ -67,6 +67,8 @@ namespace HotelBookingSystem.ViewModels
                    GuestName,
                    GuestEmail,
                    "",
+                   GuestEmail, // Username
+                   "guest123", // Default password
                    string.IsNullOrWhiteSpace(GuestNationality) ? "Unknown" : GuestNationality,
                    string.IsNullOrWhiteSpace(GuestPassport) ? "UNKNOWN" : GuestPassport);
 

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="HotelBookingSystem.Views.StaffLoginView"
+<UserControl x:Class="HotelBookingSystem.Views.StaffLoginView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <UserControl.Resources>
@@ -90,7 +90,25 @@
                                      FontSize="14" Padding="12,10" Background="#FAFBFC" 
                                      BorderBrush="{StaticResource BorderBrush2}" BorderThickness="1" Margin="0,0,0,8"/>
                         
-                        <TextBlock Text="Forgot your password? Contact IT." FontSize="11" Foreground="{StaticResource AccentBrush}" HorizontalAlignment="Right" Cursor="Hand" TextDecorations="Underline"/>
+                        <Grid Margin="0,12,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            
+                            <CheckBox Grid.Column="0" Content="Remember me" IsChecked="{Binding RememberMe}"
+                                      FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                <TextBlock Text="Don't have an account? " FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                                <TextBlock Text="Sign Up" FontSize="11" Foreground="{StaticResource AccentBrush}" 
+                                           Cursor="Hand" TextDecorations="Underline">
+                                    <TextBlock.InputBindings>
+                                        <MouseBinding MouseAction="LeftClick" Command="{Binding NavigateToSignupCommand}"/>
+                                    </TextBlock.InputBindings>
+                                </TextBlock>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
 
                     <!-- Authenticate button with inline progress indicator -->
@@ -113,7 +131,7 @@
 
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                             <ProgressBar Width="48" Height="6" IsIndeterminate="True" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibilityConverter}}" Margin="0,0,8,0"/>
-                            <TextBlock Text="Authenticate →" Foreground="White" VerticalAlignment="Center"/>
+                            <TextBlock Text="Authenticate Me" Foreground="White" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
 

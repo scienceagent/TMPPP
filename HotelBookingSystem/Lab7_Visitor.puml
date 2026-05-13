@@ -1,0 +1,124 @@
+@startuml Lab7_Visitor
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #EFF6FF
+}
+skinparam interface {
+    BackgroundColor #DBEAFE
+    BorderColor #2563EB
+}
+
+title <b>Visitor Pattern — Analytical Operations</b>\nLab 7  ·  HotelBookingSystem  ·  Raevschi Grigore TI-231
+
+note as N1
+  <b>Definition:</b>
+  Visitor lets you add new operations to an 
+  existing object structure without modifying 
+  the classes.
+
+  <b>Double Dispatch:</b>
+  element.Accept(visitor) -> visitor.Visit(this)
+  Resolves the type of both element and visitor 
+  at runtime.
+end note
+
+' ── PRIMARY HIERARCHY (HOTEL) ───────────────────────────────────────────────
+package "Hotel Analytics" <<Rectangle>> {
+    interface IVisitor {
+        + Visit(booking: Booking)
+        + Visit(room: Room)
+        + Visit(user: User)
+    }
+
+    interface IVisitable {
+        + Accept(visitor: IVisitor)
+    }
+
+    class StatisticsVisitor {
+        - _roomRepo: IRoomRepository
+        + TotalRevenue: decimal
+        + TotalBookings: int
+        --
+        + Visit(booking: Booking)
+        + Visit(room: Room)
+        + Visit(user: User)
+        + GetSummary(): string
+    }
+
+    class Booking {
+        + Accept(visitor: IVisitor)
+    }
+
+    class Room {
+        + Accept(visitor: IVisitor)
+    }
+
+    class User {
+        + Accept(visitor: IVisitor)
+    }
+
+    IVisitor <|.. StatisticsVisitor
+    IVisitable <|.. Booking
+    IVisitable <|.. Room
+    IVisitable <|.. User
+    
+    Booking ..> IVisitor : "Accepts"
+    Room ..> IVisitor : "Accepts"
+    User ..> IVisitor : "Accepts"
+}
+
+' ── SECONDARY HIERARCHY (FINANCIAL) ──────────────────────────────────────────
+package "Financial Portfolio (Banking Example)" <<Rectangle>> {
+    interface IFinancialVisitor {
+        + Visit(deposit: DepositAccount)
+        + Visit(loan: LoanAccount)
+        + Visit(stock: StockPortfolio)
+    }
+
+    interface IFinancialInstrument {
+        + Accept(visitor: IFinancialVisitor)
+        + Name: string
+    }
+
+    class RiskCalculatorVisitor {
+        - _totalRiskExposure: decimal
+        + Visit(...)
+        + PrintReport()
+    }
+
+    class TaxReportVisitor {
+        - _totalTaxableIncome: decimal
+        + Visit(...)
+        + PrintSummary()
+    }
+
+    class DepositAccount {
+        + Accept(visitor: IFinancialVisitor)
+    }
+
+    class LoanAccount {
+        + Accept(visitor: IFinancialVisitor)
+    }
+
+    class StockPortfolio {
+        + Accept(visitor: IFinancialVisitor)
+    }
+
+    IFinancialVisitor <|.. RiskCalculatorVisitor
+    IFinancialVisitor <|.. TaxReportVisitor
+    IFinancialInstrument <|.. DepositAccount
+    IFinancialInstrument <|.. LoanAccount
+    IFinancialInstrument <|.. StockPortfolio
+}
+
+@enduml

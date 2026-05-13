@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows.Input;
 using HotelBookingSystem.Adapter;
@@ -51,6 +51,14 @@ namespace HotelBookingSystem.ViewModels
           public ProxyController ProxyCtrl { get; }
           public StrategyController StrategyCtrl { get; }
           public LoginViewModel LoginCtrl { get; }
+          public SignupViewModel SignupCtrl { get; }
+
+          private bool _showSignup;
+          public bool ShowSignup
+          {
+               get => _showSignup;
+               set => SetProperty(ref _showSignup, value);
+          }
 
           private readonly BookingEventMonitor _bookingMonitor;
           public ObserverController ObserverCtrl { get; }
@@ -61,6 +69,12 @@ namespace HotelBookingSystem.ViewModels
 
           public MementoController MementoCtrl { get; }
           public IteratorController IteratorCtrl { get; }
+          public ChainController ChainCtrl { get; }
+          public StateController StateCtrl { get; }
+          public MediatorController MediatorCtrl { get; }
+          public TemplateController TemplateCtrl { get; }
+          public VisitorController VisitorCtrl { get; }
+          public RoomsListController RoomsListCtrl { get; }
 
           // ── Toast ─────────────────────────────────────────────────────────────
           public ToastService Toast => ToastService.Instance;
@@ -102,6 +116,7 @@ namespace HotelBookingSystem.ViewModels
           public ICommand GenerateReportCommand { get; }
           public ICommand TestCacheProxyCommand { get; }
           public ICommand TestAuthProxyCommand { get; }
+          public ICommand ShowBookingDetailsCommand { get; }
           public ICommand LogoutCommand { get; }
 
           private bool _isAuthenticated;
@@ -115,11 +130,19 @@ namespace HotelBookingSystem.ViewModels
           {
                // ── Authentication ───────────────────────────────────────────────
                LoginCtrl = new LoginViewModel();
+               SignupCtrl = new SignupViewModel();
+
                LoginCtrl.OnLoginSuccess += () => IsAuthenticated = true;
+               LoginCtrl.NavigateToSignupCommand = new RelayCommand(_ => { ShowSignup = true; });
+               
+               SignupCtrl.OnSignupSuccess += () => { ShowSignup = false; LoginCtrl.Username = SignupCtrl.Username; };
+               SignupCtrl.BackToLoginCommand = new RelayCommand(_ => { ShowSignup = false; });
 
                LogoutCommand = new RelayCommand(_ => {
                     IsAuthenticated = false;
                     LoginCtrl.Clear();
+                    SignupCtrl.Clear();
+                    ShowSignup = false;
                });
 
                // ── Singleton ────────────────────────────────────────────────────
@@ -181,7 +204,7 @@ namespace HotelBookingSystem.ViewModels
                    _userRepository);
 
                // Register all 5 concrete observers
-               _bookingMonitor.Subscribe(new OccupancyObserver());
+               _bookingMonitor.Subscribe(new OccupancyObserver(() => _roomRepository.GetAllRooms().Count));
                _bookingMonitor.Subscribe(new RevenueObserver());
                _bookingMonitor.Subscribe(new AlertObserver());
                _bookingMonitor.Subscribe(new AuditLogObserver());
@@ -194,7 +217,8 @@ namespace HotelBookingSystem.ViewModels
                _commandReceiver = new BookingOperationReceiver(
                    _bookingRepository,
                    _roomRepository,          // the REAL repo, not the proxy
-                   _bookingService);
+                   _bookingService,
+                   _bookingMonitor);
 
                _commandInvoker = new BookingCommandInvoker();
                _commandInvoker.OnLog += Log;
@@ -206,6 +230,7 @@ namespace HotelBookingSystem.ViewModels
                    _roomRepository);
 
                CommandCtrl.OnLog += Log;
+               CommandCtrl.OnLog += _ => ObserverCtrl?.RefreshAll();
 
                MementoCtrl = new MementoController(
                    _bookingRepository,
@@ -227,7 +252,13 @@ namespace HotelBookingSystem.ViewModels
                    _bookingRepository,
                    _roomRepository,
                    _userRepository);
-               IteratorCtrl.OnLog += Log;
+                IteratorCtrl.OnLog += Log;
+                ChainCtrl = new ChainController(_userRepository, _roomRepository);
+                StateCtrl = new StateController(_bookingRepository, _userRepository);
+                MediatorCtrl = new MediatorController(_bookingRepository, _roomRepository);
+                TemplateCtrl = new TemplateController(_bookingRepository, _roomRepository);
+                VisitorCtrl = new VisitorController(_bookingRepository, _roomRepository, _userRepository);
+                RoomsListCtrl = new RoomsListController(_roomRepository, _bookingRepository, _userRepository);
 
                // ── Log wiring ────────────────────────────────────────────────────
                void Log(string m) => LogCtrl.AddLog(m);
@@ -242,6 +273,7 @@ namespace HotelBookingSystem.ViewModels
                BridgeCtrl.OnLog += Log;
                ProxyCtrl.OnLog += Log;
                StrategyCtrl.OnLog += Log;
+               ChainCtrl.OnLog += Log;
                _bookingMonitor.OnLog += Log;
                ObserverCtrl.OnLog += Log;
                CommandCtrl.OnLog += Log;
@@ -278,6 +310,7 @@ namespace HotelBookingSystem.ViewModels
                {
                    BookingCtrl.RefreshBookings();
                    IteratorCtrl.RefreshStats();
+                   RoomsListCtrl.Refresh();
                });
                ProcessPaymentCommand = new RelayCommand(_ => PaymentCtrl.ProcessPayment(GuestCtrl.CurrentGuestId));
                RefundPaymentCommand = new RelayCommand(_ => PaymentCtrl.RefundPayment(GuestCtrl.CurrentGuestId));
@@ -331,6 +364,7 @@ namespace HotelBookingSystem.ViewModels
 
                TestCacheProxyCommand = new RelayCommand(_ => ProxyCtrl.TestCacheProxy());
                TestAuthProxyCommand = new RelayCommand(_ => ProxyCtrl.TestAuthProxy());
+               ShowBookingDetailsCommand = new RelayCommand(_ => ShowBookingDetails());
           }
 
           // ── Private helpers ───────────────────────────────────────────────────
@@ -379,6 +413,30 @@ namespace HotelBookingSystem.ViewModels
                DecoratorCtrl.RefreshBookings();
                FacadeCtrl.RefreshBookings();
                IteratorCtrl.RefreshStats();
+               RoomsListCtrl.Refresh();
+          }
+
+          private void ShowBookingDetails()
+          {
+               var selected = BookingCtrl.SelectedBooking;
+               if (selected == null)
+               {
+                    ToastService.Instance.Show("No Selection", "Please select a booking first.", ToastKind.Warning);
+                    return;
+               }
+
+               var guest = _userRepository.FindById(selected.UserId);
+               var room = _roomRepository.FindById(selected.RoomId);
+
+               if (guest == null || room == null)
+               {
+                    ToastService.Instance.Show("Error", "Could not load guest or room details.", ToastKind.Error);
+                    return;
+               }
+
+               var detailsViewModel = new BookingDetailsViewModel(selected, guest, room);
+               var window = new Views.BookingDetailsWindow { DataContext = detailsViewModel, Owner = System.Windows.Application.Current.MainWindow };
+               window.ShowDialog();
           }
      }
 }

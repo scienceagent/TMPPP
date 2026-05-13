@@ -10,5 +10,10 @@ namespace HotelBookingSystem.Services
         /// Returns true when authentication succeeds.
         /// </summary>
         Task<bool> AuthenticateAsync(string username, SecureString password, string role);
+
+        /// <summary>
+        /// Register a new user in the system.
+        /// </summary>
+        Task<bool> RegisterAsync(string username, string password, string role, string fullName, string email, string phone);
     }
 }

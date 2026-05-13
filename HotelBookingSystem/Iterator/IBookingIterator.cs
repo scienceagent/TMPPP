@@ -1,21 +1,16 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Iterator
 {
-     // ══════════════════════════════════════════════════════════════════════════
-     // ITERATOR INTERFACE
-     // Defines the traversal contract that every concrete iterator must satisfy.
-     // The client (BookingReportEngine) depends ONLY on this abstraction —
-     // it never knows whether it is iterating a list, a sorted view, a date-
-     // filtered slice, or any other traversal strategy.
-     //
-     // Design choices:
-     //   • HasNext() + Next() is the classic GoF form — explicit and clear in reports
-     //   • Reset() allows reuse of the same iterator without creating a new one
-     //   • CurrentIndex / TotalCount let the report engine show progress
-     //   • Peek() lets the engine look ahead without consuming the element
-     // ══════════════════════════════════════════════════════════════════════════
+     // --------------------------------------------------------------------------
+     // CE FACE: Aceasta este interfa?a care define?te opera?iile de baza pe care o 
+     // colec?ie de rezervari le va vizita. Ea spune CUM citim, dar nu cum sunt datele salvate.
+     // DE CE RASPUNDE: Pentru ca decupleaza logica interfe?ei/rapoartelor de lista sau baza     
+     // de date care stocheaza rezervarile. Ofera o metoda curata (HasNext(), Next(), Peak()) 
+     // astfel �nc�t Clientul (de ex ReportEngine) sa ceara rezervarea urmatoare indiferent 
+     // de modul de sortare sau filtrare din spate.
+     // --------------------------------------------------------------------------
      public interface IBookingIterator
      {
           /// <summary>Returns true if there is at least one more element.</summary>
@@ -24,7 +19,7 @@ namespace HotelBookingSystem.Iterator
           /// <summary>Returns the next booking and advances the internal cursor.</summary>
           Booking Next();
 
-          /// <summary>Resets the cursor to the beginning — allows re-traversal.</summary>
+          /// <summary>Resets the cursor to the beginning � allows re-traversal.</summary>
           void Reset();
 
           /// <summary>Returns the next booking WITHOUT advancing the cursor.</summary>
@@ -40,16 +35,16 @@ namespace HotelBookingSystem.Iterator
           string IteratorName { get; }
      }
 
-     // ══════════════════════════════════════════════════════════════════════════
-     // AGGREGATE INTERFACE
-     // The collection declares factory methods that produce iterators.
-     // The client asks the collection for a specific traversal — but the
-     // collection keeps its internal structure (List<Booking>, sort order,
-     // index) completely hidden.
-     // ══════════════════════════════════════════════════════════════════════════
+     // --------------------------------------------------------------------------
+     // CE FACE: Interfa?a care este aplicata Colec?iei (Agregatului) care stocheaza
+     // rezervarile. Define?te "re?etele" specifice pentru tipurile de interare dorite.
+     // DE CE RASPUNDE: Declararea metodelor fabrica "Create..Iterator" for?eaza ca
+     // colec?ia de rezervari sa nu trimita clientului List<Booking>, ci mereu un Iterator 
+     // �ncastrat (un obiect special care ?tie cum sa parcurga colec?ia, de ex "doar alea confirmate").
+     // --------------------------------------------------------------------------
      public interface IBookingCollection
      {
-          // ── Standard traversals ───────────────────────────────────────────────
+          // -- Standard traversals -----------------------------------------------
 
           /// <summary>All bookings in insertion (creation) order.</summary>
           IBookingIterator CreateSequentialIterator();
@@ -76,7 +71,8 @@ namespace HotelBookingSystem.Iterator
           /// </summary>
           IBookingIterator CreateTypeFilterIterator(string bookingType);
 
-          // ── C# idiomatic — implements IEnumerable for native foreach ──────────
+          // -- C# idiomatic � implements IEnumerable for native foreach ----------
           System.Collections.Generic.IEnumerable<Booking> AsEnumerable();
      }
 }
+

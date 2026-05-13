@@ -1,4 +1,5 @@
 using System.Windows;
+using HotelBookingSystem.Data;
 
 namespace HotelBookingSystem
 {
@@ -7,6 +8,12 @@ namespace HotelBookingSystem
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+                    
+            using (var context = new AppDbContext())
+            {
+                context.Database.EnsureCreated();
+                context.EnsureSeedData();
+            }
         }
     }
 }

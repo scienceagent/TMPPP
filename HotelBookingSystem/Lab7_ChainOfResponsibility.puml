@@ -1,0 +1,112 @@
+@startuml Lab7_ChainOfResponsibility
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #EFF6FF
+}
+skinparam interface {
+    BackgroundColor #DBEAFE
+    BorderColor #2563EB
+}
+
+title <b>Chain of Responsibility Pattern — Booking Validation Pipeline</b>\nLab 7  ·  HotelBookingSystem  ·  Raevschi Grigore TI-231
+
+note as N1
+  <b>Problem:</b>
+  A booking request must pass through multiple 
+  checks (Availability, Blacklist, Stay Policies, 
+  Pricing) before being finalized. 
+  Each check is a separate business rule.
+
+  <b>Solution:</b>
+  Use a chain of independent handlers. 
+  The request flows through the pipeline. 
+  Any handler can stop the process if a 
+  validation fails.
+end note
+
+' ── HANDLER INTERFACE ─────────────────────────────────────────────────────
+interface IBookingHandler {
+    + SetNext(next: IBookingHandler): IBookingHandler
+    + Handle(request: BookingProcessRequest): BookingProcessResult
+}
+
+' ── DATA OBJECTS ──────────────────────────────────────────────────────────
+class BookingProcessRequest <<record>> {
+    + GuestId: string
+    + RoomId: string
+    + CheckIn: DateTime
+    + CheckOut: DateTime
+    + ExpectedPrice: decimal
+}
+
+class BookingProcessResult <<record>> {
+    + Success: bool
+    + ProcessorName: string
+    + Message: string
+    + StatusColor: string
+}
+
+' ── BASE HANDLER ──────────────────────────────────────────────────────────
+abstract class BaseBookingHandler {
+    - _next: IBookingHandler
+    --
+    + SetNext(next: IBookingHandler): IBookingHandler
+    + {abstract} Handle(request: BookingProcessRequest): BookingProcessResult
+    # PassToNext(request: BookingProcessRequest): BookingProcessResult
+}
+
+' ── CONCRETE HANDLERS ─────────────────────────────────────────────────────
+class GuestValidationHandler {
+    + Handle(...) : BookingProcessResult
+    note: Checks for empty ID and Blacklist
+}
+
+class RoomAvailabilityHandler {
+    + Handle(...) : BookingProcessResult
+    note: Validates room ID and Date range
+}
+
+class StayDurationHandler {
+    + Handle(...) : BookingProcessResult
+    note: Min 1 night (2 on weekends)
+}
+
+class PriceVerificationHandler {
+    + Handle(...) : BookingProcessResult
+    note: Ensures price > 0
+}
+
+' ── CLIENT / VIEW MODEL ─────────────────────────────────────────────────────
+class ChainController {
+    - _pipeline: IBookingHandler
+    + GuestId: string
+    + RoomId: string
+    + Logs: ObservableCollection<BookingLogEntry>
+    --
+    + ExecuteProcess(): void
+}
+
+' ── RELATIONS ──────────────────────────────────────────────────────────────
+IBookingHandler <|.. BaseBookingHandler
+BaseBookingHandler <|-- GuestValidationHandler
+BaseBookingHandler <|-- RoomAvailabilityHandler
+BaseBookingHandler <|-- StayDurationHandler
+BaseBookingHandler <|-- PriceVerificationHandler
+
+BaseBookingHandler o--> IBookingHandler : "_next"
+
+ChainController --> IBookingHandler : "uses pipeline"
+IBookingHandler ..> BookingProcessRequest : "validates"
+IBookingHandler ..> BookingProcessResult : "returns"
+
+@enduml

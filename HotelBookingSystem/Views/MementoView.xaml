@@ -81,9 +81,6 @@
 
                 <StackPanel Grid.Column="0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <Border Background="#0F172A" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
-                            <TextBlock Text="LAB 6 · MEMENTO" FontSize="10" FontWeight="Bold" Foreground="#C4B5FD"/>
-                        </Border>
                         <TextBlock Text="Smart Booking Form"
                                    FontSize="24" FontWeight="SemiBold" Foreground="#0F172A"/>
                     </StackPanel>

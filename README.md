@@ -1,6 +1,6 @@
 # 🏨 Grand Horizon Hotel — Property Management System
 
-A full-featured WPF desktop application built with **C# 12 / .NET 8** that simulates a real hotel booking and operations workflow. The system covers the complete guest lifecycle — registration, room assignment, booking creation, payment processing, room services, check-in, check-out, reporting, and dynamic pricing — while demonstrating **thirteen GoF design patterns** across three labs.
+A full-featured WPF desktop application built with **C# 12 / .NET 8** that simulates a real hotel booking and operations workflow. The system covers the complete guest lifecycle — registration, room assignment, booking creation, payment processing, room services, check-in, check-out, reporting, and dynamic pricing — while demonstrating **nineteen GoF design patterns** across three labs.
 
 ---
 
@@ -46,6 +46,29 @@ HotelBookingSystem/
 │   ├── BookingBuilder.cs
 │   ├── BookingDirector.cs                        # Standard / Premium / VIP presets
 │   └── BookingRequest.cs                         # Constructed product
+│
+├── ChainOfResponsibility/                        # Lab 7 — Chain of Responsibility
+│   ├── IApprovalHandler.cs
+│   ├── BaseApprovalHandler.cs
+│   └── ConcreteHandlers.cs                       # Guest, Room, Stay, and Price checks
+│
+├── Mediator/                                      # Lab 7 — Mediator
+│   ├── IHotelMediator.cs
+│   └── HotelCommunicationsHub.cs
+│
+├── State/                                         # Lab 7 — State
+│   ├── IBookingState.cs
+│   └── ConcreteStates.cs                          # Created, Confirmed, CheckedIn, etc.
+│
+├── TemplateMethod/                                # Lab 7 — Template Method
+│   ├── InvoiceGenerator.cs
+│   ├── ConcreteGenerators.cs
+│   └── AuditReportGenerator.cs
+│
+├── Visitor/                                       # Lab 7 — Visitor
+│   ├── IVisitor.cs
+│   ├── StatisticsVisitor.cs
+│   └── FinancialExample.cs
 │
 ├── Commands/
 │   └── RelayCommand.cs                           # ICommand for MVVM bindings
@@ -218,6 +241,11 @@ HotelBookingSystem/
 ├── Lab4_Composite.puml
 ├── Lab4_Facade.puml
 ├── Lab6_Strategy.puml
+├── Lab7_ChainOfResponsibility.puml
+├── Lab7_Mediator.puml
+├── Lab7_State.puml
+├── Lab7_TemplateMethod.puml
+├── Lab7_Visitor.puml
 │
 ├── appsettings.json
 ├── App.xaml / App.xaml.cs
@@ -603,6 +631,176 @@ public sealed class AlertObserver : IBookingObserver
 
 ---
 
+### Lab 7 — Behavioral Patterns II
+
+---
+
+#### 15. Chain of Responsibility — `BookingHandler` pipeline
+
+**Problem:** A booking request must satisfy multiple independent business rules (guest eligibility, room availability, minimum stay policies, and pricing verification). Hard-coding these checks in a single service makes it difficult to maintain or reorder them.
+
+**Solution:** Implement a validation pipeline using the Chain of Responsibility. Each business rule is encapsulated in its own handler. The booking request flows through the chain until it is either rejected by a handler or successfully passes all stages.
+
+```csharp
+public abstract class BaseBookingHandler : IBookingHandler
+{
+    private IBookingHandler? _next;
+
+    public IBookingHandler SetNext(IBookingHandler next)
+    {
+        _next = next;
+        return next;
+    }
+
+    protected BookingProcessResult PassToNext(BookingProcessRequest request)
+    {
+        if (_next != null) return _next.Handle(request);
+        return new BookingProcessResult(true, "System", "All checks passed.");
+    }
+}
+```
+
+```csharp
+public class StayDurationHandler : BaseBookingHandler
+{
+    public override BookingProcessResult Handle(BookingProcessRequest request)
+    {
+        var duration = (request.CheckOut - request.CheckIn).TotalDays;
+        if (duration < 1)
+            return new BookingProcessResult(false, "Policy", "Min stay 1 night.");
+        return PassToNext(request);
+    }
+}
+
+```
+
+---
+
+#### 16. Mediator — `HotelCommunicationsHub`
+
+**Problem:** Multiple departments (Reception, Housekeeping, Accounting) need to coordinate during events like guest check-outs. If they reference each other directly, the system becomes a "spaghetti" of dependencies (O(n²) complexity), making it impossible to change one department without affecting others.
+
+**Solution:** Centralize all communication in a `HotelCommunicationsHub`. Departments (Colleagues) only notify the hub about events, and the hub decides which other departments need to react. This reduces coupling to O(n).
+
+```csharp
+public class HotelCommunicationsHub : IHotelMediator
+{
+    public void Notify(object sender, string @event, object? data = null)
+    {
+        if (@event == "GuestCheckedOut")
+        {
+            _housekeeping.CleanRoom(booking.RoomId);
+            _accounting.ProcessFinalBill(booking);
+        }
+    }
+}
+```
+
+```csharp
+public class ReceptionComponent : HotelComponent
+{
+    public void CheckOut(string bookingId)
+    {
+        // ... business logic ...
+        _mediator.Notify(this, "GuestCheckedOut", booking);
+    }
+}
+```
+
+---
+
+#### 17. State — `BookingStatus` lifecycle
+
+**Problem:** A booking goes through various stages (Created → Confirmed → CheckedIn → CheckedOut). Each stage allows different operations (e.g., you can't cancel after check-in). Managing this with `switch` statements becomes unmanageable as complexity grows.
+
+**Solution:** Use the State pattern. Each status is a separate class implementing `IBookingState`. The `Booking` entity delegates actions to its current state object, which knows which transitions are valid.
+
+```csharp
+public class ConfirmedState : IBookingState
+{
+    public void CheckIn(BookingContext context) 
+        => context.TransitionTo(new CheckedInState());
+
+    public void Cancel(BookingContext context) 
+        => context.TransitionTo(new CancelledState());
+}
+```
+
+```csharp
+public class CheckedInState : IBookingState
+{
+    public void Cancel(BookingContext context) 
+        => throw new InvalidOperationException("Cannot cancel after check-in.");
+}
+```
+```
+
+#### 18. Template Method — `InvoiceGenerator`
+
+**Problem:** Multiple reporting or invoicing processes (PDF, Email, CSV) share the same sequence of steps (Header -> Content -> Footer -> Delivery). Duplicating this logic in every class makes it hard to maintain the overall process flow.
+
+**Solution:** The base class `InvoiceGenerator` defines a `GenerateInvoice` method that calls abstract steps in a fixed order. Subclasses like `EmailInvoiceGenerator` and `PdfInvoiceGenerator` only implement the specific formatting and delivery logic.
+
+```csharp
+public abstract class InvoiceGenerator
+{
+    // Template Method — defines the fixed skeleton
+    public string GenerateInvoice(Booking booking, Room room)
+    {
+        var sb = new StringBuilder();
+        OnBeforeGeneration(booking, sb); // Hook
+        sb.AppendLine(FormatHeader(booking));
+        sb.AppendLine(FormatGuestInfo(booking));
+        sb.AppendLine(FormatRoomCharges(booking, room));
+        sb.AppendLine(FormatTotal(booking, room));
+        sb.AppendLine(FormatFooter());
+        OnAfterGeneration(booking, sb); // Hook
+        string result = sb.ToString();
+        SendToGuest(booking, result);
+        return result;
+    }
+
+    protected abstract string FormatHeader(Booking booking);
+    protected abstract void SendToGuest(Booking booking, string content);
+    // ... other abstract steps ...
+}
+```
+
+**Key Differences vs. Strategy:**
+*   **Template Method:** Uses **inheritance** to vary parts of an algorithm. The structure is fixed.
+*   **Strategy:** Uses **composition** to replace the entire algorithm at runtime.
+
+**Audit Reporting Example (Banking):**
+The system also includes an `AuditReportGenerator` which follows the same pattern for banking reports, handling `FetchData`, `ProcessData`, and `Export` steps.
+
+#### 19. Visitor — `StatisticsVisitor`
+
+**Problem:** You need to perform various unrelated operations (like calculating revenue, guest counts, or maintenance schedules) across a stable hierarchy of objects (`Booking`, `Room`, `User`). Adding these methods directly to the classes violates the Single Responsibility Principle and pollutes the domain models.
+
+**Solution:** Define an `IVisitor` interface with a `Visit` method for each type in the hierarchy. The objects "Accept" a visitor, which then performs the operation. This uses **Double Dispatch** to determine the correct operation at runtime.
+
+```csharp
+public class StatisticsVisitor : IVisitor
+{
+    public void Visit(Booking booking)
+    {
+        TotalBookings++;
+        // Calculate revenue using room data
+    }
+    
+    public void Visit(Room room) { /* Maintenance logic */ }
+    public void Visit(User user) { /* Active guest tracking */ }
+}
+```
+
+**Double Dispatch Logic:**
+`element.Accept(visitor)` calls `visitor.Visit(this)`, where `this` is a specific concrete type.
+
+**Financial Portfolio Example (Banking):**
+The system also includes a banking example where `IFinancialInstrument` objects (Loans, Deposits, Stocks) accept `RiskCalculatorVisitor` and `TaxReportVisitor` to perform complex financial calculations without modifying the instrument classes.
+
+---
+
 ## How to Run
 
 ```
@@ -628,7 +826,7 @@ public sealed class AlertObserver : IBookingObserver
 | View live dashboard | Lab 6 → Live Dashboard | Observer (5 views) |
 | Generate report | Lab 5 → Bridge | Bridge (File/Email/Both) |
 | Calculate pricing | Lab 6 → Pricing Strategy | Strategy (6 algorithms) |
-| Review all events | Activity Log | All 14 patterns prefixed |
+| Review all events | Activity Log | All 19 patterns prefixed |
 
 The sidebar shows a live Singleton proof: `same instance = True`.  
 The Activity Log prefixes every entry: `[Prototype]`, `[Builder]`, `[Abstract Factory]`, `[Factory Method]`, `[Singleton]`, `[Adapter]`, `[Composite]`, `[Facade]`.

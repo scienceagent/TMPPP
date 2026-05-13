@@ -4,6 +4,7 @@ namespace HotelBookingSystem.Models
      {
           Pending,
           Confirmed,
+          CheckedIn,
           Cancelled,
           Completed
      }

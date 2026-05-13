@@ -1,13 +1,13 @@
-﻿using System;
+using System;
 using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Observer
 {
-     // ══════════════════════════════════════════════════════════════════════════
-     // BOOKING EVENT — immutable record passed to every observer on notification.
-     // Contains all data an observer could need so none must reach back into
-     // other subsystems (prevents cascading dependencies).
-     // ══════════════════════════════════════════════════════════════════════════
+     // --------------------------------------------------------------------------
+     // BOOKING EVENT - structura imutabila ce transporta date
+     // Impacheteaza rapid cine, cand si cu cine s-a realizat actiunea ce va fi trimisa spre ascultatori.
+     // In acest mod, ascultatorii primesc acest "pachet" si intervin, nu asteapta la rand.
+     // --------------------------------------------------------------------------
      public sealed record BookingEvent(
          string EventId,
          BookingEventType EventType,
@@ -25,7 +25,7 @@ namespace HotelBookingSystem.Observer
          DateTime OccurredAt
      )
      {
-          // Factory — creates an event from a live Booking + resolved names
+          // Factory � creates an event from a live Booking + resolved names
           public static BookingEvent From(BookingEventType type,
                                            Booking booking,
                                            string guestName,
@@ -51,7 +51,7 @@ namespace HotelBookingSystem.Observer
           }
      }
 
-     // ── Event type enum ───────────────────────────────────────────────────────
+     // -- Event type enum -------------------------------------------------------
      public enum BookingEventType
      {
           BookingCreated,
@@ -61,19 +61,19 @@ namespace HotelBookingSystem.Observer
           GuestCheckedOut
      }
 
-     // ══════════════════════════════════════════════════════════════════════════
-     // OBSERVER INTERFACE
-     // Subject (BookingEventMonitor) depends exclusively on this abstraction.
-     // Each concrete observer has ONE responsibility and knows nothing about
-     // other observers or the Subject's internal state.
-     // ══════════════════════════════════════════════════════════════════════════
+     // --------------------------------------------------------------------------
+     // INTERFATA OBSERVATORILOR - IBookingObserver
+     // Orice clasa care implementeaza aceasta interfata devine capabila sa primeasca mesaje "Broadcast" de la monitor.
+     // Scopul este in principal interpelarea a 5 observatori independenti printr-o simpla actiune "Update"/"OnBookingEvent".
+     // --------------------------------------------------------------------------
      public interface IBookingObserver
      {
           string Name { get; }
           string Description { get; }
           string ColorHex { get; }
 
-          /// <summary>Called by Subject for every booking event — synchronous broadcast.</summary>
+          /// <summary>Called by Subject for every booking event � synchronous broadcast.</summary>
           void OnBookingEvent(BookingEvent evt);
      }
 }
+

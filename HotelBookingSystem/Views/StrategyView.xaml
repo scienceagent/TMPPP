@@ -81,7 +81,7 @@
 
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
         <StackPanel Margin="0,0,0,32">
 
             <!-- ══════ PAGE HEADER ══════ -->
@@ -92,16 +92,15 @@
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="0">
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                        <Border Background="#0F172A" CornerRadius="4" Padding="8,3" Margin="0,0,10,0">
-                            <TextBlock Text="LAB 6 · STRATEGY" FontSize="10" FontWeight="Bold" Foreground="#2E9CCA"/>
-                        </Border>
                         <TextBlock Text="Room Pricing Calculator"
                                    FontSize="24" FontWeight="SemiBold" Foreground="#0F172A"/>
                     </StackPanel>
                     <TextBlock FontSize="12" Foreground="#64748B" TextWrapping="Wrap">
-                        <Run>Six interchangeable pricing algorithms — Standard, Weekend Surge, Early Bird, Last Minute, Long Stay, Seasonal.</Run>
-                        <Run>Context (</Run><Run FontFamily="Cascadia Code, Consolas" FontSize="11">RoomPricingCalculator</Run><Run>) delegates all calculation to the active strategy.</Run>
-                        <Run FontWeight="SemiBold"> Swapping a strategy never touches the Context.</Run>
+                        <Run>Select different calculation algorithms for identical booking inputs.</Run>
+                        <Run>The Context (</Run><Run FontFamily="Cascadia Code, Consolas" FontSize="11">RoomPricingCalculator</Run>
+                        <Run>) invokes the active </Run>
+                        <Run FontFamily="Cascadia Code, Consolas" FontSize="11">IRoomPricingStrategy</Run>
+                        <Run> to calculate total dynamically.</Run>
                     </TextBlock>
                 </StackPanel>
                 <!-- Live Strategy Badge -->
@@ -231,8 +230,7 @@
                                    Margin="0,0,0,6"/>
                         <TextBlock FontSize="11" Foreground="#94A3B8" TextWrapping="Wrap"
                                    Margin="0,0,0,14">
-                            Click any strategy to swap it into the Context at runtime.
-                            The calculator re-runs instantly — zero code changes in RoomPricingCalculator.
+                            Select an algorithm to dynamically recalculate the booking total.
                         </TextBlock>
 
                         <!-- 1 Standard Rate -->
@@ -361,18 +359,6 @@
                             </Grid>
                         </RadioButton>
 
-                        <!-- Pattern in action note -->
-                        <Border Background="#EFF6FF" CornerRadius="8" Padding="12,10" Margin="0,8,0,0"
-                                BorderBrush="#BAE6FD" BorderThickness="1">
-                            <TextBlock FontSize="10" Foreground="#0369A1" TextWrapping="Wrap">
-                                <Run FontWeight="Bold">Pattern in action: </Run>
-                                <Run>Selecting a strategy calls </Run>
-                                <Run FontFamily="Cascadia Code, Consolas">calculator.SetStrategy(strategy)</Run>
-                                <Run>. The Context delegates immediately. Zero lines changed in </Run>
-                                <Run FontFamily="Cascadia Code, Consolas">RoomPricingCalculator</Run>
-                                <Run>.</Run>
-                            </TextBlock>
-                        </Border>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -533,93 +519,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- ══════ SOLID ANALYSIS ══════ -->
-            <Border Style="{StaticResource ICard}">
-                <StackPanel>
-                    <TextBlock Text="SOLID ANALYSIS — STRATEGY PATTERN"
-                               FontSize="10" FontWeight="Bold" Foreground="#64748B"
-                               Margin="0,0,0,14"/>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="12"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <Border Background="#F0FDF4" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Border Background="#15803D" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
-                                            <TextBlock Text="S" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                        </Border>
-                                        <TextBlock Text="Single Responsibility ✓" FontSize="12" FontWeight="SemiBold" Foreground="#15803D"/>
-                                    </StackPanel>
-                                    <TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap"
-                                               Text="Each ConcreteStrategy owns exactly one algorithm. RoomPricingCalculator owns zero pricing logic."/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="#F0FDF4" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Border Background="#15803D" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
-                                            <TextBlock Text="O" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                        </Border>
-                                        <TextBlock Text="Open / Closed ✓" FontSize="12" FontWeight="SemiBold" Foreground="#15803D"/>
-                                    </StackPanel>
-                                    <TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap"
-                                               Text="Add a 7th strategy (CorporateRate) with zero changes to the Context, UI, or any existing strategy."/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="#F0FDF4" CornerRadius="6" Padding="12,10">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Border Background="#15803D" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
-                                            <TextBlock Text="L" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                        </Border>
-                                        <TextBlock Text="Liskov Substitution ✓" FontSize="12" FontWeight="SemiBold" Foreground="#15803D"/>
-                                    </StackPanel>
-                                    <TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap"
-                                               Text="Any ConcreteStrategy replaces IRoomPricingStrategy without breaking RoomPricingCalculator's behaviour."/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <Border Background="#F0FDF4" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Border Background="#15803D" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
-                                            <TextBlock Text="I" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                        </Border>
-                                        <TextBlock Text="Interface Segregation ✓" FontSize="12" FontWeight="SemiBold" Foreground="#15803D"/>
-                                    </StackPanel>
-                                    <TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap"
-                                               Text="IRoomPricingStrategy has exactly one method: Calculate(). No strategy is forced to implement unused operations."/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="#F0FDF4" CornerRadius="6" Padding="12,10" Margin="0,0,0,8">
-                                <StackPanel>
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                        <Border Background="#15803D" CornerRadius="3" Padding="5,2" Margin="0,0,6,0">
-                                            <TextBlock Text="D" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                        </Border>
-                                        <TextBlock Text="Dependency Inversion ✓" FontSize="12" FontWeight="SemiBold" Foreground="#15803D"/>
-                                    </StackPanel>
-                                    <TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap"
-                                               Text="RoomPricingCalculator depends on IRoomPricingStrategy (abstraction), never on StandardRateStrategy or any concrete class."/>
-                                </StackPanel>
-                            </Border>
-                            <Border Background="#EFF6FF" CornerRadius="6" Padding="12,10">
-                                <StackPanel>
-                                    <TextBlock Text="vs. if-else / switch cascade" FontSize="11"
-                                               FontWeight="SemiBold" Foreground="#1D4ED8" Margin="0,0,0,4"/>
-                                    <TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap"
-                                               Text="Without Strategy, adding algorithm 7 means editing a switch statement — violating OCP and making every branch harder to test independently."/>
-                                </StackPanel>
-                            </Border>
-                        </StackPanel>
-                    </Grid>
-                </StackPanel>
-            </Border>
+
 
         </StackPanel>
     </ScrollViewer>

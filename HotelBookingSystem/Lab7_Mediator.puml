@@ -1,0 +1,87 @@
+@startuml Lab7_Mediator
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #F8FAFC
+}
+skinparam interface {
+    BackgroundColor #F0F9FF
+    BorderColor #0369A1
+}
+
+title <b>Mediator Pattern — Hotel Communications Hub</b>\nLab 7  ·  HotelBookingSystem
+
+note as N1
+  <b>Problem:</b>
+  Departments (Reception, Housekeeping, Accounting)
+  have complex inter-dependencies. Modifying one
+  requires updating others (O(n²) complexity).
+
+  <b>Solution:</b>
+  Centralize communication in a <b>Mediator</b> hub.
+  Components (Colleagues) only know the hub,
+  reducing coupling to O(n).
+end note
+
+' ── INTERFACES ────────────────────────────────────────────────────────────
+interface IHotelMediator {
+    + Notify(sender: object, event: string, data: object): void
+}
+
+abstract class HotelComponent {
+    # _mediator: IHotelMediator
+    + SetMediator(mediator: IHotelMediator): void
+}
+
+' ── COLLEAGUES ────────────────────────────────────────────────────────────
+class ReceptionComponent {
+    + CheckOut(bookingId: string): void
+    + AssignRoom(roomId: string): void
+}
+
+class HousekeepingComponent {
+    + CleanRoom(roomId: string): void
+}
+
+class AccountingComponent {
+    + ProcessFinalBill(booking: Booking): void
+}
+
+' ── CONCRETE MEDIATOR ─────────────────────────────────────────────────────
+class HotelCommunicationsHub {
+    - _reception: ReceptionComponent
+    - _housekeeping: HousekeepingComponent
+    - _accounting: AccountingComponent
+    --
+    + Notify(sender, event, data): void
+    + RegisterComponents(r, h, a): void
+}
+
+' ── RELATIONS ─────────────────────────────────────────────────────────────
+IHotelMediator <|.. HotelCommunicationsHub
+HotelComponent <|-- ReceptionComponent
+HotelComponent <|-- HousekeepingComponent
+HotelComponent <|-- AccountingComponent
+
+HotelComponent o--> IHotelMediator : "uses"
+HotelCommunicationsHub --> ReceptionComponent : "coordinates"
+HotelCommunicationsHub --> HousekeepingComponent : "coordinates"
+HotelCommunicationsHub --> AccountingComponent : "coordinates"
+
+note right of HotelCommunicationsHub
+  <b>Logic:</b>
+  If <i>Reception</i> says "Checked Out":
+  1. Hub tells <i>Housekeeping</i> to "Clean Room"
+  2. Hub tells <i>Accounting</i> to "Process Bill"
+end note
+
+@enduml

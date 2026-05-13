@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -11,8 +11,8 @@ using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.ViewModels
 {
-     // ── Row shown in the iterator stats table ─────────────────────────────────
-     public sealed class IteratorStatsRow
+     // -- Row shown in the iterator stats table ---------------------------------
+     public class IteratorStatsRow
      {
           public string IteratorName { get; init; } = "";
           public int TotalElements { get; init; }
@@ -21,19 +21,19 @@ namespace HotelBookingSystem.ViewModels
           public string ColorHex { get; init; } = "#2563EB";
      }
 
-     // ── Main ViewModel ─────────────────────────────────────────────────────────
-     public sealed class IteratorController : BaseViewModel
+     // -- Main ViewModel ---------------------------------------------------------
+     public class IteratorController : BaseViewModel
      {
-          // ── Pattern components ─────────────────────────────────────────────────
+          // -- Pattern components -------------------------------------------------
           private readonly BookingCollection _collection;
           private readonly BookingReportEngine _reportEngine;
 
-          // ── External dependencies ──────────────────────────────────────────────
+          // -- External dependencies ----------------------------------------------
           private readonly IBookingRepository _bookingRepo;
           private readonly IRoomRepository _roomRepo;
           private readonly IUserRepository _userRepo;
 
-          // ── Report output ──────────────────────────────────────────────────────
+          // -- Report output ------------------------------------------------------
           private string _reportOutput = "Select a report type and click Generate.";
           public string ReportOutput
           {
@@ -48,7 +48,7 @@ namespace HotelBookingSystem.ViewModels
                set => SetProperty(ref _activeReport, value);
           }
 
-          // ── Form fields ────────────────────────────────────────────────────────
+          // -- Form fields --------------------------------------------------------
           private int _recentCount = 5;
           private DateTime _rangeFrom = DateTime.Today.AddDays(-30);
           private DateTime _rangeTo = DateTime.Today.AddDays(60);
@@ -81,13 +81,13 @@ namespace HotelBookingSystem.ViewModels
                set => SetProperty(ref _selectedType, value);
           }
 
-          // ── Live stats ────────────────────────────────────────────────────────
+          // -- Live stats --------------------------------------------------------
           public ObservableCollection<IteratorStatsRow> IteratorStats { get; } = new();
 
           public string TotalBookingsDisplay =>
               $"{_collection.TotalCount} total booking(s) in collection";
 
-          // ── Dropdown data ─────────────────────────────────────────────────────
+          // -- Dropdown data -----------------------------------------------------
           public IReadOnlyList<string> StatusOptions { get; } =
               new[] { "Pending", "Confirmed", "Cancelled", "Completed" };
 
@@ -104,7 +104,7 @@ namespace HotelBookingSystem.ViewModels
             "Date Range Report",
         };
 
-          // ── Commands ──────────────────────────────────────────────────────────
+          // -- Commands ----------------------------------------------------------
           public ICommand GenerateSummaryCommand { get; }
           public ICommand GenerateTimelineCommand { get; }
           public ICommand GenerateRevenueCommand { get; }
@@ -115,7 +115,7 @@ namespace HotelBookingSystem.ViewModels
 
           public event Action<string>? OnLog;
 
-          // ── Constructor ────────────────────────────────────────────────────────
+          // -- Constructor --------------------------------------------------------
           public IteratorController(
               IBookingRepository bookingRepo,
               IRoomRepository roomRepo,
@@ -139,7 +139,7 @@ namespace HotelBookingSystem.ViewModels
                RefreshStats();
           }
 
-          // ── Report runners ─────────────────────────────────────────────────────
+          // -- Report runners -----------------------------------------------------
 
           private void RunSummary()
           {
@@ -162,7 +162,7 @@ namespace HotelBookingSystem.ViewModels
           {
                ActiveReport = "Revenue by Type";
                ReportOutput = _reportEngine.GenerateRevenueByTypeReport(_collection, _roomRepo);
-               OnLog?.Invoke("[Iterator] Generated Revenue Report using TypeFilterIterator ×3");
+               OnLog?.Invoke("[Iterator] Generated Revenue Report using TypeFilterIterator �3");
                RefreshStats();
           }
 
@@ -170,7 +170,7 @@ namespace HotelBookingSystem.ViewModels
           {
                ActiveReport = "Status Report";
                ReportOutput = _reportEngine.GenerateStatusReport(_collection, _roomRepo);
-               OnLog?.Invoke("[Iterator] Generated Status Report using StatusFilterIterator ×4");
+               OnLog?.Invoke("[Iterator] Generated Status Report using StatusFilterIterator �4");
                RefreshStats();
           }
 
@@ -184,14 +184,14 @@ namespace HotelBookingSystem.ViewModels
 
           private void RunDateRange()
           {
-               ActiveReport = $"Date Range {_rangeFrom:dd MMM} – {_rangeTo:dd MMM yyyy}";
+               ActiveReport = $"Date Range {_rangeFrom:dd MMM} � {_rangeTo:dd MMM yyyy}";
                ReportOutput = _reportEngine.GenerateDateRangeReport(
                    _collection, _roomRepo, _rangeFrom, _rangeTo);
                OnLog?.Invoke($"[Iterator] Generated Date Range Report using DateRangeIterator");
                RefreshStats();
           }
 
-          // ── Refresh live stats panel ───────────────────────────────────────────
+          // -- Refresh live stats panel -------------------------------------------
           public void RefreshStats()
           {
                OnPropertyChanged(nameof(TotalBookingsDisplay));
@@ -202,32 +202,32 @@ namespace HotelBookingSystem.ViewModels
                // Materialise each iterator to show its count in the stats panel
                var stats = new List<IteratorStatsRow>
             {
-                Row("Sequential",    all, "All bookings · creation order",           "#2563EB"),
-                Row("Chronological", all, "All bookings · sorted by check-in",        "#0891B2"),
+                Row("Sequential",    all, "All bookings � creation order",           "#2563EB"),
+                Row("Chronological", all, "All bookings � sorted by check-in",        "#0891B2"),
                 Row("Status: Pending",
                     Count(_collection.CreateStatusFilterIterator(BookingStatus.Pending)),
                     "Awaiting confirmation",                                           "#D97706"),
                 Row("Status: Confirmed",
                     Count(_collection.CreateStatusFilterIterator(BookingStatus.Confirmed)),
-                    "Confirmed — counts toward revenue",                               "#15803D"),
+                    "Confirmed � counts toward revenue",                               "#15803D"),
                 Row("Status: Cancelled",
                     Count(_collection.CreateStatusFilterIterator(BookingStatus.Cancelled)),
-                    "Cancelled — excluded from revenue",                               "#DC2626"),
+                    "Cancelled � excluded from revenue",                               "#DC2626"),
                 Row($"Type: Standard",
                     Count(_collection.CreateTypeFilterIterator("Standard")),
-                    "Standard bookings · base rate",                                   "#6366F1"),
+                    "Standard bookings � base rate",                                   "#6366F1"),
                 Row($"Type: Premium",
                     Count(_collection.CreateTypeFilterIterator("Premium")),
-                    "Premium bookings · 10% discount",                                 "#7C3AED"),
+                    "Premium bookings � 10% discount",                                 "#7C3AED"),
                 Row($"Type: VIP",
                     Count(_collection.CreateTypeFilterIterator("VIP")),
-                    "VIP bookings · 20% off + free night",                             "#DB2777"),
+                    "VIP bookings � 20% off + free night",                             "#DB2777"),
                 Row($"Date Range",
                     Count(_collection.CreateDateRangeIterator(_rangeFrom, _rangeTo)),
-                    $"{_rangeFrom:dd MMM} – {_rangeTo:dd MMM}",                        "#059669"),
+                    $"{_rangeFrom:dd MMM} � {_rangeTo:dd MMM}",                        "#059669"),
                 Row($"Recent 5",
                     Count(_collection.CreateRecentIterator(5)),
-                    "Last 5 · lazy stop",                                              "#F59E0B"),
+                    "Last 5 � lazy stop",                                              "#F59E0B"),
             };
 
                foreach (var s in stats)
@@ -239,7 +239,7 @@ namespace HotelBookingSystem.ViewModels
 
           private static int Count(IBookingIterator iter)
           {
-               // Materialise to count — just read TotalCount (already computed)
+               // Materialise to count � just read TotalCount (already computed)
                return iter.TotalCount;
           }
      }

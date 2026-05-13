@@ -7,6 +7,7 @@ using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.IO;
 using HotelBookingSystem.Commands;
 using HotelBookingSystem.Services;
 
@@ -34,9 +35,15 @@ namespace HotelBookingSystem.ViewModels
                 {
                     ValidateUsername();
                     _loginCommand?.RaiseCanExecuteChanged();
+                    OnPropertyChanged(nameof(UserInitials));
                 }
             }
         }
+
+        /// <summary>First two uppercase letters of the username — used by the sidebar avatar badge.</summary>
+        public string UserInitials => string.IsNullOrWhiteSpace(Username)
+            ? "GH"
+            : new string(Username.Where(char.IsLetterOrDigit).Take(2).ToArray()).ToUpper();
 
         public string SelectedRole
         {
@@ -47,9 +54,13 @@ namespace HotelBookingSystem.ViewModels
                 {
                     ValidateRole();
                     _loginCommand?.RaiseCanExecuteChanged();
+                    OnPropertyChanged(nameof(UserRole));
                 }
             }
         }
+
+        /// <summary>Human-readable role label — shown in the sidebar staff badge.</summary>
+        public string UserRole => string.IsNullOrWhiteSpace(SelectedRole) ? "Staff" : SelectedRole;
 
         public string ErrorMessage
         {
@@ -69,8 +80,17 @@ namespace HotelBookingSystem.ViewModels
             }
         }
 
+        private bool _rememberMe;
+        public bool RememberMe
+        {
+            get => _rememberMe;
+            set => SetProperty(ref _rememberMe, value);
+        }
+
         private RelayCommand _loginCommand;
         public ICommand LoginCommand => _loginCommand;
+
+        public ICommand NavigateToSignupCommand { get; set; }
 
         public event Action? OnLoginSuccess;
 
@@ -98,6 +118,8 @@ namespace HotelBookingSystem.ViewModels
             ValidatePassword();
 
             _loginCommand = new RelayCommand(async _ => await LoginAsync(), _ => !IsBusy && !HasErrors);
+            
+            LoadSettings();
         }
 
         public void SetSecurePassword(SecureString securePassword)
@@ -135,6 +157,7 @@ namespace HotelBookingSystem.ViewModels
                 if (ok)
                 {
                     ErrorMessage = string.Empty;
+                    SaveSettings();
                     OnLoginSuccess?.Invoke();
                 }
                 else
@@ -217,6 +240,48 @@ namespace HotelBookingSystem.ViewModels
             RemoveErrors(nameof(SelectedRole));
             if (string.IsNullOrWhiteSpace(SelectedRole))
                 AddError(nameof(SelectedRole), "Role is required.");
+        }
+
+        private string SettingsPath => Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), 
+            "HotelBookingSystem", "login_settings.txt");
+
+        private void LoadSettings()
+        {
+            try
+            {
+                if (File.Exists(SettingsPath))
+                {
+                    var content = File.ReadAllText(SettingsPath);
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        Username = content;
+                        RememberMe = true;
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private void SaveSettings()
+        {
+            try
+            {
+                var dir = Path.GetDirectoryName(SettingsPath);
+                if (dir != null && !Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                if (RememberMe)
+                {
+                    File.WriteAllText(SettingsPath, Username);
+                }
+                else
+                {
+                    if (File.Exists(SettingsPath))
+                        File.Delete(SettingsPath);
+                }
+            }
+            catch { }
         }
     }
 }

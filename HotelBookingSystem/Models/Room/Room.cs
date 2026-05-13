@@ -1,15 +1,23 @@
 using System.Globalization;
+using System.ComponentModel.DataAnnotations;
 using HotelBookingSystem.Interfaces;
 
 namespace HotelBookingSystem.Models
 {
-     public abstract class Room : IRoomProduct
+     public abstract class Room : IRoomProduct, HotelBookingSystem.Visitor.IVisitable
      {
-          public string RoomId { get; }
-          public string RoomNumber { get; }
-          public decimal BasePrice { get; }
+          public void Accept(HotelBookingSystem.Visitor.IVisitor visitor) => visitor.Visit(this);
+
+          [Key]
+          public string RoomId { get; private set; }
+          public string RoomNumber { get; private set; }
+          public decimal BasePrice { get; private set; }
           public bool IsAvailable { get; protected set; }
-          public abstract int Capacity { get; }
+          public abstract int Capacity { get; protected set; }
+
+          public string ImagePath { get; protected set; }
+
+          protected Room() { } // EF Core
 
           protected Room(string roomId, string roomNumber, decimal basePrice)
           {
@@ -17,6 +25,7 @@ namespace HotelBookingSystem.Models
                RoomNumber = roomNumber;
                BasePrice = basePrice;
                IsAvailable = true;
+               ImagePath = "/Images/4506458-room-2269591_1920.jpg"; // Default
           }
 
           public virtual void SetAvailability(bool status) => IsAvailable = status;

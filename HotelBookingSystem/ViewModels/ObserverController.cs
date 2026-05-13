@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -10,8 +10,8 @@ using HotelBookingSystem.Observer;
 
 namespace HotelBookingSystem.ViewModels
 {
-     // ── Registered observer row shown in the UI panel ─────────────────────────
-     public sealed class ObserverRowViewModel
+     // -- Registered observer row shown in the UI panel -------------------------
+     public class ObserverRowViewModel
      {
           public string Name { get; init; } = "";
           public string Description { get; init; } = "";
@@ -19,8 +19,8 @@ namespace HotelBookingSystem.ViewModels
           public bool IsActive { get; init; }
      }
 
-     // ── Live KPI card ─────────────────────────────────────────────────────────
-     public sealed class KpiCard : BaseViewModel
+     // -- Live KPI card ---------------------------------------------------------
+     public class KpiCard : BaseViewModel
      {
           private string _value = "0";
           private string _delta = "";
@@ -41,10 +41,10 @@ namespace HotelBookingSystem.ViewModels
           }
      }
 
-     // ── Main ViewModel ─────────────────────────────────────────────────────────
-     public sealed class ObserverController : BaseViewModel
+     // -- Main ViewModel ---------------------------------------------------------
+     public class ObserverController : BaseViewModel
      {
-          // ── References to concrete observers (for data binding) ───────────────
+          // -- References to concrete observers (for data binding) ---------------
           private readonly DashboardObserver _dashboard;
           private readonly OccupancyObserver _occupancy;
           private readonly RevenueObserver _revenue;
@@ -54,18 +54,18 @@ namespace HotelBookingSystem.ViewModels
           private readonly BookingEventMonitor _monitor;
           private readonly IBookingRepository _bookingRepo;
 
-          // ── Observable collections for UI ─────────────────────────────────────
+          // -- Observable collections for UI -------------------------------------
           public ObservableCollection<ObserverRowViewModel> ObserverRows { get; } = new();
           public ObservableCollection<AuditEntry> AuditEntries { get; } = new();
           public ObservableCollection<AlertEntry> AlertEntries { get; } = new();
 
-          // ── KPI cards ─────────────────────────────────────────────────────────
-          public KpiCard KpiBookings { get; } = new() { Label = "Total Bookings", Icon = "📋", ColorHex = "#2563EB" };
-          public KpiCard KpiRevenue { get; } = new() { Label = "Pipeline Revenue", Icon = "💰", ColorHex = "#15803D" };
-          public KpiCard KpiOccupancy { get; } = new() { Label = "Occupancy Rate", Icon = "🏨", ColorHex = "#0891B2" };
-          public KpiCard KpiAlerts { get; } = new() { Label = "Active Alerts", Icon = "🔔", ColorHex = "#DC2626" };
+          // -- KPI cards ---------------------------------------------------------
+          public KpiCard KpiBookings { get; } = new() { Label = "Total Bookings", Icon = "??", ColorHex = "#2563EB" };
+          public KpiCard KpiRevenue { get; } = new() { Label = "Pipeline Revenue", Icon = "??", ColorHex = "#15803D" };
+          public KpiCard KpiOccupancy { get; } = new() { Label = "Occupancy Rate", Icon = "??", ColorHex = "#0891B2" };
+          public KpiCard KpiAlerts { get; } = new() { Label = "Active Alerts", Icon = "??", ColorHex = "#DC2626" };
 
-          // ── Occupancy breakdown ────────────────────────────────────────────────
+          // -- Occupancy breakdown ------------------------------------------------
           private string _occupancyBreakdown = "No data yet — create bookings to see live metrics.";
           public string OccupancyBreakdown
           {
@@ -73,7 +73,7 @@ namespace HotelBookingSystem.ViewModels
                private set => SetProperty(ref _occupancyBreakdown, value);
           }
 
-          // ── Revenue breakdown ──────────────────────────────────────────────────
+          // -- Revenue breakdown --------------------------------------------------
           private string _revenueBreakdown = "";
           public string RevenueBreakdown
           {
@@ -81,7 +81,7 @@ namespace HotelBookingSystem.ViewModels
                private set => SetProperty(ref _revenueBreakdown, value);
           }
 
-          // ── Dashboard summary ──────────────────────────────────────────────────
+          // -- Dashboard summary --------------------------------------------------
           private string _lastActivity = "No activity yet";
           public string LastActivity
           {
@@ -96,12 +96,12 @@ namespace HotelBookingSystem.ViewModels
                private set => SetProperty(ref _lastActivityTime, value);
           }
 
-          // ── Commands ──────────────────────────────────────────────────────────
+          // -- Commands ----------------------------------------------------------
           public ICommand RefreshCommand { get; }
 
           public event Action<string>? OnLog;
 
-          // ── Constructor ───────────────────────────────────────────────────────
+          // -- Constructor -------------------------------------------------------
           public ObserverController(BookingEventMonitor monitor, IBookingRepository bookingRepo)
           {
                _monitor = monitor;
@@ -120,7 +120,7 @@ namespace HotelBookingSystem.ViewModels
                RefreshCommand = new RelayCommand(_ => RefreshAll());
           }
 
-          // ── Refresh — called after every booking event ────────────────────────
+          // -- Refresh — called after every booking event ------------------------
           public void RefreshAll()
           {
                var en = CultureInfo.GetCultureInfo("en-US");
@@ -150,11 +150,11 @@ namespace HotelBookingSystem.ViewModels
                // Revenue breakdown
                var rb = _revenue.RevenueByType;
                RevenueBreakdown =
-                   $"  Standard    : {rb.GetValueOrDefault("Standard"):C0}\n" +
-                   $"  Premium     : {rb.GetValueOrDefault("Premium"):C0}\n" +
-                   $"  VIP         : {rb.GetValueOrDefault("VIP"):C0}\n" +
-                   $"  Total       : {_revenue.TotalRevenue:C0}\n" +
-                   $"  Avg/night   : {_revenue.AvgNightlyRate:C0}\n" +
+                   $"  Standard    : {rb.GetValueOrDefault("Standard").ToString("C0", en)}\n" +
+                   $"  Premium     : {rb.GetValueOrDefault("Premium").ToString("C0", en)}\n" +
+                   $"  VIP         : {rb.GetValueOrDefault("VIP").ToString("C0", en)}\n" +
+                   $"  Total       : {_revenue.TotalRevenue.ToString("C0", en)}\n" +
+                   $"  Avg/night   : {_revenue.AvgNightlyRate.ToString("C0", en)}\n" +
                    $"  Top type    : {_revenue.TopRevenueType}";
 
                // Dashboard last activity

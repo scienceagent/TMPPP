@@ -1,16 +1,23 @@
 using System;
+using HotelBookingSystem.State;
 
 namespace HotelBookingSystem.Models
 {
-     public class Booking
+     public class Booking : HotelBookingSystem.Visitor.IVisitable
      {
-          public string BookingId { get; }
-          public string UserId { get; }
-          public string RoomId { get; }
-          public DateTime CheckInDate { get; }
-          public DateTime CheckOutDate { get; }
-          public string BookingType { get; }
-          public BookingStatus Status { get; private set; }
+          public void Accept(HotelBookingSystem.Visitor.IVisitor visitor) => visitor.Visit(this);
+
+          public string BookingId { get; set; }
+          public string UserId { get; set; }
+          public string RoomId { get; set; }
+          public DateTime CheckInDate { get; set; }
+          public DateTime CheckOutDate { get; set; }
+          public string BookingType { get; set; }
+          public BookingStatus Status { get; set; }
+
+          // Pattern State: internal behavior delegate
+          private IBookingState _state;
+          public IBookingState CurrentState => _state ??= BookingStateFactory.GetState(Status);
 
           public Booking(string bookingId, string userId, string roomId,
                          DateTime checkInDate, DateTime checkOutDate,
@@ -23,27 +30,19 @@ namespace HotelBookingSystem.Models
                CheckOutDate = checkOutDate;
                BookingType = bookingType;
                Status = BookingStatus.Pending;
+               _state = new PendingState();
           }
 
-          public void Confirm()
+          // Method for the State pattern to trigger transitions
+          public void SetState(IBookingState newState)
           {
-               if (Status != BookingStatus.Pending)
-                    throw new InvalidOperationException("Only pending bookings can be confirmed.");
-               Status = BookingStatus.Confirmed;
+               _state = newState;
+               Status = BookingStateFactory.GetStatus(newState);
           }
 
-          public void Cancel()
-          {
-               if (Status == BookingStatus.Cancelled)
-                    throw new InvalidOperationException("Booking already cancelled.");
-               Status = BookingStatus.Cancelled;
-          }
-
-          public void Complete()
-          {
-               if (Status != BookingStatus.Confirmed)
-                    throw new InvalidOperationException("Only confirmed bookings can be completed.");
-               Status = BookingStatus.Completed;
-          }
+          public void Confirm() => CurrentState.Confirm(this);
+          public void CheckIn() => CurrentState.CheckIn(this);
+          public void Cancel() => CurrentState.Cancel(this);
+          public void Complete() => CurrentState.Complete(this);
      }
 }

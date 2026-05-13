@@ -1,168 +1,166 @@
-﻿using System;
-using System.Linq;
+using System.Collections.Generic;
 using HotelBookingSystem.Interfaces;
 using HotelBookingSystem.Models;
 
 namespace HotelBookingSystem.Command
 {
-     // ══════════════════════════════════════════════════════════════════════════
-     // RECEIVER
-     // BookingOperationReceiver knows HOW to perform hotel operations.
-     // Concrete commands store a reference to this receiver and delegate their
-     // actual work here. The Invoker never touches the Receiver directly.
-     //
-     // This separates "what to do" (Command) from "how to do it" (Receiver).
-     // ══════════════════════════════════════════════════════════════════════════
-     public sealed class BookingOperationReceiver
-     {
-          private readonly IBookingRepository _bookingRepo;
-          private readonly IRoomRepository _roomRepo;
-          private readonly IBookingService _bookingService;
+    /// <summary>
+    /// RECEIVER
+    /// Con?ine logica de business reala ?i interac?ioneaza cu repository-urile.
+    /// Acesta este cel care "?tie" cum sa execute opera?iunile, separ�nd detaliile 
+    /// tehnice de obiectul Comanda care doar �i apeleaza metodele.
+    /// </summary>
+    public class BookingOperationReceiver
+    {
+        private readonly IBookingRepository _bookingRepo;
+        private readonly IRoomRepository _roomRepo;
+        private readonly IBookingService _bookingService;
+        private readonly Observer.BookingEventMonitor? _bookingMonitor;
 
-          public BookingOperationReceiver(
-              IBookingRepository bookingRepo,
-              IRoomRepository roomRepo,
-              IBookingService bookingService)
-          {
-               _bookingRepo = bookingRepo;
-               _roomRepo = roomRepo;
-               _bookingService = bookingService;
-          }
+        public BookingOperationReceiver(
+            IBookingRepository bookingRepo,
+            IRoomRepository roomRepo,
+            IBookingService bookingService,
+            Observer.BookingEventMonitor? bookingMonitor = null)
+        {
+            _bookingRepo = bookingRepo;
+            _roomRepo = roomRepo;
+            _bookingService = bookingService;
+            _bookingMonitor = bookingMonitor;
+        }
 
-          // ── Booking operations ─────────────────────────────────────────────
+        // -- Booking Operations -----------------------------------------------
 
-          public void SaveBooking(Booking booking)
-          {
-               _bookingRepo.Save(booking);
-          }
+        public void SaveBooking(Booking booking)
+        {
+            _bookingRepo.Save(booking);
+            _bookingMonitor?.NotifyBookingCreated(booking);
+        }
 
-          public void RemoveBooking(string bookingId)
-          {
-               // InMemoryBookingRepository stores by ID — re-saving with a tombstone
-               // is not the right approach; instead we mark it cancelled
-               // (true deletion requires a Remove() on the repo).
-               // We use a cancelled status as the "removed" state for Undo.
-               var booking = _bookingRepo.FindById(bookingId);
-               if (booking != null)
-               {
-                    booking.Cancel();
-                    _bookingRepo.Save(booking);
-               }
-          }
+        public void RemoveBooking(string bookingId)
+        {
+            // We use a cancelled status as the "removed" state for Undo purposes
+            var booking = _bookingRepo.FindById(bookingId);
+            if (booking != null)
+            {
+                booking.Cancel();
+                _bookingRepo.Save(booking);
+            }
+        }
 
-          public void ConfirmBooking(string bookingId)
-          {
-               _bookingService.ConfirmBooking(bookingId);
-          }
+        public void ConfirmBooking(string bookingId)
+        {
+            _bookingService.ConfirmBooking(bookingId);
+            var booking = _bookingRepo.FindById(bookingId);
+            if (booking != null)
+                _bookingMonitor?.NotifyBookingConfirmed(booking);
+        }
 
-          public void RevertBookingToPending(string bookingId)
-          {
-               // Invert a Confirmed booking back to Pending.
-               // We replace the booking object with a fresh Pending copy.
-               var existing = _bookingRepo.FindById(bookingId);
-               if (existing == null) return;
+        public void RevertBookingToPending(string bookingId)
+        {
+            // Revert a Confirmed booking back to Pending
+            var existing = _bookingRepo.FindById(bookingId);
+            if (existing == null) return;
 
-               var pending = new Booking(
-                   existing.BookingId,
-                   existing.UserId,
-                   existing.RoomId,
-                   existing.CheckInDate,
-                   existing.CheckOutDate,
-                   existing.BookingType);  // default ctor → Pending
+            var pending = new Booking(
+                existing.BookingId,
+                existing.UserId,
+                existing.RoomId,
+                existing.CheckInDate,
+                existing.CheckOutDate,
+                existing.BookingType);
 
-               _bookingRepo.Save(pending);
+            _bookingRepo.Save(pending);
 
-               // Restore room availability
-               var room = _roomRepo.FindById(existing.RoomId);
-               room?.SetAvailability(true);
-               if (room != null) _roomRepo.Save(room);
-          }
+            // Restore room availability
+            var room = _roomRepo.FindById(existing.RoomId);
+            if (room != null)
+            {
+                room.SetAvailability(true);
+                _roomRepo.Save(room);
+            }
+        }
 
-          public void CancelBooking(string bookingId)
-          {
-               _bookingService.CancelBooking(bookingId);
-          }
+        public void CancelBooking(string bookingId)
+        {
+            _bookingService.CancelBooking(bookingId);
+            var booking = _bookingRepo.FindById(bookingId);
+            if (booking != null)
+                _bookingMonitor?.NotifyBookingCancelled(booking);
+        }
 
-          public void RestoreBookingStatus(string bookingId, BookingStatus previousStatus)
-          {
-               // Revert a cancelled booking to a prior known status
-               var existing = _bookingRepo.FindById(bookingId);
-               if (existing == null) return;
+        public void RestoreBookingStatus(string bookingId, BookingStatus previousStatus)
+        {
+            var existing = _bookingRepo.FindById(bookingId);
+            if (existing == null) return;
 
-               var restored = new Booking(
-                   existing.BookingId,
-                   existing.UserId,
-                   existing.RoomId,
-                   existing.CheckInDate,
-                   existing.CheckOutDate,
-                   existing.BookingType);
+            var restored = new Booking(
+                existing.BookingId,
+                existing.UserId,
+                existing.RoomId,
+                existing.CheckInDate,
+                existing.CheckOutDate,
+                existing.BookingType);
 
-               // Advance to the target status
-               switch (previousStatus)
-               {
-                    case BookingStatus.Confirmed:
-                         restored.Confirm();
-                         var room = _roomRepo.FindById(existing.RoomId);
-                         room?.SetAvailability(false);
-                         if (room != null) _roomRepo.Save(room);
-                         break;
-                    case BookingStatus.Pending:
-                         break; // already Pending after new Booking()
-               }
+            if (previousStatus == BookingStatus.Confirmed)
+            {
+                restored.Confirm();
+                var room = _roomRepo.FindById(existing.RoomId);
+                if (room != null)
+                {
+                    room.SetAvailability(false);
+                    _roomRepo.Save(room);
+                }
+            }
 
-               _bookingRepo.Save(restored);
-          }
+            _bookingRepo.Save(restored);
 
-          // ── Room operations ────────────────────────────────────────────────
+            // Notify observers of the restoration
+            if (restored.Status == BookingStatus.Confirmed)
+                _bookingMonitor?.NotifyBookingConfirmed(restored);
+            else if (restored.Status == BookingStatus.Cancelled)
+                _bookingMonitor?.NotifyBookingCancelled(restored);
+            else
+                _bookingMonitor?.NotifyBookingCreated(restored);
+        }
 
-          /// <summary>
-          /// Returns current base price of the room (for snapshotting before change).
-          /// </summary>
-          public decimal GetRoomBasePrice(string roomId)
-          {
-               return _roomRepo.FindById(roomId)?.BasePrice ?? 0m;
-          }
+        // -- Room Operations --------------------------------------------------
 
-          /// <summary>
-          /// Adjusts a room's base price by creating a new Room instance
-          /// (immutable BasePrice requires replacement).
-          /// </summary>
-          public void SetRoomBasePrice(string roomId, decimal newPrice)
-          {
-               var room = _roomRepo.FindById(roomId);
-               if (room == null) return;
+        public decimal GetRoomBasePrice(string roomId)
+        {
+            return _roomRepo.FindById(roomId)?.BasePrice ?? 0m;
+        }
 
-               // Create replacement with the new price — same type via reflection-free approach
-               Room updated = room switch
-               {
-                    Models.Suite s => new Models.Suite(
-                        s.RoomId, s.RoomNumber, newPrice, s.Capacity,
-                        s.HasKitchen, s.HasLivingRoom),
+        public void SetRoomBasePrice(string roomId, decimal newPrice)
+        {
+            var room = _roomRepo.FindById(roomId);
+            if (room == null) return;
 
-                    Models.DeluxeRoom d => new Models.DeluxeRoom(
-                        d.RoomId, d.RoomNumber, newPrice, d.Capacity,
-                        new System.Collections.Generic.List<string>(d.Amenities), d.HasBalcony),
+            // Create replacement with the new price (immutable BasePrice requires replacement)
+            Room updated = room switch
+            {
+                Models.Suite s => new Models.Suite(
+                    s.RoomId, s.RoomNumber, newPrice, s.Capacity,
+                    s.HasKitchen, s.HasLivingRoom),
 
-                    _ => new Models.StandardRoom(
-                        room.RoomId, room.RoomNumber, newPrice, room.Capacity)
-               };
+                Models.DeluxeRoom d => new Models.DeluxeRoom(
+                    d.RoomId, d.RoomNumber, newPrice, d.Capacity,
+                    new List<string>(d.Amenities), d.HasBalcony),
 
-               updated.SetAvailability(room.IsAvailable);
-               _roomRepo.Save(updated);
-          }
+                _ => new Models.StandardRoom(
+                    room.RoomId, room.RoomNumber, newPrice, room.Capacity)
+            };
 
-          // ── Queries (read-only, used by commands to snapshot state) ──────────
+            updated.SetAvailability(room.IsAvailable);
+            _roomRepo.Save(updated);
+        }
 
-          public Booking? FindBooking(string bookingId)
-              => _bookingRepo.FindById(bookingId);
+        // -- Read-Only Queries ------------------------------------------------
 
-          public Room? FindRoom(string roomId)
-              => _roomRepo.FindById(roomId);
-
-          public System.Collections.Generic.List<Booking> GetAllBookings()
-              => _bookingRepo.GetAllBookings();
-
-          public System.Collections.Generic.List<Room> GetAllRooms()
-              => _roomRepo.GetAllRooms();
-     }
+        public Booking? FindBooking(string bookingId) => _bookingRepo.FindById(bookingId);
+        public Room? FindRoom(string roomId) => _roomRepo.FindById(roomId);
+        public List<Booking> GetAllBookings() => _bookingRepo.GetAllBookings();
+        public List<Room> GetAllRooms() => _roomRepo.GetAllRooms();
+    }
 }
+

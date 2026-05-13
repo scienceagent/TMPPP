@@ -1,0 +1,99 @@
+@startuml Lab7_State
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 13
+skinparam classFontName "Segoe UI"
+skinparam defaultFontName "Segoe UI"
+skinparam shadowing false
+skinparam linetype ortho
+
+skinparam class {
+    BackgroundColor #FEFEFE
+    BorderColor #546E7A
+    ArrowColor #546E7A
+    HeaderBackgroundColor #F8FAFC
+}
+skinparam interface {
+    BackgroundColor #F0F9FF
+    BorderColor #0369A1
+}
+
+title <b>State Pattern — Booking Lifecycle Management</b>\nLab 7  ·  HotelBookingSystem
+
+note as N1
+  <b>Problem:</b>
+  A booking's behavior changes depending on its current 
+  status (Created, Confirmed, CheckedIn, etc.). 
+  Complex "if-else" or "switch" logic makes it 
+  hard to manage transitions.
+
+  <b>Solution:</b>
+  Encapsulate each state in its own class. 
+  The Booking object delegates state-dependent 
+  operations to the current state object.
+end note
+
+' ── STATE INTERFACE ───────────────────────────────────────────────────────
+interface IBookingState {
+    + StateName: string
+    + Description: string
+    + StatusColor: string
+    --
+    + Confirm(context: BookingContext): void
+    + CheckIn(context: BookingContext): void
+    + CheckOut(context: BookingContext): void
+    + Cancel(context: BookingContext): void
+}
+
+' ── CONTEXT ───────────────────────────────────────────────────────────────
+class BookingContext {
+    - _currentState: IBookingState
+    + BookingId: string
+    + GuestName: string
+    + History: List<string>
+    --
+    + TransitionTo(newState: IBookingState): void
+    + Confirm(): void
+    + CheckIn(): void
+    + CheckOut(): void
+    + Cancel(): void
+}
+
+' ── CONCRETE STATES ───────────────────────────────────────────────────────
+class CreatedState {
+    + Confirm() : transition to Confirmed
+    + Cancel() : transition to Cancelled
+}
+
+class ConfirmedState {
+    + CheckIn() : transition to CheckedIn
+    + Cancel() : transition to Cancelled
+}
+
+class CheckedInState {
+    + CheckOut() : transition to CheckedOut
+}
+
+class CheckedOutState <<final>> {
+    note: Operations throw exceptions
+}
+
+class CancelledState <<final>> {
+    note: Operations throw exceptions
+}
+
+' ── RELATIONS ──────────────────────────────────────────────────────────────
+IBookingState <|.. CreatedState
+IBookingState <|.. ConfirmedState
+IBookingState <|.. CheckedInState
+IBookingState <|.. CheckedOutState
+IBookingState <|.. CancelledState
+
+BookingContext o--> IBookingState : "current state"
+
+CreatedState ..> ConfirmedState : "triggers"
+CreatedState ..> CancelledState : "triggers"
+ConfirmedState ..> CheckedInState : "triggers"
+CheckedInState ..> CheckedOutState : "triggers"
+
+@enduml

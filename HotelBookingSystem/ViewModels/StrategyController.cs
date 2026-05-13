@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -7,8 +7,8 @@ using HotelBookingSystem.Strategy;
 
 namespace HotelBookingSystem.ViewModels
 {
-     // ── Comparison table row ───────────────────────────────────────────────────
-     public sealed class StrategyComparisonRow
+     // -- Comparison table row ---------------------------------------------------
+     public class StrategyComparisonRow
      {
           private static readonly CultureInfo En = CultureInfo.GetCultureInfo("en-US");
 
@@ -33,34 +33,34 @@ namespace HotelBookingSystem.ViewModels
                {
                     if (Discount > 0) return $"-{Discount.ToString("C", En)}  (-{DiscountPercent:F1}%)";
                     if (Discount < 0) return $"+{(-Discount).ToString("C", En)}  (+{-DiscountPercent:F1}%)";
-                    return "—";
+                    return "�";
                }
           }
           public string BadgeText => IsCheapest ? "BEST" : IsMostExpensive ? "HIGH" : "";
      }
 
-     // ── Main ViewModel ─────────────────────────────────────────────────────────
-     public sealed class StrategyController : BaseViewModel
+     // -- Main ViewModel ---------------------------------------------------------
+     public class StrategyController : BaseViewModel
      {
-          // ── All available strategies ──────────────────────────────────────────
+          // -- All available strategies ------------------------------------------
           private readonly List<IRoomPricingStrategy> _allStrategies;
 
-          // ── Context (holds the active strategy) ───────────────────────────────
+          // -- Context (holds the active strategy) -------------------------------
           private readonly RoomPricingCalculator _calculator;
 
-          // ── Form inputs ───────────────────────────────────────────────────────
+          // -- Form inputs -------------------------------------------------------
           private decimal _basePrice = 150m;
           private DateTime _checkIn = DateTime.Today.AddDays(35);
           private DateTime _checkOut = DateTime.Today.AddDays(37);
           private string _selectedStrategyName = "Standard Rate";
 
-          // ── Outputs ───────────────────────────────────────────────────────────
+          // -- Outputs -----------------------------------------------------------
           private string _breakdownOutput = "Select a strategy and dates above to calculate.";
           private string _currentResult = "";
           private string _bestOptionNote = "";
           private string _currentStrategyColor = "#2E9CCA";
 
-          // ── Properties ────────────────────────────────────────────────────────
+          // -- Properties --------------------------------------------------------
 
           public decimal BasePrice
           {
@@ -88,7 +88,7 @@ namespace HotelBookingSystem.ViewModels
                set
                {
                     if (!SetProperty(ref _selectedStrategyName, value)) return;
-                    // ── RUNTIME SWAP — core of the Strategy pattern ──────────────
+                    // -- RUNTIME SWAP � core of the Strategy pattern --------------
                     var strategy = _allStrategies.FirstOrDefault(s => s.Name == value);
                     if (strategy != null)
                          _calculator.SetStrategy(strategy);
@@ -121,13 +121,13 @@ namespace HotelBookingSystem.ViewModels
                private set => SetProperty(ref _bestOptionNote, value);
           }
 
-          // ── Observable collections ────────────────────────────────────────────
+          // -- Observable collections --------------------------------------------
           public ObservableCollection<string> StrategyNames { get; } = new();
           public ObservableCollection<StrategyComparisonRow> ComparisonRows { get; } = new();
 
           public event Action<string>? OnLog;
 
-          // ── Constructor ───────────────────────────────────────────────────────
+          // -- Constructor -------------------------------------------------------
           public StrategyController()
           {
                _allStrategies = new List<IRoomPricingStrategy>
@@ -148,12 +148,12 @@ namespace HotelBookingSystem.ViewModels
                RunCalculation();
           }
 
-          // ── Core calculation ──────────────────────────────────────────────────
+          // -- Core calculation --------------------------------------------------
           public void RunCalculation()
           {
                if (_basePrice <= 0 || _checkOut <= _checkIn)
                {
-                    BreakdownOutput = "⚠  Enter a valid base price (> 0) and date range.";
+                    BreakdownOutput = "?  Enter a valid base price (> 0) and date range.";
                     return;
                }
 
@@ -178,11 +178,11 @@ namespace HotelBookingSystem.ViewModels
                        : "no adjustment";
 
                CurrentResult =
-                   $"Total:  {Usd(selected.FinalTotal)}   ·   {selected.Nights} night(s)" +
-                   $"   ·   {Usd(selected.EffectiveNightlyRate)} / night avg   ·   {delta}";
+                   $"Total:  {Usd(selected.FinalTotal)}   �   {selected.Nights} night(s)" +
+                   $"   �   {Usd(selected.EffectiveNightlyRate)} / night avg   �   {delta}";
 
                OnLog?.Invoke(
-                   $"[Strategy] '{selected.StrategyName}' → " +
+                   $"[Strategy] '{selected.StrategyName}' ? " +
                    $"{Usd(selected.FinalTotal)}  ({selected.Nights} nights @ {Usd(selected.EffectiveNightlyRate)}/night)");
 
                // Run all strategies for the comparison table
@@ -213,10 +213,10 @@ namespace HotelBookingSystem.ViewModels
                }
 
                BestOptionNote = cheapest != null && cheapest.StrategyName != _selectedStrategyName
-                   ? $"💡  Best deal for these dates: \"{cheapest.StrategyName}\" — {Usd(cheapest.FinalTotal)}" +
+                   ? $"??  Best deal for these dates: \"{cheapest.StrategyName}\" � {Usd(cheapest.FinalTotal)}" +
                      $"  (saves {Usd(selected.FinalTotal - cheapest.FinalTotal)} vs your current selection)"
                    : cheapest?.StrategyName == _selectedStrategyName
-                       ? "✓  You have selected the best deal available for these dates."
+                       ? "?  You have selected the best deal available for these dates."
                        : "";
           }
      }

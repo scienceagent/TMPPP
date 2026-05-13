@@ -9,27 +9,27 @@ using HotelBookingSystem.Commands;     // RelayCommand
 
 namespace HotelBookingSystem.ViewModels
 {
-     public sealed class CommandController : BaseViewModel
+     public class CommandController : BaseViewModel
      {
-          // ── Core components ────────────────────────────────────────────────────
+          // -- Core components ----------------------------------------------------
           private readonly BookingCommandInvoker _invoker;
           private readonly BookingOperationReceiver _receiver;
           private readonly IBookingRepository _bookingRepo;
           private readonly IRoomRepository _roomRepo;
 
-          // ── Form state ─────────────────────────────────────────────────────────
+          // -- Form state ---------------------------------------------------------
           private string? _selectedBookingId;
           private string? _selectedRoomId;
           private decimal _newRoomPrice = 150m;
           private string _statusMessage = "Select a booking and use the operation buttons below.";
           private string _transactionResult = "Run a transaction demo to see atomic rollback in action.";
 
-          // ── Observable collections ─────────────────────────────────────────────
+          // -- Observable collections ---------------------------------------------
           public ObservableCollection<string> BookingIds { get; } = new();
           public ObservableCollection<string> RoomIds { get; } = new();
           public ObservableCollection<CommandHistoryEntry> HistoryRows { get; } = new();
 
-          // ── Properties ────────────────────────────────────────────────────────
+          // -- Properties --------------------------------------------------------
 
           public string? SelectedBookingId
           {
@@ -79,12 +79,12 @@ namespace HotelBookingSystem.ViewModels
                     var room = _roomRepo.FindById(b.RoomId);
                     int nights = (b.CheckOutDate - b.CheckInDate).Days;
                     return $"{b.BookingType} · Room {room?.RoomNumber ?? "?"} · " +
-                           $"{b.CheckInDate:dd MMM} → {b.CheckOutDate:dd MMM} " +
+                           $"{b.CheckInDate:dd MMM} ? {b.CheckOutDate:dd MMM} " +
                            $"({nights}n) · Status: {b.Status}";
                }
           }
 
-          // ── Commands ────────────────────────────────────────────────────────────
+          // -- Commands ------------------------------------------------------------
           public ICommand RefreshCommand { get; }
           public ICommand ConfirmBookingCommand { get; }
           public ICommand CancelBookingCommand { get; }
@@ -97,7 +97,7 @@ namespace HotelBookingSystem.ViewModels
 
           public event Action<string>? OnLog;
 
-          // ── Constructor ────────────────────────────────────────────────────────
+          // -- Constructor --------------------------------------------------------
           public CommandController(
               BookingCommandInvoker invoker,
               BookingOperationReceiver receiver,
@@ -152,7 +152,7 @@ namespace HotelBookingSystem.ViewModels
                RefreshData();
           }
 
-          // ── Data refresh ───────────────────────────────────────────────────────
+          // -- Data refresh -------------------------------------------------------
           public void RefreshData()
           {
                var bookings = _bookingRepo.GetAllBookings();
@@ -177,19 +177,19 @@ namespace HotelBookingSystem.ViewModels
                RaiseStackCounts();
           }
 
-          // ── Execute helpers ────────────────────────────────────────────────────
+          // -- Execute helpers ----------------------------------------------------
           private void RunCommand(IHotelCommand cmd)
           {
                try
                {
                     _invoker.Execute(cmd);
-                    StatusMessage = $"✓ {cmd.Description}";
+                    StatusMessage = $"? {cmd.Description}";
                     RefreshData();
                     ToastService.Instance.Show("Command Executed", cmd.Description, ToastKind.Success);
                }
                catch (Exception ex)
                {
-                    StatusMessage = $"✗ {ex.Message}";
+                    StatusMessage = $"? {ex.Message}";
                     ToastService.Instance.Show("Command Failed", ex.Message, ToastKind.Error);
                }
           }
@@ -222,7 +222,7 @@ namespace HotelBookingSystem.ViewModels
                RunCommand(cmd);
           }
 
-          // ── Transaction demo — atomic cancel + rebook, with intentional failure ──
+          // -- Transaction demo — atomic cancel + rebook, with intentional failure --
           private void RunTransactionDemo()
           {
                var bookings = _bookingRepo.GetAllBookings();
@@ -231,20 +231,20 @@ namespace HotelBookingSystem.ViewModels
                if (bookings.Count == 0 || rooms.Count < 2)
                {
                     TransactionResult =
-                        "⚠  Need at least 1 booking and 2 rooms to demo the transaction.\n" +
+                        "?  Need at least 1 booking and 2 rooms to demo the transaction.\n" +
                         "   Create a booking on the New Booking page first.";
                     return;
                }
 
                // Demonstrate TWO scenarios:
                // A) Successful transaction
-               // B) Failed transaction → automatic rollback
+               // B) Failed transaction ? automatic rollback
 
                var booking = bookings[0];
                var room1 = rooms[0];
                var room2 = rooms.Count > 1 ? rooms[1] : rooms[0];
 
-               // ── Scenario A: successful rebook ────────────────────────────────
+               // -- Scenario A: successful rebook --------------------------------
                var newForA = new Booking(
                    Guid.NewGuid().ToString(),
                    booking.UserId,
@@ -261,7 +261,7 @@ namespace HotelBookingSystem.ViewModels
                    },
                    "Confirm + Create companion booking");
 
-               // ── Scenario B: attempt an invalid price (< 0) → triggers rollback ─
+               // -- Scenario B: attempt an invalid price (< 0) ? triggers rollback -
                bool successB = false;
                try
                {
@@ -277,14 +277,14 @@ namespace HotelBookingSystem.ViewModels
                catch { /* expected */ }
 
                TransactionResult =
-                   $"Transaction A (Confirm + Create): {(successA ? "✓ COMMITTED" : "✗ ROLLED BACK")}\n" +
-                   $"Transaction B (Price + Invalid):   {(successB ? "✓ COMMITTED" : "✗ ROLLED BACK (expected)")}\n\n" +
+                   $"Transaction A (Confirm + Create): {(successA ? "? COMMITTED" : "? ROLLED BACK")}\n" +
+                   $"Transaction B (Price + Invalid):   {(successB ? "? COMMITTED" : "? ROLLED BACK (expected)")}\n\n" +
                    "See Activity Log for full step-by-step trace.";
 
                RefreshData();
           }
 
-          // ── UI sync helpers ────────────────────────────────────────────────────
+          // -- UI sync helpers ----------------------------------------------------
           private void SyncHistory()
           {
                HistoryRows.Clear();

@@ -1,0 +1,153 @@
+<UserControl x:Class="HotelBookingSystem.Views.ChainView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HotelBookingSystem.Views"
+             xmlns:vm="clr-namespace:HotelBookingSystem.ViewModels"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    
+    <UserControl.Resources>
+        
+        <Style x:Key="InputLabel" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#64748B"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Padding" Value="12,10"/>
+            <Setter Property="Background" Value="#F8FAFC"/>
+            <Setter Property="BorderBrush" Value="#E2E8F0"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="6"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style x:Key="ModernDatePicker" TargetType="DatePicker">
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="0,0,0,15"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Background="#F1F5F9">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="380"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left Panel: Request Form -->
+        <Border Grid.Column="0" Background="White" Margin="20" CornerRadius="12" Padding="25">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="20" ShadowDepth="2" Opacity="0.05"/>
+            </Border.Effect>
+            
+            <StackPanel>
+                <TextBlock Text="Booking Pipeline" FontSize="20" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,5"/>
+                <TextBlock Text="Process a booking request through multiple validation layers." FontSize="13" Foreground="#64748B" Margin="0,0,0,25" TextWrapping="Wrap"/>
+
+                <TextBlock Text="GUEST ID" Style="{StaticResource InputLabel}"/>
+                <TextBox Text="{Binding GuestId}" Style="{StaticResource ModernTextBox}"/>
+
+                <TextBlock Text="ROOM ID" Style="{StaticResource InputLabel}"/>
+                <TextBox Text="{Binding RoomId}" Style="{StaticResource ModernTextBox}"/>
+
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="15"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <StackPanel Grid.Column="0">
+                        <TextBlock Text="CHECK-IN" Style="{StaticResource InputLabel}"/>
+                        <DatePicker SelectedDate="{Binding CheckIn}" Style="{StaticResource ModernDatePicker}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="CHECK-OUT" Style="{StaticResource InputLabel}"/>
+                        <DatePicker SelectedDate="{Binding CheckOut}" Style="{StaticResource ModernDatePicker}"/>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="EXPECTED TOTAL ($)" Style="{StaticResource InputLabel}"/>
+                <TextBox Text="{Binding ExpectedPrice}" Style="{StaticResource ModernTextBox}"/>
+
+                <Button Command="{Binding ProcessCommand}" 
+                        Content="Validate Booking" 
+                        Background="#2563EB" Foreground="White" 
+                        Height="45" FontWeight="Bold" Margin="0,10,0,0">
+                    <Button.Resources>
+                        <Style TargetType="Border">
+                            <Setter Property="CornerRadius" Value="6"/>
+                        </Style>
+                    </Button.Resources>
+                </Button>
+
+                <!-- Visualization of the Chain -->
+                <TextBlock Text="VALIDATION PIPELINE" Style="{StaticResource InputLabel}" Margin="0,30,0,10"/>
+                <Border Background="#F8FAFC" CornerRadius="8" Padding="15">
+                    <StackPanel>
+                        <TextBlock Text="1. Guest Eligibility" FontSize="12" Foreground="#475569" Margin="0,2"/>
+                        <TextBlock Text="   ↓" HorizontalAlignment="Left" Foreground="#CBD5E1" Margin="15,0"/>
+                        <TextBlock Text="2. Room Availability" FontSize="12" Foreground="#475569" Margin="0,2"/>
+                        <TextBlock Text="   ↓" HorizontalAlignment="Left" Foreground="#CBD5E1" Margin="15,0"/>
+                        <TextBlock Text="3. Policy Compliance (Stay Duration)" FontSize="12" Foreground="#475569" Margin="0,2"/>
+                        <TextBlock Text="   ↓" HorizontalAlignment="Left" Foreground="#CBD5E1" Margin="15,0"/>
+                        <TextBlock Text="4. Price Verification" FontSize="12" Foreground="#475569" Margin="0,2"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <!-- Right Panel: Processing Logs -->
+        <Grid Grid.Column="1" Margin="0,20,20,20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="0,0,0,15">
+                <TextBlock Text="Pipeline Execution" FontSize="18" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center"/>
+                <Button Command="{Binding ClearLogsCommand}" Content="Clear Logs" Background="Transparent" Foreground="#64748B" BorderThickness="0" HorizontalAlignment="Right" VerticalAlignment="Center" Padding="10,5"/>
+            </DockPanel>
+
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding Logs}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Background="White" Margin="0,0,0,10" CornerRadius="8" Padding="15" BorderThickness="4,0,0,0" BorderBrush="{Binding Color}">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="10" ShadowDepth="1" Opacity="0.03"/>
+                                </Border.Effect>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <Border Width="40" Height="40" Background="#F1F5F9" CornerRadius="20" VerticalAlignment="Top" Margin="0,0,15,0">
+                                        <TextBlock Text="{Binding Author[0]}" VerticalAlignment="Center" HorizontalAlignment="Center" FontWeight="Bold" Foreground="#64748B"/>
+                                    </Border>
+                                    
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding Author}" FontWeight="Bold" Foreground="#334155" FontSize="14"/>
+                                        <TextBlock Text="{Binding Message}" Foreground="#64748B" FontSize="13" TextWrapping="Wrap" Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

@@ -11,19 +11,19 @@ using HotelBookingSystem.Services;
 
 namespace HotelBookingSystem.ViewModels
 {
-     public sealed class MementoController : BaseViewModel
+     public class MementoController : BaseViewModel
      {
-          // ── Pattern components ─────────────────────────────────────────────────
+          // -- Pattern components -------------------------------------------------
           private readonly BookingFormOriginator _originator;
           private readonly BookingFormHistory _caretaker;
 
-          // ── External dependencies ──────────────────────────────────────────────
+          // -- External dependencies ----------------------------------------------
           private readonly IBookingRepository _bookingRepo;
           private readonly IRoomRepository _roomRepo;
           private readonly IUserRepository _userRepo;
           private readonly IBookingService _bookingService;
 
-          // ── Wizard step ───────────────────────────────────────────────────────
+          // -- Wizard step -------------------------------------------------------
           private int _activeStep;
           public int ActiveStep
           {
@@ -43,7 +43,7 @@ namespace HotelBookingSystem.ViewModels
           public bool IsStep1 => _activeStep == 1;
           public bool IsStep2 => _activeStep == 2;
 
-          // ── Originator field proxies (all trigger SaveState on change) ─────────
+          // -- Originator field proxies (all trigger SaveState on change) ---------
 
           public string GuestName
           {
@@ -121,7 +121,7 @@ namespace HotelBookingSystem.ViewModels
                set { _originator.Notes = value; OnPropertyChanged(); }
           }
 
-          // ── Named checkpoint text box ──────────────────────────────────────────
+          // -- Named checkpoint text box ------------------------------------------
           private string _checkpointName = "";
           public string CheckpointName
           {
@@ -129,7 +129,7 @@ namespace HotelBookingSystem.ViewModels
                set => SetProperty(ref _checkpointName, value);
           }
 
-          // ── Derived display ────────────────────────────────────────────────────
+          // -- Derived display ----------------------------------------------------
           public bool IsGuestValid => _originator.IsGuestValid;
           public bool IsRoomValid => _originator.IsRoomValid;
           public bool IsDatesValid => _originator.IsDatesValid;
@@ -140,7 +140,7 @@ namespace HotelBookingSystem.ViewModels
           public int RedoCount => _caretaker.RedoCount;
           public int NamedCount => _caretaker.NamedCount;
 
-          // ── Status / submit message ────────────────────────────────────────────
+          // -- Status / submit message --------------------------------------------
           private string _statusMessage = "Fill in the form below. Every change is auto-checkpointed.";
           public string StatusMessage
           {
@@ -148,7 +148,7 @@ namespace HotelBookingSystem.ViewModels
                set => SetProperty(ref _statusMessage, value);
           }
 
-          // ── Observable collections ─────────────────────────────────────────────
+          // -- Observable collections ---------------------------------------------
           public ObservableCollection<string> BookingTypes { get; } =
               new() { "Standard", "Premium", "VIP" };
 
@@ -161,7 +161,7 @@ namespace HotelBookingSystem.ViewModels
 
           public ObservableCollection<NamedCheckpoint> NamedCheckpoints { get; } = new();
 
-          // ── Commands ──────────────────────────────────────────────────────────
+          // -- Commands ----------------------------------------------------------
           public ICommand UndoCommand { get; }
           public ICommand RedoCommand { get; }
           public ICommand SaveCheckpointCommand { get; }
@@ -175,7 +175,7 @@ namespace HotelBookingSystem.ViewModels
           public event Action<string>? OnLog;
           public event Action? OnFormSubmitted;    // raised when booking is created
 
-          // ── Constructor ────────────────────────────────────────────────────────
+          // -- Constructor --------------------------------------------------------
           public MementoController(
               IBookingRepository bookingRepo,
               IRoomRepository roomRepo,
@@ -202,7 +202,7 @@ namespace HotelBookingSystem.ViewModels
 
                LoadAvailableRooms();
 
-               // ── Commands ──────────────────────────────────────────────────────
+               // -- Commands ------------------------------------------------------
                UndoCommand = new RelayCommand(
                    _ => { _caretaker.Undo(_originator); PushOriginatorToUI(); },
                    _ => _caretaker.UndoCount > 0);
@@ -222,7 +222,7 @@ namespace HotelBookingSystem.ViewModels
                QuickSaveCommand = new RelayCommand(_ =>
                {
                     _caretaker.SaveState(_originator);
-                    StatusMessage = $"✓ Checkpoint saved at {DateTime.Now:HH:mm:ss}";
+                    StatusMessage = $"? Checkpoint saved at {DateTime.Now:HH:mm:ss}";
                });
 
                NextStepCommand = new RelayCommand(
@@ -238,14 +238,14 @@ namespace HotelBookingSystem.ViewModels
                    _ => _originator.IsFormComplete);
           }
 
-          // ── Auto-save checkpoint on every meaningful field change ──────────────
+          // -- Auto-save checkpoint on every meaningful field change --------------
           // Called from the property setters of key fields
           private void AutoSave()
           {
                _caretaker.SaveState(_originator);
           }
 
-          // ── Named checkpoint ───────────────────────────────────────────────────
+          // -- Named checkpoint ---------------------------------------------------
           private void SaveNamedCheckpoint()
           {
                string name = string.IsNullOrWhiteSpace(_checkpointName)
@@ -255,20 +255,20 @@ namespace HotelBookingSystem.ViewModels
                _caretaker.SaveNamedCheckpoint(_originator, name);
                CheckpointName = "";
                SyncNamedCheckpoints();
-               StatusMessage = $"✓ Named checkpoint saved: '{name}'";
+               StatusMessage = $"? Named checkpoint saved: '{name}'";
           }
 
-          // ── Jump to a named checkpoint ─────────────────────────────────────────
+          // -- Jump to a named checkpoint -----------------------------------------
           private void JumpToCheckpoint(string name)
           {
                if (_caretaker.JumpToCheckpoint(_originator, name))
                {
                     PushOriginatorToUI();
-                    StatusMessage = $"↩ Restored to checkpoint: '{name}'";
+                    StatusMessage = $"? Restored to checkpoint: '{name}'";
                }
           }
 
-          // ── Reset to blank ─────────────────────────────────────────────────────
+          // -- Reset to blank -----------------------------------------------------
           private void ResetForm()
           {
                _caretaker.SaveState(_originator, "Before reset");
@@ -278,12 +278,12 @@ namespace HotelBookingSystem.ViewModels
                StatusMessage = "Form reset. Previous state saved for Undo.";
           }
 
-          // ── Submit — creates the actual Booking domain object ─────────────────
+          // -- Submit — creates the actual Booking domain object -----------------
           private void SubmitForm()
           {
                if (!_originator.IsFormComplete)
                {
-                    StatusMessage = "✗ Form is incomplete — fill all required fields.";
+                    StatusMessage = "? Form is incomplete — fill all required fields.";
                     return;
                }
 
@@ -296,6 +296,8 @@ namespace HotelBookingSystem.ViewModels
                         _originator.GuestName,
                         _originator.GuestEmail,
                         "",
+                        _originator.GuestEmail, // Username
+                        "guest123",            // Default Password
                         _originator.GuestNationality.IfEmpty("Unknown"),
                         _originator.GuestPassport.IfEmpty("UNKNOWN"));
                     _userRepo.Save(guest);
@@ -314,7 +316,7 @@ namespace HotelBookingSystem.ViewModels
 
                if (result.Success)
                {
-                    StatusMessage = $"✓ Booking created: {booking.BookingId[..8]}… ({_originator.BookingType})";
+                    StatusMessage = $"? Booking created: {booking.BookingId[..8]}… ({_originator.BookingType})";
                     OnLog?.Invoke($"[Memento] Booking submitted from form snapshot — {_originator.GuestName} · Room {_originator.RoomNumber}");
                     _caretaker.ClearAll();
                     _originator.Reset();
@@ -327,12 +329,12 @@ namespace HotelBookingSystem.ViewModels
                }
                else
                {
-                    StatusMessage = $"✗ {result.Message}";
+                    StatusMessage = $"? {result.Message}";
                     ToastService.Instance.Show("Booking Failed", result.Message, ToastKind.Error);
                }
           }
 
-          // ── Sync UI from originator (called after Undo/Redo/Restore) ──────────
+          // -- Sync UI from originator (called after Undo/Redo/Restore) ----------
           public void PushOriginatorToUI()
           {
                // Re-raise ALL properties so every bound control updates
@@ -359,7 +361,7 @@ namespace HotelBookingSystem.ViewModels
                OnPropertyChanged(nameof(IsStep2));
           }
 
-          // ── Load available rooms for the dropdown ─────────────────────────────
+          // -- Load available rooms for the dropdown -----------------------------
           public void LoadAvailableRooms()
           {
                AvailableRoomNumbers.Clear();
@@ -367,7 +369,7 @@ namespace HotelBookingSystem.ViewModels
                     AvailableRoomNumbers.Add(r.RoomNumber);
           }
 
-          // ── When user picks a room number — populate room fields ───────────────
+          // -- When user picks a room number — populate room fields ---------------
           public void SelectRoomByNumber(string roomNumber)
           {
                var room = _roomRepo.GetAllRooms().FirstOrDefault(r => r.RoomNumber == roomNumber);
@@ -383,7 +385,7 @@ namespace HotelBookingSystem.ViewModels
                _caretaker.SaveState(_originator, $"Selected Room {roomNumber}");
           }
 
-          // ── Sync observable collections from caretaker ─────────────────────────
+          // -- Sync observable collections from caretaker -------------------------
           private void SyncTimeline()
           {
                CheckpointTimeline.Clear();
@@ -416,10 +418,11 @@ namespace HotelBookingSystem.ViewModels
           }
      }
 
-     // ── string extension helper ────────────────────────────────────────────────
+     // -- string extension helper ------------------------------------------------
      file static class StringEx
      {
           public static string IfEmpty(this string s, string fallback)
               => string.IsNullOrWhiteSpace(s) ? fallback : s;
      }
 }
+

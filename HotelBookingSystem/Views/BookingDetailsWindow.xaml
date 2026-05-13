@@ -1,0 +1,79 @@
+<Window x:Class="HotelBookingSystem.Views.BookingDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Booking Details" Height="500" Width="450"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F8FAFC">
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="BOOKING DETAILS" FontSize="10" FontWeight="Bold" Foreground="#64748B" Margin="0,0,0,4"/>
+            <TextBlock Text="{Binding BookingId}" FontSize="18" FontWeight="SemiBold" Foreground="#0F172A"/>
+            <Border Background="#F0FDF4" CornerRadius="4" Padding="8,2" HorizontalAlignment="Left" Margin="0,8,0,0">
+                <TextBlock Text="{Binding Status}" Foreground="#15803D" FontSize="11" FontWeight="Bold"/>
+            </Border>
+        </StackPanel>
+
+        <!-- Content -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                
+                <!-- Guest Section -->
+                <TextBlock Text="GUEST INFORMATION" FontSize="11" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,0,12"/>
+                <Border Background="White" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,20">
+                    <StackPanel>
+                        <TextBlock Text="{Binding GuestName}" FontSize="15" FontWeight="SemiBold" Foreground="#0F172A"/>
+                        <TextBlock Text="{Binding GuestEmail}" FontSize="13" Foreground="#64748B" Margin="0,2,0,0"/>
+                        <TextBlock Text="{Binding GuestPhone}" FontSize="13" Foreground="#64748B" Margin="0,2,0,8"/>
+                        <Separator Background="#F1F5F9" Margin="0,4,0,8"/>
+                        <TextBlock Text="{Binding GuestDetails}" FontSize="12" Foreground="#475569" FontStyle="Italic"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Room Section -->
+                <TextBlock Text="ROOM &amp; STAY" FontSize="11" FontWeight="Bold" Foreground="#1D4ED8" Margin="0,0,0,12"/>
+                <Border Background="White" CornerRadius="8" Padding="16" BorderBrush="#E2E8F0" BorderThickness="1" Margin="0,0,0,20">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="{Binding RoomNumber, StringFormat='Room {0}'}" FontSize="15" FontWeight="SemiBold" Foreground="#0F172A"/>
+                                <TextBlock Text="{Binding RoomType}" FontSize="13" Foreground="#64748B"/>
+                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding RoomPrice, StringFormat='{}{0} / night'}" FontSize="14" FontWeight="SemiBold" Foreground="#15803D" VerticalAlignment="Center"/>
+                        </Grid>
+                        <Separator Background="#F1F5F9" Margin="0,4,0,8"/>
+                        <TextBlock Text="{Binding StayDates}" FontSize="13" FontWeight="Medium" Foreground="#0F172A"/>
+                        <TextBlock Text="{Binding TotalNights, StringFormat='{}Total duration: {0} nights'}" FontSize="12" Foreground="#64748B" Margin="0,2,0,0"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Button Grid.Row="2" Content="Close" Click="CloseButton_Click"
+                Background="#1D4ED8" Foreground="White" FontWeight="SemiBold" FontSize="13"
+                Padding="24,10" HorizontalAlignment="Right" BorderThickness="0" Cursor="Hand">
+            <Button.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="6"/>
+                </Style>
+            </Button.Resources>
+        </Button>
+    </Grid>
+</Window>
